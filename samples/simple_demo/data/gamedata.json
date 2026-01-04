@@ -1,0 +1,1379 @@
+{
+  "characters": [
+    {
+      "defaultExpression": "通常",
+      "expressions": [
+        {
+          "image": "./data/images/character/meru/normal.png",
+          "name": "通常"
+        },
+        {
+          "image": "./data/images/character/meru/speak.png",
+          "name": "会話"
+        },
+        {
+          "image": "./data/images/character/meru/sspeak.png",
+          "name": "会話笑顔"
+        },
+        {
+          "image": "./data/images/character/meru/surprise.png",
+          "name": "驚き"
+        },
+        {
+          "image": "./data/images/character/meru/sad.png",
+          "name": "悲しい"
+        },
+        {
+          "image": "./data/images/character/meru/smile.png",
+          "name": "笑顔"
+        }
+      ],
+      "name": "める"
+    },
+    {
+      "defaultExpression": "通常",
+      "expressions": [
+        {
+          "image": "./data/images/character/neko/neko.png",
+          "name": "通常"
+        }
+      ],
+      "name": "ねこ"
+    }
+  ],
+  "game": {
+    "backStyle": {
+      "backgroundColor": "rgba(255, 255, 255, 1)",
+      "backgroundImage": ""
+    },
+    "character": {
+      "slots": 3
+    },
+    "config": {
+      "backStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "backgroundImage": ""
+      },
+      "bgmText": "BGM音量",
+      "containerStyle": {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(0, 0, 0, 1)",
+        "borderRadius": "5px",
+        "borderStyle": "none",
+        "borderWidth": "1px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px",
+        "gap": 12,
+        "shadowColor": "rgba(0, 0, 0, 0.32)",
+        "width": 450
+      },
+      "seText": "SE音量",
+      "speedText": "文字送り速度",
+      "thumbStyle": {
+        "backgroundColor": "rgba(54, 56, 201, 1)",
+        "borderColor": "rgba(255, 255, 255, 1)",
+        "borderStyle": "solid",
+        "borderWidth": "2px",
+        "size": 20
+      },
+      "trackStyle": {
+        "backgroundColor": "rgba(169, 169, 169, 1)",
+        "borderRadius": "3px",
+        "height": 6
+      },
+      "visibleBGM": true,
+      "visibleSE": true,
+      "visibleSpeed": true,
+      "visibleVoice": true,
+      "voiceText": "ボイス音量"
+    },
+    "direction": {
+      "hover": "hoverOp",
+      "size": 40,
+      "style": {
+        "backgroundColor": "rgba(0,0,0,0)",
+        "color": "rgba(131, 124, 144, 1)"
+      },
+      "useDefaultArrow": true
+    },
+    "gameStyle": {
+      "borderColor": "rgba(0,0,0,1)",
+      "borderStyle": "none",
+      "borderWidth": 1,
+      "color": "rgba(0,0,0,1)",
+      "shadowColor": "rgba(0, 0, 0, 0.3)"
+    },
+    "image": {
+      "position": [
+        139,
+        75
+      ],
+      "size": [
+        385,
+        400
+      ],
+      "style": {
+        "borderColor": "rgba(255,255,255,1)",
+        "borderStyle": "none",
+        "borderWidth": "1px"
+      }
+    },
+    "input": {
+      "backStyle": {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(146, 146, 146, 1)",
+        "borderRadius": "2px",
+        "borderStyle": "solid",
+        "borderWidth": "1px"
+      },
+      "buttonStyle": {
+        "backgroundColor": "rgba(216, 203, 253, 1)",
+        "borderColor": "rgba(0, 0, 0, 1)",
+        "borderRadius": "5px",
+        "borderStyle": "none",
+        "borderWidth": "1px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px"
+      },
+      "hover": "hoverDk",
+      "inputStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "borderColor": "rgba(129, 129, 129, 1)",
+        "borderRadius": "2px",
+        "borderStyle": "solid",
+        "borderWidth": "1",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px"
+      },
+      "position": [
+        180,
+        80
+      ],
+      "size": [
+        300,
+        140
+      ]
+    },
+    "itemBox": {
+      "boxStyle": {
+        "backgroundColor": "rgba(240,240,240,1)",
+        "backgroundImage": "",
+        "color": "rgba(0,0,0,1)"
+      },
+      "columnCount": 2,
+      "foldable": false,
+      "hover": "none",
+      "itemStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "borderRadius": "0px"
+      },
+      "paginationSize": 16,
+      "position": "right",
+      "selectedItemBorder": {
+        "color": "rgba(255,0,0,1)",
+        "style": "solid",
+        "width": "2px"
+      },
+      "size": 160,
+      "space": 10
+    },
+    "itemDrawer": {
+      "backStyle": {
+        "backgroundColor": "rgba(0,0,0,0.5)"
+      },
+      "size": [
+        320,
+        240
+      ],
+      "style": {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "borderRadius": "0px"
+      }
+    },
+    "menu": {
+      "configText": "config",
+      "hover": "hoverOp",
+      "loadText": "Load",
+      "position": "bottom right",
+      "saveText": "Save",
+      "style": {
+        "fontSize": "16px",
+        "fontWeight": 510,
+        "gap": 10
+      },
+      "visibleConfig": true,
+      "visibleLoad": true,
+      "visibleSave": true
+    },
+    "option": {
+      "gap": 20,
+      "hover": "hoverDk",
+      "position": [
+        50,
+        50
+      ],
+      "size": 180,
+      "style": {
+        "backgroundColor": "rgba(236, 228, 248, 1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(54, 116, 255, 1)",
+        "borderRadius": "2px",
+        "borderStyle": "double",
+        "borderWidth": "6px",
+        "color": "rgba(0, 0, 0, 1)",
+        "fontSize": "16px",
+        "padding": 5,
+        "textAlign": "center"
+      }
+    },
+    "save": {
+      "auto": false,
+      "autoText": "Auto",
+      "backStyle": {
+        "backgroundColor": "rgba(222,222,222,1)",
+        "backgroundImage": "",
+        "padding": "10px 30px"
+      },
+      "buttonStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(0, 0, 0, 1)",
+        "borderRadius": "5px",
+        "borderStyle": "none",
+        "borderWidth": "1px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px",
+        "padding": 10
+      },
+      "dataText": "Save Data",
+      "hover": "hoverDk",
+      "loadText": "Load",
+      "noDataText": "No Data",
+      "saveText": "Save",
+      "slots": 3
+    },
+    "screenSize": [
+      800,
+      480
+    ],
+    "sound": {
+      "bgm": 0.8,
+      "se": 1,
+      "voice": 1
+    },
+    "startScene": "開始画面",
+    "textBox": {
+      "highlightStyle": {
+        "color": "rgba(127, 34, 244, 1)",
+        "strokeColor": "rgba(255,255,255,1)"
+      },
+      "nameStyle": {
+        "backgroundColor": "rgba(2, 6, 23, 0.44)",
+        "backgroundImage": ""
+      },
+      "position": [
+        20,
+        300
+      ],
+      "size": [
+        600,
+        150
+      ],
+      "speed": 80,
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "url(./data/images/textbox.png)",
+        "borderTopColor": "rgba(0, 0, 0, 1)",
+        "borderTopRightRadius": "1px",
+        "borderTopStyle": "none",
+        "borderTopWidth": "1px",
+        "color": "rgba(255,255,255,1)",
+        "fontSize": "16px",
+        "lineHeight": 1.2,
+        "padding": 44,
+        "textAlign": "left"
+      }
+    },
+    "title": "Tojinovel 機能サンプルゲーム"
+  },
+  "items": [
+    {
+      "have": false,
+      "hotspots": [],
+      "image": "./data/images/item/item_image.png",
+      "name": "鍵"
+    }
+  ],
+  "scenes": [
+    {
+      "background": "./data/images/image/image.png",
+      "directions": {
+        "bottom": {
+          "target": ""
+        },
+        "left": {
+          "target": ""
+        },
+        "right": {
+          "target": ""
+        },
+        "top": {
+          "target": ""
+        }
+      },
+      "hotspots": [
+        {
+          "name": "ゲーム説明ラベル",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                389,
+                259,
+                558,
+                310
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "機能説明 サンプルゲーム",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "はじめから",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                264,
+                321,
+                406,
+                365
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "はじめから"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "はじめから",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "つづきから",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                264,
+                370,
+                406,
+                414
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "つづきから"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "つづきから",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        }
+      ],
+      "name": "開始画面",
+      "visitEvent": {
+        "file": "",
+        "label": ""
+      }
+    },
+    {
+      "background": "./data/images/background/scene_image.png",
+      "directions": {
+        "bottom": {
+          "target": ""
+        },
+        "left": {
+          "target": ""
+        },
+        "right": {
+          "target": ""
+        },
+        "top": {
+          "target": ""
+        }
+      },
+      "hotspots": [],
+      "name": "説明画面",
+      "visitEvent": {
+        "file": "./data/events/events.txt",
+        "label": "開始"
+      }
+    },
+    {
+      "background": "./data/images/background/denno.png",
+      "directions": {
+        "bottom": {
+          "target": ""
+        },
+        "left": {
+          "target": ""
+        },
+        "right": {
+          "target": ""
+        },
+        "top": {
+          "target": ""
+        }
+      },
+      "hotspots": [
+        {
+          "name": "カウンタ数値",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                525,
+                9,
+                625,
+                109
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": false,
+              "zIndex": 10
+            },
+            {
+              "area": [
+                522,
+                20,
+                623,
+                72
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "数値表示",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "27px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "[タイマー]",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            },
+            {
+              "area": [
+                316,
+                20,
+                623,
+                72
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "乱数表示",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "24px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "今日の運勢…[運勢テキスト]",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "イベントデモ",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                66,
+                139,
+                333,
+                183
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/eventdemo.txt",
+                "label": "はじめてのイベントデモ"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "イベントデモ",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "脱出デモ",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                66,
+                201,
+                333,
+                245
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/escapedemo.txt",
+                "label": "脱出開始"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "脱出デモ",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "題字",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                49,
+                59,
+                182,
+                99
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "21px",
+                "fontWeight": 480,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "とじのべる デモ",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        }
+      ],
+      "name": "チャプター",
+      "visitEvent": {
+        "file": "",
+        "label": ""
+      }
+    },
+    {
+      "background": "",
+      "directions": {
+        "bottom": {
+          "target": ""
+        },
+        "left": {
+          "target": "脱出サンプル後ろ"
+        },
+        "right": {
+          "target": "脱出サンプル後ろ"
+        },
+        "top": {
+          "target": ""
+        }
+      },
+      "hotspots": [
+        {
+          "name": "ドア",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                185,
+                181,
+                312,
+                405
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/escapedemo.txt",
+                "label": "ドアを調べる"
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 0,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "./data/events/escapedemo.txt",
+                  "item": "鍵",
+                  "label": "ドアを開く"
+                }
+              ],
+              "visibility": true,
+              "zIndex": 12
+            },
+            {
+              "area": [
+                185,
+                181,
+                312,
+                405
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "ドア開き",
+              "onClick": {
+                "file": "./data/events/escapedemo.txt",
+                "label": "開いたドアを調べる"
+              },
+              "style": {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 0,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 12
+            }
+          ]
+        },
+        {
+          "name": "ドアノブ",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                280,
+                275,
+                300,
+                297
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 22,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "ドア開いたやつ",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                58,
+                180,
+                185,
+                404
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/escapedemo.txt",
+                "label": "ドアを調べる"
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 0,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": false,
+              "zIndex": 12
+            },
+            {
+              "area": [
+                60,
+                181,
+                187,
+                405
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "ドア開き",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 0,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 12
+            }
+          ]
+        },
+        {
+          "name": "ドアノブ開いたやつ",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                72,
+                276,
+                92,
+                298
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 22,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": false,
+              "zIndex": 10
+            },
+            {
+              "area": [
+                72,
+                276,
+                92,
+                298
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "ドア開き",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 22,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        }
+      ],
+      "name": "脱出サンプル正面",
+      "visitEvent": {
+        "file": "",
+        "label": ""
+      }
+    },
+    {
+      "background": "",
+      "directions": {
+        "bottom": {
+          "target": ""
+        },
+        "left": {
+          "target": "脱出サンプル正面"
+        },
+        "right": {
+          "target": "脱出サンプル正面"
+        },
+        "top": {
+          "target": ""
+        }
+      },
+      "hotspots": [
+        {
+          "name": "机",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                382,
+                294,
+                575,
+                312
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 0,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 12
+            }
+          ]
+        },
+        {
+          "name": "机足（左）",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                396,
+                311,
+                411,
+                401
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 0,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 12
+            }
+          ]
+        },
+        {
+          "name": "机足（右）",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                541,
+                310,
+                556,
+                400
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0, 0, 0, 1)",
+                "borderRadius": 0,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 12
+            }
+          ]
+        },
+        {
+          "name": "鍵",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                441,
+                258,
+                491,
+                306
+              ],
+              "background": "./data/images/item/item_image.png",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/escapedemo.txt",
+                "label": "机を調べる"
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": -41,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 16
+            },
+            {
+              "area": [
+                374,
+                252,
+                579,
+                315
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "獲得後",
+              "onClick": {
+                "file": "./data/events/escapedemo.txt",
+                "label": "机を調べる"
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 15
+            }
+          ]
+        }
+      ],
+      "name": "脱出サンプル後ろ",
+      "visitEvent": {
+        "file": "",
+        "label": ""
+      }
+    }
+  ],
+  "toolVersion": "unknown",
+  "variables": [
+    {
+      "name": "運勢",
+      "value": "0"
+    },
+    {
+      "name": "選択",
+      "value": "選択なし"
+    },
+    {
+      "name": "タイマー",
+      "value": "10"
+    },
+    {
+      "name": "運勢テキスト",
+      "value": ""
+    }
+  ]
+}

@@ -1,0 +1,404 @@
+{
+  "characters": [
+    {
+      "defaultExpression": "通常",
+      "expressions": [
+        {
+          "image": "./system/character_image.png",
+          "name": "通常"
+        }
+      ],
+      "name": "キャラクター1"
+    }
+  ],
+  "game": {
+    "backStyle": {
+      "backgroundColor": "rgba(255, 255, 255, 1)",
+      "backgroundImage": ""
+    },
+    "character": {
+      "slots": 3
+    },
+    "config": {
+      "backStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "backgroundImage": ""
+      },
+      "bgmText": "BGM音量",
+      "containerStyle": {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(0, 0, 0, 1)",
+        "borderRadius": "5px",
+        "borderStyle": "none",
+        "borderWidth": "1px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px",
+        "gap": 12,
+        "shadowColor": "rgba(0, 0, 0, 0.32)",
+        "width": 450
+      },
+      "seText": "SE音量",
+      "speedText": "文字送り速度",
+      "thumbStyle": {
+        "backgroundColor": "rgba(54, 56, 201, 1)",
+        "borderColor": "rgba(255, 255, 255, 1)",
+        "borderStyle": "solid",
+        "borderWidth": "2px",
+        "size": 20
+      },
+      "trackStyle": {
+        "backgroundColor": "rgba(169, 169, 169, 1)",
+        "borderRadius": "3px",
+        "height": 6
+      },
+      "visibleBGM": true,
+      "visibleSE": true,
+      "visibleSpeed": true,
+      "visibleVoice": true,
+      "voiceText": "ボイス音量"
+    },
+    "direction": {
+      "hover": "none",
+      "size": 40,
+      "style": {
+        "backgroundColor": "rgba(0,0,0,0)",
+        "color": "rgba(125,125,125,1)"
+      },
+      "useDefaultArrow": true
+    },
+    "gameStyle": {
+      "borderColor": "rgba(0,0,0,1)",
+      "borderStyle": "none",
+      "borderWidth": 1,
+      "color": "rgba(0,0,0,1)",
+      "shadowColor": "rgba(0, 0, 0, 0.3)"
+    },
+    "image": {
+      "position": [
+        180,
+        40
+      ],
+      "size": [
+        300,
+        400
+      ],
+      "style": {
+        "borderColor": "rgba(255,255,255,1)",
+        "borderStyle": "none",
+        "borderWidth": "1px"
+      }
+    },
+    "input": {
+      "backStyle": {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(146, 146, 146, 1)",
+        "borderRadius": "2px",
+        "borderStyle": "solid",
+        "borderWidth": "1px"
+      },
+      "buttonStyle": {
+        "backgroundColor": "rgba(216, 203, 253, 1)",
+        "borderColor": "rgba(0, 0, 0, 1)",
+        "borderRadius": "5px",
+        "borderStyle": "none",
+        "borderWidth": "1px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px"
+      },
+      "hover": "hoverDk",
+      "inputStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "borderColor": "rgba(129, 129, 129, 1)",
+        "borderRadius": "2px",
+        "borderStyle": "solid",
+        "borderWidth": "1",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px"
+      },
+      "position": [
+        180,
+        80
+      ],
+      "size": [
+        300,
+        140
+      ]
+    },
+    "itemBox": {
+      "boxStyle": {
+        "backgroundColor": "rgba(240,240,240,1)",
+        "backgroundImage": "",
+        "color": "rgba(0,0,0,1)"
+      },
+      "columnCount": 2,
+      "foldable": false,
+      "hover": "none",
+      "itemStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "borderRadius": "0px"
+      },
+      "paginationSize": 16,
+      "position": "right",
+      "selectedItemBorder": {
+        "color": "rgba(255,0,0,1)",
+        "style": "solid",
+        "width": "2px"
+      },
+      "size": 160,
+      "space": 10
+    },
+    "itemDrawer": {
+      "backStyle": {
+        "backgroundColor": "rgba(0,0,0,0.5)"
+      },
+      "size": [
+        320,
+        240
+      ],
+      "style": {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "borderRadius": "0px"
+      }
+    },
+    "menu": {
+      "configText": "config",
+      "hover": "hoverOp",
+      "loadText": "Load",
+      "position": "bottom right",
+      "saveText": "Save",
+      "style": {
+        "fontSize": "16px",
+        "fontWeight": 470,
+        "gap": 10
+      },
+      "visibleConfig": true,
+      "visibleLoad": true,
+      "visibleSave": true
+    },
+    "option": {
+      "gap": 20,
+      "hover": "none",
+      "position": [
+        50,
+        50
+      ],
+      "size": 180,
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0.34)",
+        "backgroundImage": "",
+        "borderColor": "rgba(0,0,0,1)",
+        "borderRadius": "0px",
+        "borderStyle": "none",
+        "borderWidth": "0px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px",
+        "padding": 5,
+        "textAlign": "left"
+      }
+    },
+    "save": {
+      "auto": false,
+      "autoText": "Auto",
+      "backStyle": {
+        "backgroundColor": "rgba(222,222,222,1)",
+        "backgroundImage": "",
+        "padding": "10px 30px"
+      },
+      "buttonStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(0, 0, 0, 1)",
+        "borderRadius": "5px",
+        "borderStyle": "none",
+        "borderWidth": "1px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px",
+        "padding": 10
+      },
+      "dataText": "Save Data",
+      "hover": "hoverDk",
+      "loadText": "Load",
+      "noDataText": "No Data",
+      "saveText": "Save",
+      "slots": 3
+    },
+    "screenSize": [
+      800,
+      480
+    ],
+    "sound": {
+      "bgm": 0.8,
+      "se": 1,
+      "voice": 1
+    },
+    "startScene": "New Scene",
+    "textBox": {
+      "highlightStyle": {
+        "color": "rgba(255,0,0,1)",
+        "strokeColor": "rgba(255,255,255,1)"
+      },
+      "position": [
+        20,
+        300
+      ],
+      "size": [
+        600,
+        150
+      ],
+      "speed": 80,
+      "style": {
+        "backgroundColor": "rgba(0,0,0,0.6)",
+        "backgroundImage": "",
+        "borderTopColor": "rgba(0, 0, 0, 1)",
+        "borderTopRightRadius": "1px",
+        "borderTopStyle": "none",
+        "borderTopWidth": "1px",
+        "color": "rgba(255,255,255,1)",
+        "fontSize": "16px",
+        "lineHeight": 1.2,
+        "padding": 10,
+        "textAlign": "left"
+      },
+      "nameStyle": {
+        "backgroundColor": "rgba(0, 0, 0, 0.6)",
+        "backgroundImage": ""
+      }
+    },
+    "title": "Game title"
+  },
+  "items": [
+    {
+      "have": true,
+      "hotspots": [
+        {
+          "name": "New hotspot",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                52,
+                26,
+                265,
+                219
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        }
+      ],
+      "image": "./system/item_image.png",
+      "name": "New item"
+    }
+  ],
+  "scenes": [
+    {
+      "background": "./system/scene_image.png",
+      "directions": {
+        "bottom": {
+          "target": ""
+        },
+        "left": {
+          "target": ""
+        },
+        "right": {
+          "target": ""
+        },
+        "top": {
+          "target": ""
+        }
+      },
+      "hotspots": [
+        {
+          "name": "New hotspot",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                270,
+                177,
+                370,
+                277
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        }
+      ],
+      "name": "New Scene",
+      "visitEvent": {
+        "file": "",
+        "label": ""
+      }
+    }
+  ],
+  "variables": [
+    {
+      "name": "New data",
+      "value": "0"
+    }
+  ]
+}

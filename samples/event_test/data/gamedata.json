@@ -1,0 +1,1673 @@
+{
+  "characters": [
+    {
+      "defaultExpression": "通常",
+      "expressions": [
+        {
+          "image": "./data/images/character/meru/normal.png",
+          "name": "通常"
+        },
+        {
+          "image": "./data/images/character/meru/speak.png",
+          "name": "会話"
+        },
+        {
+          "image": "./data/images/character/meru/sspeak.png",
+          "name": "会話笑顔"
+        },
+        {
+          "image": "./data/images/character/meru/surprise.png",
+          "name": "驚き"
+        },
+        {
+          "image": "./data/images/character/meru/sad.png",
+          "name": "悲しい"
+        },
+        {
+          "image": "./data/images/character/meru/smile.png",
+          "name": "笑顔"
+        }
+      ],
+      "name": "める"
+    },
+    {
+      "defaultExpression": "通常",
+      "expressions": [
+        {
+          "image": "./data/images/character/neko/neko.png",
+          "name": "通常"
+        }
+      ],
+      "name": "ねこ"
+    }
+  ],
+  "commit": "unknown",
+  "game": {
+    "backStyle": {
+      "backgroundColor": "rgba(255, 255, 255, 1)",
+      "backgroundImage": ""
+    },
+    "character": {
+      "slots": 3
+    },
+    "config": {
+      "backStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "backgroundImage": ""
+      },
+      "bgmText": "BGM音量",
+      "containerStyle": {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(0, 0, 0, 1)",
+        "borderRadius": "5px",
+        "borderStyle": "none",
+        "borderWidth": "1px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px",
+        "gap": 12,
+        "shadowColor": "rgba(0, 0, 0, 0.32)",
+        "width": 450
+      },
+      "seText": "SE音量",
+      "speedText": "文字送り速度",
+      "thumbStyle": {
+        "backgroundColor": "rgba(54, 56, 201, 1)",
+        "borderColor": "rgba(255, 255, 255, 1)",
+        "borderStyle": "solid",
+        "borderWidth": "2px",
+        "size": 20
+      },
+      "trackStyle": {
+        "backgroundColor": "rgba(169, 169, 169, 1)",
+        "borderRadius": "3px",
+        "height": 6
+      },
+      "visibleBGM": true,
+      "visibleSE": true,
+      "visibleSpeed": true,
+      "visibleVoice": true,
+      "voiceText": "ボイス音量"
+    },
+    "direction": {
+      "hover": "hoverOp",
+      "size": 40,
+      "style": {
+        "backgroundColor": "rgba(0,0,0,0)",
+        "color": "rgba(131, 124, 144, 1)"
+      },
+      "useDefaultArrow": true
+    },
+    "gameStyle": {
+      "borderColor": "rgba(0,0,0,1)",
+      "borderStyle": "none",
+      "borderWidth": 1,
+      "color": "rgba(0,0,0,1)",
+      "shadowColor": "rgba(0, 0, 0, 0.3)"
+    },
+    "image": {
+      "position": [
+        139,
+        75
+      ],
+      "size": [
+        385,
+        400
+      ],
+      "style": {
+        "borderColor": "rgba(255,255,255,1)",
+        "borderStyle": "none",
+        "borderWidth": "1px"
+      }
+    },
+    "input": {
+      "backStyle": {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(146, 146, 146, 1)",
+        "borderRadius": "2px",
+        "borderStyle": "solid",
+        "borderWidth": "1px"
+      },
+      "buttonStyle": {
+        "backgroundColor": "rgba(216, 203, 253, 1)",
+        "borderColor": "rgba(0, 0, 0, 1)",
+        "borderRadius": "5px",
+        "borderStyle": "none",
+        "borderWidth": "1px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px"
+      },
+      "hover": "hoverDk",
+      "inputStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "borderColor": "rgba(129, 129, 129, 1)",
+        "borderRadius": "2px",
+        "borderStyle": "solid",
+        "borderWidth": "1",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px"
+      },
+      "position": [
+        180,
+        80
+      ],
+      "size": [
+        300,
+        140
+      ]
+    },
+    "itemBox": {
+      "boxStyle": {
+        "backgroundColor": "rgba(240,240,240,1)",
+        "backgroundImage": "",
+        "color": "rgba(0,0,0,1)"
+      },
+      "columnCount": 2,
+      "foldable": false,
+      "hover": "none",
+      "itemStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "borderRadius": "0px"
+      },
+      "paginationSize": 16,
+      "position": "right",
+      "selectedItemBorder": {
+        "color": "rgba(255,0,0,1)",
+        "style": "solid",
+        "width": "2px"
+      },
+      "size": 160,
+      "space": 10
+    },
+    "itemDrawer": {
+      "backStyle": {
+        "backgroundColor": "rgba(0,0,0,0.5)"
+      },
+      "size": [
+        320,
+        240
+      ],
+      "style": {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "borderRadius": "0px"
+      }
+    },
+    "menu": {
+      "configText": "config",
+      "hover": "hoverOp",
+      "loadText": "Load",
+      "position": "bottom right",
+      "saveText": "Save",
+      "style": {
+        "fontSize": "16px",
+        "fontWeight": 510,
+        "gap": 10
+      },
+      "visibleConfig": true,
+      "visibleLoad": true,
+      "visibleSave": true
+    },
+    "option": {
+      "gap": 20,
+      "hover": "hoverDk",
+      "position": [
+        50,
+        50
+      ],
+      "size": 180,
+      "style": {
+        "backgroundColor": "rgba(236, 228, 248, 1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(54, 116, 255, 1)",
+        "borderRadius": "2px",
+        "borderStyle": "double",
+        "borderWidth": "6px",
+        "color": "rgba(0, 0, 0, 1)",
+        "fontSize": "16px",
+        "padding": 5,
+        "textAlign": "center"
+      }
+    },
+    "save": {
+      "auto": false,
+      "autoText": "Auto",
+      "backStyle": {
+        "backgroundColor": "rgba(222,222,222,1)",
+        "backgroundImage": "",
+        "padding": "10px 30px"
+      },
+      "buttonStyle": {
+        "backgroundColor": "rgba(255,255,255,1)",
+        "backgroundImage": "",
+        "borderColor": "rgba(0, 0, 0, 1)",
+        "borderRadius": "5px",
+        "borderStyle": "none",
+        "borderWidth": "1px",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "16px",
+        "padding": 10
+      },
+      "dataText": "Save Data",
+      "hover": "hoverDk",
+      "loadText": "Load",
+      "noDataText": "No Data",
+      "saveText": "Save",
+      "slots": 3
+    },
+    "screenSize": [
+      800,
+      480
+    ],
+    "sound": {
+      "bgm": 0.8,
+      "se": 1,
+      "voice": 1
+    },
+    "startScene": "デモ画面",
+    "textBox": {
+      "highlightStyle": {
+        "color": "rgba(127, 34, 244, 1)",
+        "strokeColor": "rgba(255,255,255,1)"
+      },
+      "nameStyle": {
+        "backgroundColor": "rgba(2, 6, 23, 0.44)",
+        "backgroundImage": ""
+      },
+      "position": [
+        20,
+        300
+      ],
+      "size": [
+        600,
+        150
+      ],
+      "speed": 80,
+      "style": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "url(./data/images/textbox.png)",
+        "borderTopColor": "rgba(0, 0, 0, 1)",
+        "borderTopRightRadius": "1px",
+        "borderTopStyle": "none",
+        "borderTopWidth": "1px",
+        "color": "rgba(255,255,255,1)",
+        "fontSize": "16px",
+        "lineHeight": 1.2,
+        "padding": 44,
+        "textAlign": "left"
+      }
+    },
+    "title": "Tojinovel 機能サンプルゲーム"
+  },
+  "items": [
+    {
+      "have": false,
+      "hotspots": [
+        {
+          "name": "サンプル",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                185,
+                7,
+                275,
+                59
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(255, 255, 255, 1)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            },
+            {
+              "area": [
+                185,
+                7,
+                275,
+                59
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "変更後",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(255, 143, 143, 1)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            },
+            {
+              "area": [
+                185,
+                7,
+                275,
+                59
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "黒",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "サンプル2",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                11,
+                136,
+                111,
+                180
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル2",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            },
+            {
+              "area": [
+                11,
+                136,
+                111,
+                180
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "黒",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル2",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "サンプル3",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                114,
+                192,
+                209,
+                232
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル3",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        }
+      ],
+      "image": "./data/images/item/item_image.png",
+      "name": "鍵"
+    }
+  ],
+  "scenes": [
+    {
+      "background": "./data/images/background/scene_image.png",
+      "directions": {
+        "bottom": {
+          "target": ""
+        },
+        "left": {
+          "target": ""
+        },
+        "right": {
+          "target": ""
+        },
+        "top": {
+          "target": ""
+        }
+      },
+      "hotspots": [
+        {
+          "name": "サンプル",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                123,
+                345,
+                223,
+                445
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(255, 255, 255, 1)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            },
+            {
+              "area": [
+                123,
+                345,
+                223,
+                445
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "変更後",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(255, 143, 143, 1)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            },
+            {
+              "area": [
+                123,
+                345,
+                223,
+                445
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "黒",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "サンプル2",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                454,
+                79,
+                554,
+                179
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル2",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            },
+            {
+              "area": [
+                454,
+                79,
+                554,
+                179
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "黒",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル2",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "サンプル3",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                498,
+                325,
+                598,
+                425
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "center",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "サンプル3",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        }
+      ],
+      "name": "外",
+      "visitEvent": {
+        "file": "",
+        "label": ""
+      }
+    },
+    {
+      "background": "./data/images/background/denno.png",
+      "directions": {
+        "bottom": {
+          "target": ""
+        },
+        "left": {
+          "target": ""
+        },
+        "right": {
+          "target": ""
+        },
+        "top": {
+          "target": ""
+        }
+      },
+      "hotspots": [
+        {
+          "name": "カウンタ数値",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                459,
+                20,
+                625,
+                65
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "カウント数値：[カウント]",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "デモ開始（フル）",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                228,
+                111,
+                420,
+                155
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "フル実行"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "0.すべてのデモを実行",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "題字",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                49,
+                59,
+                182,
+                99
+              ],
+              "background": "",
+              "hover": "none",
+              "name": "default",
+              "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(0,0,0,0)",
+                "borderColor": "rgba(0,0,0,0)",
+                "borderRadius": 0,
+                "borderStyle": "none",
+                "borderWidth": "1px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "21px",
+                "fontWeight": 480,
+                "rotate": 0,
+                "shadowColor": "rgba(0,0,0,0)",
+                "textAlign": "left",
+                "textPadding": "0px",
+                "textVAlign": "center"
+              },
+              "text": "とじのべる デモ",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "テキスト",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                25,
+                163,
+                217,
+                207
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "テキスト・キャラクター"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "1.テキスト・キャラクター",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "変数",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                26,
+                214,
+                218,
+                258
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "変数・フラグ"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "2.変数・フラグ",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "シーン・ステート",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                27,
+                266,
+                219,
+                310
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "シーン・ステート"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "3.シーン・ステート",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "アイテム",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                26,
+                317,
+                218,
+                361
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "アイテム"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "4.アイテム",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "背景",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                227,
+                163,
+                419,
+                207
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "背景"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "5.背景",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "画像表示",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                228,
+                215,
+                420,
+                259
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "画像表示"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "6.画像表示",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "入力・選択肢",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                228,
+                266,
+                420,
+                310
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "入力・選択肢"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "7.入力・選択肢",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "音",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                228,
+                318,
+                420,
+                362
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "音"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "8.音",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "ハイパーリンク",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                431,
+                163,
+                623,
+                207
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "ハイパーリンク"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "9.ハイパーリンク",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "セーブ・ロード・設定",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                430,
+                217,
+                622,
+                261
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "セーブ・ロード・設定"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "10.セーブ・ロード・設定",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "タイマー",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                431,
+                267,
+                623,
+                311
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "タイマー"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "11.タイマー",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "ハイパーリンク同窓",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                28,
+                385,
+                256,
+                429
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "ハイパーリンク同タブ"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "ハイパーリンクをこのタブで開く",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "ロードボタン",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                270,
+                385,
+                432,
+                429
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "ロードボタン"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "スロット2をロード",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "イベントキュー",
+          "state": "default",
+          "states": [
+            {
+              "area": [
+                441,
+                385,
+                603,
+                429
+              ],
+              "background": "",
+              "hover": "hoverSh",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "タイマーイベントタイミング"
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "イベントキュー",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "zIndex": 10
+            }
+          ]
+        }
+      ],
+      "name": "デモ画面",
+      "visitEvent": {
+        "file": "",
+        "label": ""
+      }
+    }
+  ],
+  "variables": [
+    {
+      "name": "サイコロ",
+      "value": "0"
+    },
+    {
+      "name": "カウント",
+      "value": "0"
+    },
+    {
+      "name": "フル実行",
+      "value": "0"
+    }
+  ]
+}
