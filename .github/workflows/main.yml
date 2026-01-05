@@ -1,0 +1,135 @@
+name: Build & Release
+
+on:
+  push:
+    branches:
+      - test-actions
+
+permissions:
+  contents: write   # tag / release / wiki push 用
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # ----------------------------
+      # checkout
+      # ----------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 差分取得 & tag 用
+
+      # ----------------------------
+      # バージョン生成
+      # ----------------------------
+      - name: Generate version
+        id: version
+        shell: pwsh
+        run: |
+          $version = "v0.1.${{ github.run_number }}.${{ github.run_attempt }}"
+          @"
+          RELEASE_VERSION=$version
+          "@ | Out-File .env.local -Encoding utf8
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      # ----------------------------
+      # 変更検知
+      # ----------------------------
+      - name: Detect changes
+        id: changes
+        shell: pwsh
+        run: |
+          if ("${{ github.event.before }}" -eq "0000000000000000000000000000000000000000") {
+            $files = git ls-files
+          } else {
+            $files = git diff --name-only ${{ github.event.before }} ${{ github.sha }}
+          }
+
+          $hasSamples = $files | Where-Object { $_ -like "samples/*" }
+          $hasWiki    = $files | Where-Object { $_ -like "docs/wiki/*" }
+          $hasCore    = $files | Where-Object {
+            $_ -notlike "samples/*" -and $_ -notlike "docs/wiki/*"
+          }
+
+          echo "samples=$([bool]$hasSamples)" >> $env:GITHUB_OUTPUT
+          echo "wiki=$([bool]$hasWiki)"       >> $env:GITHUB_OUTPUT
+          echo "core=$([bool]$hasCore)"       >> $env:GITHUB_OUTPUT
+
+      # ----------------------------
+      # Setup environments
+      # ----------------------------
+      - name: Setup Node
+        if: steps.changes.outputs.core == 'True' || steps.changes.outputs.samples == 'True'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      
+      - name: Setup Go
+        if: steps.changes.outputs.core == 'True' || steps.changes.outputs.samples == 'True'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+        
+      # ----------------------------
+      # Build (Client + Server)
+      # ----------------------------
+      - name: Build all
+        if: steps.changes.outputs.core == 'True' || steps.changes.outputs.samples == 'True'
+        shell: pwsh
+        run: |
+          ./scripts/build-all.ps1
+
+      # ----------------------------
+      # Wiki 更新
+      # ----------------------------
+      - name: Update GitHub Wiki
+        if: steps.changes.outputs.wiki == 'True'
+        shell: pwsh
+        run: |
+          git clone https://github.com/${{ github.repository }}.wiki.git wiki
+          Copy-Item docs/wiki/* wiki -Recurse -Force
+          cd wiki
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update wiki (${{ steps.version.outputs.version }})" || exit 0
+          git push
+
+      # ----------------------------
+      # Release 作成
+      # ----------------------------
+      - name: Prepare release files
+        id: release_files
+        shell: pwsh
+        run: |
+          $files = @()
+      
+          if ("${{ steps.changes.outputs.core }}" -eq "True") {
+            $files += "release/*.zip"
+          }
+      
+          if ("${{ steps.changes.outputs.samples }}" -eq "True") {
+            $files += "release/samples/*.zip"
+          }
+      
+          if ($files.Count -eq 0) {
+            echo "skip=true" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+      
+          $filesText = $files -join "`n"
+          echo "files<<EOF" >> $env:GITHUB_OUTPUT
+          echo $filesText >> $env:GITHUB_OUTPUT
+          echo "EOF" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: steps.release_files.outputs.skip != 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          prerelease: true
+          files: ${{ steps.release_files.outputs.files }}
