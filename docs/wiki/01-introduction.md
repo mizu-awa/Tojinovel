@@ -1,5 +1,5 @@
 # とじのべる（Tojinovel）ユーザーマニュアル
-## 🎉 はじめに
+## 🎉 はじめに 
 
 とじのべるは、ブラウザ上で脱出ゲーム／ノベルゲームを作れるエディタです。
 
@@ -164,7 +164,7 @@ game/editor.html
 大量の画像を読み込むとプレビューが重くなる可能性があります。
 
 不具合は GitHub Issues へ報告いただけると助かります！  
-[リンク]
+[GitHub Issues](https://github.com/mizu-awa/Tojinovel/issues)
 
 ## 免責事項
 本ツールは無保証で提供されます。  
