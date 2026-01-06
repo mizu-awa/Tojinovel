@@ -3,7 +3,7 @@ name: Build & Release
 on:
   push:
     branches:
-      - test-actions
+      - main
 
 permissions:
   contents: write   # tag / release / wiki push 用
