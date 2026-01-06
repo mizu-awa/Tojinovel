@@ -22,19 +22,6 @@ jobs:
           fetch-depth: 0   # 差分取得 & tag 用
 
       # ----------------------------
-      # バージョン生成
-      # ----------------------------
-      - name: Generate version
-        id: version
-        shell: pwsh
-        run: |
-          $version = "v0.1.${{ github.run_number }}.${{ github.run_attempt }}"
-          @"
-          RELEASE_VERSION=$version
-          "@ | Out-File .env.local -Encoding utf8
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-
-      # ----------------------------
       # 変更検知
       # ----------------------------
       - name: Detect changes
@@ -58,6 +45,20 @@ jobs:
           echo "core=$([bool]$hasCore)"       >> $env:GITHUB_OUTPUT
 
       # ----------------------------
+      # バージョン生成
+      # ----------------------------
+      - name: Generate version
+        if: steps.changes.outputs.core == 'True' || steps.changes.outputs.samples == 'True'
+        id: version
+        shell: pwsh
+        run: |
+          $version = "v0.1.${{ github.run_number }}.${{ github.run_attempt }}"
+          @"
+          RELEASE_VERSION=$version
+          "@ | Out-File .env.local -Encoding utf8
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      # ----------------------------
       # Setup environments
       # ----------------------------
       - name: Setup Node
@@ -67,6 +68,7 @@ jobs:
           node-version: 22
 
       - run: npm ci
+        if: steps.changes.outputs.core == 'True' || steps.changes.outputs.samples == 'True'
       
       - name: Setup Go
         if: steps.changes.outputs.core == 'True' || steps.changes.outputs.samples == 'True'
@@ -98,42 +100,29 @@ jobs:
           git config user.name  "github-actions"
           git config user.email "actions@github.com"
           git add .
-          git commit -m "Update wiki (${{ steps.version.outputs.version }})" || exit 0
+          git commit -m "Update wiki (${{ github.sha }})" || exit 0
           git push
 
       # ----------------------------
-      # Release 作成
+      # Release 作成（フルセット）
       # ----------------------------
       - name: Prepare release files
+        if: steps.changes.outputs.core == 'True' || steps.changes.outputs.samples == 'True'
         id: release_files
         shell: pwsh
         run: |
-          $files = @()
-      
-          if ("${{ steps.changes.outputs.core }}" -eq "True") {
-            $files += "release/*.zip"
-          }
-      
-          if ("${{ steps.changes.outputs.samples }}" -eq "True") {
-            $files += "release/samples/*.zip"
-          }
-      
-          if ($files.Count -eq 0) {
-            echo "skip=true" >> $env:GITHUB_OUTPUT
-            exit 0
-          }
-      
-          $filesText = $files -join "`n"
           echo "files<<EOF" >> $env:GITHUB_OUTPUT
-          echo $filesText >> $env:GITHUB_OUTPUT
+          echo "release/*.zip" >> $env:GITHUB_OUTPUT
+          echo "release/samples/*.zip" >> $env:GITHUB_OUTPUT
           echo "EOF" >> $env:GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        if: steps.release_files.outputs.skip != 'true'
+        if: steps.changes.outputs.core == 'True' || steps.changes.outputs.samples == 'True'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.version }}
           name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
-          prerelease: true
+          prerelease: true   # 安定版にしたら false
           files: ${{ steps.release_files.outputs.files }}
+
