@@ -50,7 +50,7 @@ function ItemBox({
     const haveItems = items.filter(item => item.have);
 
     // ページ数
-    const maxPage = Math.ceil(haveItems.length / pageFill);
+    const maxPage = Math.max(1, Math.ceil(haveItems.length / pageFill));
 
     const prevPage = () => {
         setPage(Math.max(0, page - 1))
