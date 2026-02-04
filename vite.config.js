@@ -11,6 +11,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         sub: resolve(__dirname, 'editor.html'),
+        debug: resolve(__dirname, 'debug.html'),
       },
     },
   },
