@@ -79,7 +79,7 @@ cd server
 
 ### 一括ビルド
 ```powershell
-./build-all.ps1
+./scripts/build-all.ps1
 ```
 
 ## ビルド後のフォルダ構成例
