@@ -1,5 +1,8 @@
 // React
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
+
+// デバッグレイアウト（debug.htmlからのみ読み込まれる）
+const DebugLayout = lazy(() => import("./components/DebugLayout.jsx"));
 
 // hooks
 import { useGameData } from "./hooks/useGameData";
@@ -21,7 +24,7 @@ import { useIndexedDBSaves } from "./hooks/useIndexedDBStorage.js";
 import Config from "./components/Config.jsx";
 import BackgroundEventRunner from "./components/BackgroundEventRunner.jsx";
 
-export default function GameApp() {
+export default function GameApp({ debug }) {
   // state-----------------------------------------------------------------------------------------
   const [selectedItem, selectItem] = useState(null);
   const [viewItemName, setViewItemName] = useState(null);
@@ -506,177 +509,200 @@ export default function GameApp() {
   if (loading) return <Loading />;
   if (error) return <Error message={error.message} />;
 
-  return (
-    <div
-      style={{
-        ...gameData.game.backStyle,
-        display: "flex",
-        width: "100vw",
-        height: "100vh",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden"
-      }}
-    >
-      <div
-        ref={ref}
-        style={{
-          ...gameData.game.gameStyle,
-          boxShadow: `0 4px 12px ${gameData.game.gameStyle.shadowColor}`,
-          display: "flex",
-          width: gameData.game.screenSize[0],
-          height: gameData.game.screenSize[1],
-          cursor: "pointer",
-          userSelect: "none",
-          flexFlow: gameData.game.itemBox.position === "right" ? "row"
-                  : gameData.game.itemBox.position === "left" ? "row-reverse"
-                  : gameData.game.itemBox.position === "top" ? "column-reverse"
-                  : gameData.game.itemBox.position === "bottom" ? "column"
-                  : "row",
-          overflow: "clip"
-        }}
+  const backStyle = {
+    ...gameData.game.backStyle,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  };
+
+  const gameContainerStyle = {
+    ...gameData.game.gameStyle,
+    boxShadow: `0 4px 12px ${gameData.game.gameStyle.shadowColor}`,
+    display: "flex",
+    width: gameData.game.screenSize[0],
+    height: gameData.game.screenSize[1],
+    cursor: "pointer",
+    userSelect: "none",
+    flexFlow: gameData.game.itemBox.position === "right" ? "row"
+            : gameData.game.itemBox.position === "left" ? "row-reverse"
+            : gameData.game.itemBox.position === "top" ? "column-reverse"
+            : gameData.game.itemBox.position === "bottom" ? "column"
+            : "row",
+    overflow: "clip",
+  };
+
+  // ゲームコンテンツ（共通）
+  const gameContent = (
+    <div ref={ref} style={gameContainerStyle}>
+      <SceneWrap
+        screenSize={gameData.game.screenSize}
+        itemBoxSize={gameData.game.itemBox.foldable ? 0 : gameData.game.itemBox.size}
+        itemBoxPosition={gameData.game.itemBox.position}
+        background={currentScene.background}
       >
-        <SceneWrap
-          screenSize={gameData.game.screenSize}
-          itemBoxSize={gameData.game.itemBox.foldable ? 0 : gameData.game.itemBox.size}
-          itemBoxPosition={gameData.game.itemBox.position}
-          background={currentScene.background}
-        >
-
-          {/* ホットスポット */}
-          <Hotspots
-            type="scene"
-            hotspots={currentScene.hotspots}
-            currentSceneName={currentScene.name}
-            handleHotspotClick={handleHotspotClick}
-            variables={gameData.variables}
-          />
-
-          {/* 方向移動ボタン */}
-          <SceneDirections
-            directions={currentScene.directions}
-            config={gameData.game.direction}
-            handleDirectionClick={handleDirectionClick}
-          />
-
-          {/* アイテム表示 */}
-          <ItemDrawer
-            item={viewItem}
-            itemDrawer={gameData.game.itemDrawer}
-            handleHotspotClick={handleHotspotClick}
-            handleItemBackClick={handleItemBackClick}
-            variables={gameData.variables}
-          />
-
-          {/* メニューボタン */}
-          <Menu
-            menu={gameData.game.menu}
-            save={clickSave}
-            load={clickLoad}
-            config={openConfig}
-          />
-
-        </SceneWrap>
-
-        {/* アイテムボックス */}
-        <ItemBox
-          items={gameData.items}
-          itemBox={gameData.game.itemBox}
-          selectedItem={selectedItem}
-          handleItemClick={handleItemClick}
-          screenSize={gameData.game.screenSize}
+        {/* ホットスポット */}
+        <Hotspots
+          type="scene"
+          hotspots={currentScene.hotspots}
+          currentSceneName={currentScene.name}
+          handleHotspotClick={handleHotspotClick}
+          variables={gameData.variables}
         />
 
-        {/* イベント表示 */}
-        <EventViewer
-          onComplete={() => setLines(null)}
-          lines={lines}
-          gameData={gameData}
-          updateGameData={updateGameData}
-          setViewItemName={setViewItemName}
-          fileJump={fileJump}
-          moveScene={moveScene}
-          save={getEventSaveData}
-          index={index}
-          setIndex={setIndex}
-          characterSlots={characterSlots}
-          setCharacterSlots={setCharacterSlots}
-          currentLine={currentLine}
-          setCurrentLine={setCurrentLine}
-          currentOptions={currentOptions}
-          setCurrentOptions={setCurrentOptions}
-          currentBack={currentBack}
-          setCurrentBack={setCurrentBack}
-          currentImage={currentImage}
-          setCurrentImage={setCurrentImage}
-          hiddenCharacter={hiddenCharacter}
-          hideCharacter={hideCharacter}
-          currentInput={currentInput}
-          setCurrentInput={setCurrentInput}
-          ifDepth={ifDepth}
-          opDepth={opDepth}
-          opLabel={opLabel}
-          bgm={bgm}
-          openSave={clickSave}
-          openLoad={clickLoad}
-          saveGame={saveGame}
-          loadGame={loadGame}
-          audioManager={audioManager}
-          openConfig={openConfig}
-          startTimer={startTimer}
-          stopTimer={stopTimer}
-          restartTimer={restartTimer}
+        {/* 方向移動ボタン */}
+        <SceneDirections
+          directions={currentScene.directions}
+          config={gameData.game.direction}
+          handleDirectionClick={handleDirectionClick}
         />
 
-        {/* イベント表示(バックグラウンド) */}
-        <BackgroundEventRunner
-          onComplete={finishBackEvent}
-          lines={backLines}
-          gameData={gameData}
-          updateGameData={updateGameData}
-          setViewItemName={setViewItemName}
-          fileJump={fileJump}
-          moveScene={moveScene}
-          save={getEventSaveData}
-          index={0}
-          setIndex={null}
-          ifDepth={ifDepthBack}
-          opDepth={opDepthBack}
-          opLabel={opLabelBack}
-          bgm={bgm}
-          openSave={clickSave}
-          openLoad={clickLoad}
-          saveGame={saveGame}
-          loadGame={loadGame}
-          audioManager={audioManager}
-          openConfig={openConfig}
-          startTimer={startTimer}
-          stopTimer={stopTimer}
-          restartTimer={restartTimer}
+        {/* アイテム表示 */}
+        <ItemDrawer
+          item={viewItem}
+          itemDrawer={gameData.game.itemDrawer}
+          handleHotspotClick={handleHotspotClick}
+          handleItemBackClick={handleItemBackClick}
+          variables={gameData.variables}
         />
 
-        {/* セーブロード画面 */}
-        <SaveLoad
-          saveLoadSlots={saveLoadSlots}
-          save={gameData.game.save}
-          saveClick={saveGame}
-          loadClick={loadGame}
-          closeSaveLoad={closeSaveLoad}
+        {/* メニューボタン */}
+        <Menu
+          menu={gameData.game.menu}
+          save={clickSave}
+          load={clickLoad}
+          config={openConfig}
         />
+      </SceneWrap>
 
-        {/* 設定画面 */}
-        <Config
-          visible={viewConfig}
-          config={gameData.game.config}
-          close={closeConfig}
-          bgm={gameData.game.sound.bgm}
-          se={gameData.game.sound.se}
-          voice={gameData.game.sound.voice}
-          speed={gameData.game.textBox.speed}
-          updateGameData={updateGameData}
-        />
+      {/* アイテムボックス */}
+      <ItemBox
+        items={gameData.items}
+        itemBox={gameData.game.itemBox}
+        selectedItem={selectedItem}
+        handleItemClick={handleItemClick}
+        screenSize={gameData.game.screenSize}
+      />
 
-      </div>
+      {/* イベント表示 */}
+      <EventViewer
+        onComplete={() => setLines(null)}
+        lines={lines}
+        gameData={gameData}
+        updateGameData={updateGameData}
+        setViewItemName={setViewItemName}
+        fileJump={fileJump}
+        moveScene={moveScene}
+        save={getEventSaveData}
+        index={index}
+        setIndex={setIndex}
+        characterSlots={characterSlots}
+        setCharacterSlots={setCharacterSlots}
+        currentLine={currentLine}
+        setCurrentLine={setCurrentLine}
+        currentOptions={currentOptions}
+        setCurrentOptions={setCurrentOptions}
+        currentBack={currentBack}
+        setCurrentBack={setCurrentBack}
+        currentImage={currentImage}
+        setCurrentImage={setCurrentImage}
+        hiddenCharacter={hiddenCharacter}
+        hideCharacter={hideCharacter}
+        currentInput={currentInput}
+        setCurrentInput={setCurrentInput}
+        ifDepth={ifDepth}
+        opDepth={opDepth}
+        opLabel={opLabel}
+        bgm={bgm}
+        openSave={clickSave}
+        openLoad={clickLoad}
+        saveGame={saveGame}
+        loadGame={loadGame}
+        audioManager={audioManager}
+        openConfig={openConfig}
+        startTimer={startTimer}
+        stopTimer={stopTimer}
+        restartTimer={restartTimer}
+      />
+
+      {/* イベント表示(バックグラウンド) */}
+      <BackgroundEventRunner
+        onComplete={finishBackEvent}
+        lines={backLines}
+        gameData={gameData}
+        updateGameData={updateGameData}
+        setViewItemName={setViewItemName}
+        fileJump={fileJump}
+        moveScene={moveScene}
+        save={getEventSaveData}
+        index={0}
+        setIndex={null}
+        ifDepth={ifDepthBack}
+        opDepth={opDepthBack}
+        opLabel={opLabelBack}
+        bgm={bgm}
+        openSave={clickSave}
+        openLoad={clickLoad}
+        saveGame={saveGame}
+        loadGame={loadGame}
+        audioManager={audioManager}
+        openConfig={openConfig}
+        startTimer={startTimer}
+        stopTimer={stopTimer}
+        restartTimer={restartTimer}
+      />
+
+      {/* セーブロード画面 */}
+      <SaveLoad
+        saveLoadSlots={saveLoadSlots}
+        save={gameData.game.save}
+        saveClick={saveGame}
+        loadClick={loadGame}
+        closeSaveLoad={closeSaveLoad}
+      />
+
+      {/* 設定画面 */}
+      <Config
+        visible={viewConfig}
+        config={gameData.game.config}
+        close={closeConfig}
+        bgm={gameData.game.sound.bgm}
+        se={gameData.game.sound.se}
+        voice={gameData.game.sound.voice}
+        speed={gameData.game.textBox.speed}
+        updateGameData={updateGameData}
+      />
+    </div>
+  );
+
+  // デバッグモード: PanelGroupで横並びレイアウト
+  if (debug) {
+    const debugProps = {
+      gameData, updateGameData, currentScene, moveScene,
+      selectedItem, selectItem, viewItemName, lines, setLines, backLines,
+      index, executeEvent, timers, bgm, audioManager,
+      stopTimer, restartTimer,
+    };
+    return (
+      <Suspense fallback={
+        <div style={{ ...backStyle, width: "100vw", height: "100vh" }}>
+          {gameContent}
+        </div>
+      }>
+        <DebugLayout debugProps={debugProps}>
+          <div style={{ ...backStyle, width: "100%", height: "100%" }}>
+            {gameContent}
+          </div>
+        </DebugLayout>
+      </Suspense>
+    );
+  }
+
+  // 通常モード
+  return (
+    <div style={{ ...backStyle, width: "100vw", height: "100vh" }}>
+      {gameContent}
     </div>
   );
 }

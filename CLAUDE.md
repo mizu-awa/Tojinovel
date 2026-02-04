@@ -4,9 +4,11 @@
 
 Tojinovel（とじのべる）は、ブラウザベースの脱出ゲーム・ノベルゲーム制作ツール。
 React フロントエンド（ゲームプレイヤー + ビジュアルエディタ）と Go バックエンドで構成される。
+ビルド成果物（dist/）がゲーム制作者に配布され、制作者はそれを使ってゲームを作成する。
 
 - **ゲームプレイヤー**: `index.html` → `src/main.jsx` → `src/GameApp.jsx`
 - **エディタ**: `editor.html` → `src/editor.jsx` → `src/EditorApp.jsx`
+- **デバッグプレイヤー**: `debug.html` → `src/debug.jsx` → `src/GameApp.jsx`（debug prop付き）
 - **サーバー**: `server/server.go`（ファイル配信 + JSON保存、ポート 42736）
 
 ゲームデータは `public/data/gamedata.json` に一元管理され、セーブデータは IndexedDB に保存される。
@@ -229,3 +231,6 @@ const executeEvent = () => { ... };
 #アイテム破棄: 鍵
 #ステート変更: 玄関, ドア, unlocked
 ```
+
+### コーディングルール
+新機能を追加するときは、必ず feature/機能名 のブランチを切ってから実装すること

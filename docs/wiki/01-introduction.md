@@ -17,6 +17,8 @@
 ゲームの再生画面です。最終的な配布物になります。  
     * http://localhost:ポート番号/editor.html  
 ゲームの編集画面です。
+    * http://localhost:ポート番号/debug.html  
+    ゲームのデバッグ画面です。
 
 開かない場合は、手動で http://localhost:ポート番号/
  にアクセスしてください。  
@@ -30,7 +32,8 @@
 project/  
   ├─ game/  
   │   ├─ index.html        ← ゲーム再生画面  
-  │   ├─ editor.html       ← 編集画面   
+  │   ├─ editor.html       ← 編集画面  
+  │   ├─ debug.html        ← デバッグ画面 
   │   ├─ system/           ← UIや内部処理に使うファイル。基本的に編集しません   
   │   └─ data/             ← ゲーム用データ格納フォルダ  
   │       └─ gamedata.json ← エディタが生成するゲームデータ（編集非推奨） 
@@ -38,9 +41,10 @@ project/
 ```
 
 ## 🖋 ゲーム編集の基本操作
-画面構成については、以下を参照ください。
+画面構成については、以下を参照ください。  
 [ゲーム画面構成](03-game-ui)  
-[エディタ画面構成](04-editor-ui)
+[エディタ画面構成](04-editor-ui)  
+[デバッグ画面構成](08-debug-ui)
 
 ### 1. 新規プロジェクトの作成
 zipファイルを解凍した時点でプロジェクトの作成は完了しています。  
@@ -152,6 +156,7 @@ game/assets フォルダ
 不要なもの：
 ```
 game/editor.html
+game/debug.html
 実行ファイル（exe / app / binary）
 ```
 

@@ -151,6 +151,12 @@ func main() {
 	fmt.Println("Server started:", url)
 	openBrowser(url)
 
+	// debug.html が存在する場合のみ開く
+	editorPath_debug := filepath.Join(cfg.DistDir, "debug.html")
+	if _, err := os.Stat(editorPath_debug); err == nil {
+		openBrowser(url + "/debug.html")
+	}
+
 	// editor.html が存在する場合のみ開く
 	editorPath := filepath.Join(cfg.DistDir, "editor.html")
 	if _, err := os.Stat(editorPath); err == nil {
