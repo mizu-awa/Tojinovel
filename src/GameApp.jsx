@@ -680,7 +680,7 @@ export default function GameApp({ debug }) {
   if (debug) {
     const debugProps = {
       gameData, updateGameData, currentScene, moveScene,
-      selectedItem, selectItem, lines, setLines, backLines,
+      selectedItem, selectItem, viewItemName, lines, setLines, backLines,
       index, executeEvent, timers, bgm, audioManager,
       stopTimer, restartTimer,
     };

@@ -1,46 +1,6 @@
 import { memo, useState, useEffect } from "react";
 
-const rowStyle = {
-  padding: "4px 0",
-  borderBottom: "1px solid #e0e0e0",
-  fontSize: "12px",
-};
-
-const timerNameStyle = {
-  fontWeight: 700,
-  color: "#333",
-};
-
-const timerInfoStyle = {
-  display: "flex",
-  gap: 12,
-  alignItems: "center",
-  marginTop: 2,
-  color: "#666",
-  fontSize: "11px",
-};
-
-const buttonStyle = {
-  padding: "2px 8px",
-  backgroundColor: "#fff",
-  color: "#333",
-  border: "1px solid #c4c4c4",
-  borderRadius: 4,
-  cursor: "pointer",
-  fontSize: "11px",
-  fontFamily: "inherit",
-};
-
-const statusDotStyle = (active) => ({
-  display: "inline-block",
-  width: 8,
-  height: 8,
-  borderRadius: "50%",
-  backgroundColor: active ? "#4bbeeb" : "#c4c4c4",
-  marginRight: 6,
-});
-
-function DebugTimers({ timers, stopTimer, restartTimer }) {
+function DebugTimers({ timers, stopTimer, restartTimer, theme }) {
   // timersはrefなので定期的に再描画する
   const [, forceUpdate] = useState(0);
 
@@ -51,21 +11,42 @@ function DebugTimers({ timers, stopTimer, restartTimer }) {
 
   const timerList = timers.current || [];
 
+  // スタイル
+  const buttonStyle = {
+    padding: "2px 8px",
+    backgroundColor: theme.paper,
+    color: theme.text,
+    border: `1px solid ${theme.inputBorder}`,
+    borderRadius: 4,
+    cursor: "pointer",
+    fontSize: "11px",
+    fontFamily: "inherit",
+  };
+
+  const statusDotStyle = (active) => ({
+    display: "inline-block",
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    backgroundColor: active ? theme.primary : theme.muted,
+    marginRight: 6,
+  });
+
   return (
     <div>
-      <div style={{ fontSize: "11px", color: "#999", fontWeight: 700, marginBottom: 6 }}>
+      <div style={{ fontSize: "11px", color: theme.textMuted, fontWeight: 700, marginBottom: 6 }}>
         タイマー
       </div>
 
       {timerList.length === 0 ? (
-        <div style={{ fontSize: "12px", color: "#999", padding: "4px 0" }}>
+        <div style={{ fontSize: "12px", color: theme.textMuted, padding: "4px 0" }}>
           アクティブなタイマーはありません
         </div>
       ) : (
         timerList.map((timer, i) => (
-          <div key={i} style={rowStyle}>
+          <div key={i} style={{ padding: "4px 0", borderBottom: `1px solid ${theme.border}`, fontSize: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={timerNameStyle}>
+              <span style={{ fontWeight: 700, color: theme.text }}>
                 <span style={statusDotStyle(!timer.paused && !timer.finished)} />
                 {timer.varName}
               </span>
@@ -83,7 +64,14 @@ function DebugTimers({ timers, stopTimer, restartTimer }) {
                 )}
               </div>
             </div>
-            <div style={timerInfoStyle}>
+            <div style={{
+              display: "flex",
+              gap: 12,
+              alignItems: "center",
+              marginTop: 2,
+              color: theme.textSecondary,
+              fontSize: "11px",
+            }}>
               <span>カウント: {timer.count}</span>
               <span>終了値: {timer.end}</span>
               <span>ステップ: {timer.step}</span>

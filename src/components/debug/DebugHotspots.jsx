@@ -1,53 +1,6 @@
 import { memo } from "react";
 
-const rowStyle = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 8,
-  alignItems: "center",
-  padding: "4px 0",
-  borderBottom: "1px solid #e0e0e0",
-};
-
-const nameStyle = {
-  fontSize: "12px",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  color: "#333",
-};
-
-const selectStyle = {
-  backgroundColor: "#fff",
-  border: "1px solid #c4c4c4",
-  borderRadius: 4,
-  color: "#333",
-  padding: "3px 4px",
-  fontSize: "12px",
-  fontFamily: "inherit",
-  width: "100%",
-  boxSizing: "border-box",
-};
-
-const visibilityDotStyle = (visible) => ({
-  display: "inline-block",
-  width: 8,
-  height: 8,
-  borderRadius: "50%",
-  backgroundColor: visible ? "#4bbeeb" : "#c4c4c4",
-  marginRight: 6,
-  flexShrink: 0,
-});
-
-const sectionHeaderStyle = {
-  fontSize: "11px",
-  color: "#999",
-  fontWeight: 700,
-  marginBottom: 6,
-  marginTop: 12,
-};
-
-function DebugHotspots({ hotspots, currentSceneName, items, updateGameData }) {
+function DebugHotspots({ hotspots, currentSceneName, items, viewItemName, updateGameData, theme }) {
   // シーンホットスポットのステートを変更
   const handleStateChange = (hotspotIndex, newStateName) => {
     updateGameData((prev) => {
@@ -87,22 +40,66 @@ function DebugHotspots({ hotspots, currentSceneName, items, updateGameData }) {
     return currentState ? currentState.visibility : false;
   };
 
-  // ホットスポットを持つアイテムのみフィルタ
-  const itemsWithHotspots = items
-    ? items
-        .map((item, index) => ({ item, index }))
-        .filter(({ item }) => item.hotspots && item.hotspots.length > 0)
-    : [];
+  // 現在開いているアイテムのホットスポットのみ表示
+  let viewItem = null;
+  let viewItemIndex = -1;
+  if (viewItemName && items) {
+    viewItemIndex = items.findIndex((item) => item.name === viewItemName);
+    if (viewItemIndex !== -1) {
+      viewItem = items[viewItemIndex];
+    }
+  }
+  const itemHotspots = viewItem?.hotspots || [];
+
+  // スタイル
+  const rowStyle = {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 8,
+    alignItems: "center",
+    padding: "4px 0",
+    borderBottom: `1px solid ${theme.border}`,
+  };
+
+  const nameStyle = {
+    fontSize: "12px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    color: theme.text,
+  };
+
+  const selectStyle = {
+    backgroundColor: theme.paper,
+    border: `1px solid ${theme.inputBorder}`,
+    borderRadius: 4,
+    color: theme.text,
+    padding: "3px 4px",
+    fontSize: "12px",
+    fontFamily: "inherit",
+    width: "100%",
+    boxSizing: "border-box",
+  };
+
+  const visibilityDotStyle = (visible) => ({
+    display: "inline-block",
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    backgroundColor: visible ? theme.primary : theme.muted,
+    marginRight: 6,
+    flexShrink: 0,
+  });
 
   return (
     <div>
       {/* シーンホットスポット */}
-      <div style={{ fontSize: "11px", color: "#666", marginBottom: 8 }}>
-        シーン: <span style={{ color: "#4bbeeb" }}>{currentSceneName}</span>
+      <div style={{ fontSize: "11px", color: theme.textSecondary, marginBottom: 8 }}>
+        シーン: <span style={{ color: theme.primary }}>{currentSceneName}</span>
       </div>
 
       {/* ヘッダー */}
-      <div style={{ ...rowStyle, fontWeight: 700, fontSize: "11px", color: "#999" }}>
+      <div style={{ ...rowStyle, fontWeight: 700, fontSize: "11px", color: theme.textMuted }}>
         <span>ホットスポット</span>
         <span>ステート</span>
       </div>
@@ -127,43 +124,60 @@ function DebugHotspots({ hotspots, currentSceneName, items, updateGameData }) {
         </div>
       ))}
 
-      <div style={{ marginTop: 4, fontSize: "11px", color: "#999" }}>
+      <div style={{ marginTop: 4, fontSize: "11px", color: theme.textMuted, marginBottom: 24 }}>
         {hotspots.length} ホットスポット
       </div>
+      
 
       {/* アイテムホットスポット */}
-      {itemsWithHotspots.length > 0 && (
-        <>
-          <div style={sectionHeaderStyle}>アイテムホットスポット</div>
+      {viewItem ? (
+        <div>
+          <div style={{ fontSize: "11px", color: theme.textSecondary, marginBottom: 8 }}>
+            アイテム: <span style={{ color: theme.primary }}>{viewItem.name}</span>
+          </div>
 
-          {itemsWithHotspots.map(({ item, index: itemIndex }) => (
-            <div key={item.name}>
-              <div style={{ fontSize: "12px", color: "#4bbeeb", fontWeight: 700, padding: "4px 0" }}>
-                {item.name}
-              </div>
+          {/* ヘッダー */}
+          <div style={{ ...rowStyle, fontWeight: 700, fontSize: "11px", color: theme.textMuted }}>
+            <span>ホットスポット</span>
+            <span>ステート</span>
+          </div>
 
-              {item.hotspots.map((hs, hsIndex) => (
-                <div key={hs.name} style={rowStyle}>
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <span style={visibilityDotStyle(getVisibility(hs))} title={getVisibility(hs) ? "表示中" : "非表示"} />
-                    <span style={nameStyle} title={hs.name}>{hs.name}</span>
-                  </div>
-                  <select
-                    style={selectStyle}
-                    value={hs.state}
-                    onChange={(e) => handleItemStateChange(itemIndex, hsIndex, e.target.value)}
-                  >
-                    {hs.states.map((s) => (
-                      <option key={s.name} value={s.name}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
+          {itemHotspots.length > 0 ? (
+            itemHotspots.map((hs, hsIndex) => (
+              <div key={hs.name} style={rowStyle}>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <span style={visibilityDotStyle(getVisibility(hs))} title={getVisibility(hs) ? "表示中" : "非表示"} />
+                  <span style={nameStyle} title={hs.name}>{hs.name}</span>
                 </div>
-              ))}
+                <select
+                  style={selectStyle}
+                  value={hs.state}
+                  onChange={(e) => handleItemStateChange(viewItemIndex, hsIndex, e.target.value)}
+                >
+                  {hs.states.map((s) => (
+                    <option key={s.name} value={s.name}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))
+          ) : (
+            <div style={{ fontSize: "12px", color: theme.textMuted, padding: "4px 0" }}>
+              ホットスポットなし
             </div>
-          ))}
-        </>
+          )}
+
+          <div style={{ marginTop: 4, fontSize: "11px", color: theme.textMuted }}>
+            {itemHotspots.length} ホットスポット
+          </div>
+        </div>
+      ) : (
+        <div style={{ fontSize: "12px", color: theme.textMuted, padding: "4px 0" }}>
+          {viewItemName
+            ? `アイテム「${viewItemName}」が見つかりません`
+            : "アイテムホットスポットは、アイテムウィンドウを開くと表示されます"}
+        </div>
       )}
     </div>
   );

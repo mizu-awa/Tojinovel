@@ -1,35 +1,6 @@
 import { memo, useState } from "react";
 
-const rowStyle = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 4,
-  alignItems: "center",
-  padding: "3px 0",
-  borderBottom: "1px solid #e0e0e0",
-};
-
-const nameStyle = {
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  fontSize: "12px",
-  color: "#333",
-};
-
-const inputStyle = {
-  backgroundColor: "#fff",
-  border: "1px solid #c4c4c4",
-  borderRadius: 4,
-  color: "#333",
-  padding: "3px 6px",
-  fontSize: "12px",
-  fontFamily: "inherit",
-  width: "100%",
-  boxSizing: "border-box",
-};
-
-function DebugVariables({ variables, updateGameData }) {
+function DebugVariables({ variables, updateGameData, theme }) {
   const [filter, setFilter] = useState("");
 
   // 変数の値を更新
@@ -46,6 +17,28 @@ function DebugVariables({ variables, updateGameData }) {
     ? variables.filter((v) => v.name.includes(filter))
     : variables;
 
+  // スタイル
+  const rowStyle = {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 4,
+    alignItems: "center",
+    padding: "3px 0",
+    borderBottom: `1px solid ${theme.border}`,
+  };
+
+  const inputStyle = {
+    backgroundColor: theme.paper,
+    border: `1px solid ${theme.inputBorder}`,
+    borderRadius: 4,
+    color: theme.text,
+    padding: "3px 6px",
+    fontSize: "12px",
+    fontFamily: "inherit",
+    width: "100%",
+    boxSizing: "border-box",
+  };
+
   return (
     <div>
       {/* フィルター */}
@@ -58,7 +51,7 @@ function DebugVariables({ variables, updateGameData }) {
       />
 
       {/* ヘッダー */}
-      <div style={{ ...rowStyle, fontWeight: 700, fontSize: "11px", color: "#999" }}>
+      <div style={{ ...rowStyle, fontWeight: 700, fontSize: "11px", color: theme.textMuted }}>
         <span>名前</span>
         <span>値</span>
       </div>
@@ -71,7 +64,13 @@ function DebugVariables({ variables, updateGameData }) {
           : i;
         return (
           <div key={originalIndex} style={rowStyle}>
-            <span style={nameStyle} title={v.name}>{v.name}</span>
+            <span style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              fontSize: "12px",
+              color: theme.text,
+            }} title={v.name}>{v.name}</span>
             <input
               style={inputStyle}
               value={String(v.value)}
@@ -82,7 +81,7 @@ function DebugVariables({ variables, updateGameData }) {
       })}
 
       {/* 件数表示 */}
-      <div style={{ marginTop: 8, fontSize: "11px", color: "#999" }}>
+      <div style={{ marginTop: 8, fontSize: "11px", color: theme.textMuted }}>
         {filtered.length} / {variables.length} 件
       </div>
     </div>
