@@ -23,7 +23,8 @@ export default function useEventViewer({
   audioManager,
   openConfig,
   startTimer, stopTimer, restartTimer,
-  setVisibleCount
+  setVisibleCount,
+  onConsoleLog
 }){
     // states------------------------------------------------------------------------------------------
     const [inputValue, setInputValue] = useState("");
@@ -714,6 +715,8 @@ export default function useEventViewer({
             }
             else if(line.type === "console"){
                 console.log(line.command); // 消さない
+                // デバッグコンソールにログを送信
+                onConsoleLog?.(line.command);
             }
             
             i++;

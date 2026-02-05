@@ -42,6 +42,8 @@ export default function GameApp({ debug }) {
   const [hiddenCharacter, hideCharacter] = useState(false);
   const [currentInput, setCurrentInput] = useState(null);
   const [timerEvents, setTimerEvents] = useState(null);
+  // debug
+  const [consoleLogs, setConsoleLogs] = useState([]);
 
   // ref-------------------------------------------------------------------------------------------
   const ref = useRef();
@@ -61,6 +63,11 @@ export default function GameApp({ debug }) {
   
   const backLinesQueue = useRef([]);
   const isBackEventRunning = useRef(false);
+
+  // デバッグコンソールログ追加（安定した参照のためrefで保持）
+  const addConsoleLog = useRef((message) => {
+    setConsoleLogs(prev => [...prev, { message, timestamp: new Date() }]);
+  });
 
   // functions-----------------------------------------------------------------------------------------
   const executeEvent = (parsedLines, jump=false) => {
@@ -85,6 +92,9 @@ export default function GameApp({ debug }) {
       }
     }
   }
+
+  // デバッグコンソールのクリア
+  const clearConsoleLogs = () => setConsoleLogs([]);
 
   const finishBackEvent = () => {
     if (backLinesQueue.current.length > 0) {
@@ -624,6 +634,7 @@ export default function GameApp({ debug }) {
         startTimer={startTimer}
         stopTimer={stopTimer}
         restartTimer={restartTimer}
+        onConsoleLog={addConsoleLog.current}
       />
 
       {/* イベント表示(バックグラウンド) */}
@@ -651,6 +662,7 @@ export default function GameApp({ debug }) {
         startTimer={startTimer}
         stopTimer={stopTimer}
         restartTimer={restartTimer}
+        onConsoleLog={addConsoleLog.current}
       />
 
       {/* セーブロード画面 */}
@@ -683,6 +695,7 @@ export default function GameApp({ debug }) {
       selectedItem, selectItem, viewItemName, lines, setLines, backLines,
       index, executeEvent, timers, bgm, audioManager,
       stopTimer, restartTimer,
+      consoleLogs, clearConsoleLogs,
     };
     return (
       <Suspense fallback={

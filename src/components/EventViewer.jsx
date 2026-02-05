@@ -23,7 +23,8 @@ function EventViewer({
   openSave, openLoad, saveGame, loadGame,
   audioManager,
   openConfig,
-  startTimer, stopTimer, restartTimer
+  startTimer, stopTimer, restartTimer,
+  onConsoleLog
 }) {
 
   // states-----------------------------------------------------------------------------------------------------------------------
@@ -60,7 +61,8 @@ function EventViewer({
         audioManager,
         openConfig,
         startTimer, stopTimer, restartTimer,
-        setVisibleCount
+        setVisibleCount,
+        onConsoleLog
     });
   
   // effects--------------------------------------------------------------------------------------------------------------------
