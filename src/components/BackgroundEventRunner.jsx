@@ -25,6 +25,7 @@ export default function BackgroundEventRunner({
   audioManager,
   openConfig,
   startTimer, stopTimer, restartTimer,
+  onConsoleLog,
 }) {
   useEventExecution({//TODO: バックグラウンド実行に不要なデータはnullで渡している バグが起きそう
     lines,
@@ -49,7 +50,8 @@ export default function BackgroundEventRunner({
     audioManager,
     openConfig,
     startTimer, stopTimer, restartTimer,
-    setVisibleCount: noop
+    setVisibleCount: noop,
+    onConsoleLog
   });
   return null;
 }
