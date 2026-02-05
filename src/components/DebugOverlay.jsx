@@ -5,9 +5,6 @@ import DebugScenes from "./debug/DebugScenes.jsx";
 import DebugItems from "./debug/DebugItems.jsx";
 import DebugHotspots from "./debug/DebugHotspots.jsx";
 import DebugEvents from "./debug/DebugEvents.jsx";
-import DebugTimers from "./debug/DebugTimers.jsx";
-import DebugAudio from "./debug/DebugAudio.jsx";
-import DebugConsole from "./debug/DebugConsole.jsx";
 
 const TABS = [
   { key: "variables", label: "変数" },
@@ -15,9 +12,6 @@ const TABS = [
   { key: "items",     label: "アイテム" },
   { key: "hotspots",  label: "ホットスポット" },
   { key: "events",    label: "イベント" },
-  { key: "timers",    label: "タイマー" },
-  { key: "audio",     label: "オーディオ" },
-  { key: "console",   label: "コンソール" },
 ];
 
 function DebugOverlay({
@@ -151,26 +145,11 @@ function DebugOverlay({
             index={index}
             executeEvent={executeEvent}
             characters={gameData.characters}
-            theme={theme}
-          />
-        )}
-        {activeTab === "timers" && (
-          <DebugTimers
             timers={timers}
             stopTimer={stopTimer}
             restartTimer={restartTimer}
-            theme={theme}
-          />
-        )}
-        {activeTab === "audio" && (
-          <DebugAudio
             bgm={bgm}
             audioManager={audioManager}
-            theme={theme}
-          />
-        )}
-        {activeTab === "console" && (
-          <DebugConsole
             consoleLogs={consoleLogs}
             clearConsoleLogs={clearConsoleLogs}
             theme={theme}
