@@ -46,7 +46,7 @@ function scrollToLabel(textarea, label) {
   textarea.focus();
 }
 
-export default function useScenarioEditor({ setIsSaved }) {
+export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
   // ref-------------------------------------------------------------------------------------------
   // key: ファイルパス（"./events/room1.txt"）, value: { content: string, dirty: boolean }
   const eventBufferRef = useRef(new Map());
@@ -282,6 +282,11 @@ export default function useScenarioEditor({ setIsSaved }) {
     const path = currentFilePathRef.current;
     if (!path || !textareaRef.current) return;
 
+    // undo/redo用スナップショット（変更前の状態を保存）
+    if (onBeforeTextChange) {
+      onBeforeTextChange();
+    }
+
     const currentContent = textareaRef.current.value;
     eventBufferRef.current.set(path, { content: currentContent, dirty: true });
     setHasDirtyFiles(true);
@@ -290,7 +295,7 @@ export default function useScenarioEditor({ setIsSaved }) {
 
     // IndexedDBへのデバウンス保存をスケジュール
     scheduleIDBSave();
-  }, [setIsSaved, scheduleIDBSave]);
+  }, [setIsSaved, scheduleIDBSave, onBeforeTextChange]);
 
   // 全dirtyファイルをサーバーに保存
   const saveAllDirtyFiles = useCallback(async () => {
@@ -353,6 +358,37 @@ export default function useScenarioEditor({ setIsSaved }) {
     }
   }, [updateHasDirtyFiles]);
 
+  // undo/redoからバッファを復元
+  const restoreEventBuffer = useCallback((serializedBuffer) => {
+    if (!serializedBuffer) return;
+
+    eventBufferRef.current = new Map(Object.entries(serializedBuffer));
+    updateHasDirtyFiles();
+
+    // 現在開いているファイルの内容をtextareaに反映
+    const path = currentFilePathRef.current;
+    if (path) {
+      const entry = eventBufferRef.current.get(path);
+      if (entry) {
+        pendingContentRef.current = entry.content;
+        if (textareaRef.current) {
+          textareaRef.current.value = entry.content;
+          pendingContentRef.current = null;
+        }
+        setStatus(entry.dirty ? "未保存" : null);
+        setFileNotFound(false);
+      } else {
+        // ファイルがバッファにない（削除された等）
+        pendingContentRef.current = "";
+        if (textareaRef.current) {
+          textareaRef.current.value = "";
+          pendingContentRef.current = null;
+        }
+        setStatus(null);
+      }
+    }
+  }, [updateHasDirtyFiles]);
+
   return {
     currentFilePath,
     currentLabel,
@@ -366,5 +402,8 @@ export default function useScenarioEditor({ setIsSaved }) {
     fileNotFound,
     createNewFile,
     closeFile,
+    // undo/redo用
+    eventBufferRef,
+    restoreEventBuffer,
   };
 }

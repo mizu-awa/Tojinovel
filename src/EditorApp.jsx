@@ -92,10 +92,39 @@ export default function EditorApp() {
   
   // resize window--------------------------------------------------------------------
   const { ref, boxRef } = useResizeWindow({gameData});
-  
+
+  // scenario editor------------------------------------------------------
+  // 循環依存解決: onBeforeTextChangeはrefで後から設定
+  const onBeforeTextChangeRef = useRef(() => {});
+  const {
+    currentFilePath,
+    currentLabel,
+    textareaRef,
+    loadEventFile,
+    handleTextChange,
+    saveAllDirtyFiles,
+    hasDirtyFiles: _hasDirtyFiles,
+    status: scenarioStatus,
+    loadBufferFromIndexedDB,
+    fileNotFound,
+    createNewFile,
+    closeFile,
+    eventBufferRef,
+    restoreEventBuffer,
+  } = useScenarioEditor({
+    setIsSaved,
+    onBeforeTextChange: () => onBeforeTextChangeRef.current()
+  });
+
   // undo redo--------------------------------------------------------
   const { debouncedDoAction, undo, redo, canUndo, canRedo }
-  = useUndoRedo({setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem});
+  = useUndoRedo({
+    setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem,
+    eventBufferRef, restoreEventBuffer
+  });
+
+  // debouncedDoActionをシナリオエディタに渡す
+  onBeforeTextChangeRef.current = debouncedDoAction;
 
   // handle change----------------------------------------------------------------------------------
   const { handleMainTabChange, handleAddArrayItem, handleDeleteKey, handleDatasetChange} = useHandleChange({setGameData, setMainTab, setIsSaved, debouncedDoAction});
@@ -121,22 +150,6 @@ export default function EditorApp() {
     selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem,
     mainTab
 });
-
-  // scenario editor------------------------------------------------------
-  const {
-    currentFilePath,
-    currentLabel,
-    textareaRef,
-    loadEventFile,
-    handleTextChange,
-    saveAllDirtyFiles,
-    hasDirtyFiles: _hasDirtyFiles,
-    status: scenarioStatus,
-    loadBufferFromIndexedDB,
-    fileNotFound,
-    createNewFile,
-    closeFile,
-  } = useScenarioEditor({ setIsSaved });
 
   // 保存処理を統合（gamedata.json + イベントファイル）
   const saveAll = useCallback(async () => {

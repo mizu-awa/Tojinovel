@@ -4,7 +4,9 @@ const MAX_HISTORY = 50; // 最大履歴数
 const DEBOUNCE_MS = 500; // デバウンス時間
 
 export default function useUndoRedo({
-    setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem
+    setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem,
+    // シナリオエディタ用（オプション）
+    eventBufferRef, restoreEventBuffer
 }){
     const historyRef = useRef([]);
     const futureRef = useRef([]);
@@ -45,7 +47,13 @@ export default function useUndoRedo({
 
         // バースト開始時のみスナップショットを取る
         if (!isEditingRef.current) {
-          const snapshot = structuredClone(gameDataRef.current);
+          const snapshot = {
+            gameData: structuredClone(gameDataRef.current),
+            // eventBufferがある場合はそれも含める
+            eventBuffer: eventBufferRef?.current
+              ? Object.fromEntries(eventBufferRef.current)
+              : null
+          };
           historyRef.current = [...historyRef.current, snapshot].slice(-MAX_HISTORY);
           futureRef.current = [];
           isEditingRef.current = true;
@@ -58,7 +66,7 @@ export default function useUndoRedo({
         debounceRef.current = setTimeout(() => {
           isEditingRef.current = false;
         }, DEBOUNCE_MS);
-      }, []);
+      }, [eventBufferRef]);
 
       const undo = useCallback(() => {
         const history = historyRef.current;
@@ -75,16 +83,26 @@ export default function useUndoRedo({
         historyRef.current = history.slice(0, -1);
 
         // 現在の状態を future に保存（※ clone 必須）
-        futureRef.current = [
-          structuredClone(gameDataRef.current),
-          ...futureRef.current,
-        ];
+        const currentSnapshot = {
+          gameData: structuredClone(gameDataRef.current),
+          eventBuffer: eventBufferRef?.current
+            ? Object.fromEntries(eventBufferRef.current)
+            : null
+        };
+        futureRef.current = [currentSnapshot, ...futureRef.current];
 
         setCanUndo(historyRef.current.length > 0);
         setCanRedo(true);
-        checkSelected(previous);
-        setGameData(previous);
-      }, [checkSelected, setGameData]);
+
+        // gameDataを復元
+        checkSelected(previous.gameData);
+        setGameData(previous.gameData);
+
+        // eventBufferを復元
+        if (restoreEventBuffer && previous.eventBuffer) {
+          restoreEventBuffer(previous.eventBuffer);
+        }
+      }, [checkSelected, setGameData, eventBufferRef, restoreEventBuffer]);
 
       const redo = useCallback(() => {
         const future = futureRef.current;
@@ -100,16 +118,26 @@ export default function useUndoRedo({
         futureRef.current = future.slice(1);
 
         // 現在の状態を history に保存（※ clone 必須）
-        historyRef.current = [
-          ...historyRef.current,
-          structuredClone(gameDataRef.current),
-        ];
+        const currentSnapshot = {
+          gameData: structuredClone(gameDataRef.current),
+          eventBuffer: eventBufferRef?.current
+            ? Object.fromEntries(eventBufferRef.current)
+            : null
+        };
+        historyRef.current = [...historyRef.current, currentSnapshot];
 
         setCanUndo(true);
         setCanRedo(futureRef.current.length > 0);
-        checkSelected(next);
-        setGameData(next);
-      }, [checkSelected, setGameData]);
+
+        // gameDataを復元
+        checkSelected(next.gameData);
+        setGameData(next.gameData);
+
+        // eventBufferを復元
+        if (restoreEventBuffer && next.eventBuffer) {
+          restoreEventBuffer(next.eventBuffer);
+        }
+      }, [checkSelected, setGameData, eventBufferRef, restoreEventBuffer]);
 
 
     return ({
