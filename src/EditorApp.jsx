@@ -602,7 +602,7 @@ export default function EditorApp() {
               {/* シナリオエディタ: シーン/アイテムタブでのみ表示 */}
               {(mainTab === "scenes" || mainTab === "items") && <>
                 <PanelResizeHandle style={handleStyleVertical} />
-                <Panel defaultSize={35} minSize={15}>
+                <Panel defaultSize={35} minSize={0}>
                   <ScenarioEditor
                     currentFilePath={currentFilePath}
                     currentLabel={currentLabel}
