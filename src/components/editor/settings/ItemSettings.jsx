@@ -11,7 +11,7 @@ import MyAutoComplete from "../MyAutoComplete";
 import StyledCheckbox from "../StyledCheckBox";
 import MyAccordion from "../MyAccordion";
 import { Box, IconButton } from "@mui/material";
-import { Add, Delete } from "@mui/icons-material";
+import { Add, Delete, Edit } from "@mui/icons-material";
 import { inputPropsFontWeight, inputPropsDefaultNum, inputPropsZIndex } from "./inputProps";
 import NameWarn from "../NameWarn";
 
@@ -26,7 +26,8 @@ const ItemSettings = ({
   hotspot,
   state,
   states,
-  handleDatasetChange
+  handleDatasetChange,
+  loadEventFile
 }) => {
   if(!item) return null
 
@@ -318,12 +319,23 @@ const ItemSettings = ({
         <SectionDivider />
 
         <FormField label="クリックイベント ファイル">
-          <StyledInput
-            value={state.onClick.file?.replace(/^\.\/(.*)$/, "$1") || ""}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.onClick.file`}
-            data-type="path"
-          />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+            <StyledInput
+              value={state.onClick.file?.replace(/^\.\/(.*)$/, "$1") || ""}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.onClick.file`}
+              data-type="path"
+            />
+            <IconButton
+              size="small"
+              onClick={() => loadEventFile(state.onClick.file, state.onClick.label)}
+              disabled={!state.onClick.file}
+              title="シナリオエディタで開く"
+              sx={{ p: 0.25 }}
+            >
+              <Edit sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Box>
         </FormField>
 
         <FormField label="クリックイベント ラベル">
@@ -340,6 +352,7 @@ const ItemSettings = ({
           handleDatasetChange= {handleDatasetChange}
           deleteUsedItem = {deleteUsedItem}
           statePath={statePath}
+          loadEventFile={loadEventFile}
         />
         
         <Box sx={{textAlign: "right"}}>
@@ -360,7 +373,8 @@ const UsedItemFormSet = memo(({
   itemList,
   handleDatasetChange,
   deleteUsedItem,
-  statePath
+  statePath,
+  loadEventFile
 }) => {
   return(
     usedItems.map((u, index) => {
@@ -378,12 +392,23 @@ const UsedItemFormSet = memo(({
           />
 
           <FormField label="アイテム使用イベント ファイル">
-            <StyledInput
-              value={u.file?.replace(/^\.\/(.*)$/, "$1") || ""}
-              onChange={handleDatasetChange}
-              data-path={`${indexPath}.file`}
-              data-type="path"
-            />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+              <StyledInput
+                value={u.file?.replace(/^\.\/(.*)$/, "$1") || ""}
+                onChange={handleDatasetChange}
+                data-path={`${indexPath}.file`}
+                data-type="path"
+              />
+              <IconButton
+                size="small"
+                onClick={() => loadEventFile(u.file, u.label)}
+                disabled={!u.file}
+                title="シナリオエディタで開く"
+                sx={{ p: 0.25 }}
+              >
+                <Edit sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Box>
           </FormField>
 
           <FormField label="アイテム使用イベント ラベル">
