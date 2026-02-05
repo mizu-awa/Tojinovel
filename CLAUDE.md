@@ -55,8 +55,9 @@ src/
 │   ├── audioManager.js          # Howler.js ベースの音声管理
 │   └── editor/                  # エディタ専用フック
 │       ├── useEditorData.js     # エディタ状態管理
-│       ├── useUndoRedo.js       # Undo/Redo（履歴50件）
-│       └── useHandleChange.js   # ネストされたデータの更新ハンドラ
+│       ├── useUndoRedo.js       # Undo/Redo（履歴50件、gameData + eventBuffer）
+│       ├── useHandleChange.js   # ネストされたデータの更新ハンドラ
+│       └── useScenarioEditor.js # シナリオエディタ（イベントファイル編集）
 ├── datas/
 │   └── defaultGameData.js       # デフォルトスキーマ定義
 └── theme/
@@ -106,6 +107,7 @@ import SceneWrap from "./components/SceneWrap.jsx";
 - `sessionStorage` でエディタ状態の永続化
 - `IndexedDB`（idb ライブラリ）でゲームセーブデータの永続化
 - エディタの Undo/Redo は `structuredClone` によるスナップショット方式（最大50件）
+  - スナップショットには `gameData` と `eventBuffer`（シナリオエディタのファイル内容）の両方を含む
 
 ### スタイリング
 
@@ -229,6 +231,30 @@ const executeEvent = () => { ... };
 
 - 実装: `useEventExecution.js` で `onConsoleLog` コールバック経由で `GameApp.jsx` の `consoleLogs` state に追加
 - UI: `DebugConsole.jsx`（タイムスタンプ付きログ一覧、クリアボタン）
+
+### シナリオエディタ
+
+エディタ内でイベントファイル（.txt）を直接編集できる機能。
+
+**アーキテクチャ:**
+- `useScenarioEditor.js`: バッファ管理、fetch、IndexedDB、保存ロジック
+- `ScenarioEditor.jsx`: UIコンポーネント（memo化、非制御textarea）
+- `server.go`: `POST /save-event` エンドポイント
+
+**バッファ管理:**
+- `eventBufferRef = useRef(new Map())` でファイル内容をメモリ上に保持
+- key: ファイルパス（`"./events/room1.txt"`）, value: `{ content: string, dirty: boolean }`
+- IndexedDB に2秒デバウンスでバックアップ（クラッシュ対策）
+
+**Undo/Redo統合:**
+- `useUndoRedo` のスナップショットに `gameData` と `eventBuffer` の両方を含める
+- シナリオエディタの `onBeforeTextChange` コールバックで変更前スナップショットを取得
+- 循環依存解決: `onBeforeTextChangeRef` を使用してフック間でコールバックを共有
+
+**注意点:**
+- textareaは非制御コンポーネント（`useState` に持たない）でパフォーマンス確保
+- `pendingContentRef` パターン: textareaマウント前のコンテンツを保持し、マウント時に適用
+- ファイルのフェッチ後にパスが変わっていたら結果を破棄（高速切替対策）
 
 ### よくある脱出ゲームのパターン
 

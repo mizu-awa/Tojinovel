@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // --- 設定用構造体 ---
@@ -81,6 +82,72 @@ func handleSave(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("ok"))
 }
 
+// --- イベントファイル保存API ---
+type SaveEventRequest struct {
+	Path    string `json:"path"`
+	Content string `json:"content"`
+}
+
+func handleSaveEvent(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "POST only", http.StatusMethodNotAllowed)
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "read error", 500)
+		return
+	}
+
+	var req SaveEventRequest
+	if err := json.Unmarshal(body, &req); err != nil {
+		http.Error(w, "invalid JSON", 400)
+		return
+	}
+
+	if req.Path == "" {
+		http.Error(w, "path is required", 400)
+		return
+	}
+
+	// パスバリデーション: ディレクトリトラバーサル防止
+	cleanPath := filepath.Clean(req.Path)
+	if strings.Contains(cleanPath, "..") {
+		http.Error(w, "invalid path", 400)
+		return
+	}
+	if filepath.IsAbs(cleanPath) {
+		http.Error(w, "invalid path", 400)
+		return
+	}
+
+	// distDir配下のフルパスを構築し、収まるか確認
+	fullPath := filepath.Join(cfg.DistDir, cleanPath)
+	absDistDir, _ := filepath.Abs(cfg.DistDir)
+	absFullPath, _ := filepath.Abs(fullPath)
+	if !strings.HasPrefix(absFullPath, absDistDir) {
+		http.Error(w, "invalid path", 400)
+		return
+	}
+
+	// ディレクトリを自動作成
+	dir := filepath.Dir(fullPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		http.Error(w, "failed to create directory", 500)
+		return
+	}
+
+	// ファイル書き込み
+	if err := os.WriteFile(fullPath, []byte(req.Content), 0644); err != nil {
+		http.Error(w, "save failed", 500)
+		return
+	}
+
+	w.WriteHeader(200)
+	w.Write([]byte("ok"))
+}
+
 // --- 設定ファイル読み込み ---
 func loadConfig() {
 	f, err := os.Open("config.json")
@@ -134,6 +201,22 @@ func withCORS(h http.Handler) http.Handler {
 	})
 }
 
+// --- キャッシュを禁止するラッパー ---
+func noCache(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		ext := strings.ToLower(filepath.Ext(r.URL.Path))
+
+		if ext == ".html" || ext == ".txt" || ext == ".json" {
+			w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+			w.Header().Set("Pragma", "no-cache")
+			w.Header().Set("Expires", "0")
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 // --- メイン ---
 func main() {
 	loadConfig()
@@ -141,10 +224,13 @@ func main() {
 
 	// dist フォルダを静的配信
 	fs := http.FileServer(http.Dir(cfg.DistDir))
-	http.Handle("/", fs)
+	http.Handle("/", noCache(fs))
 
 	// 保存API
 	http.Handle("/save", withCORS(http.HandlerFunc(handleSave)))
+
+	// イベントファイル保存API
+	http.Handle("/save-event", withCORS(http.HandlerFunc(handleSaveEvent)))
 
 	// サーバー起動
 	url := "http://localhost:" + cfg.Port

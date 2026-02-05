@@ -1,5 +1,5 @@
 //react
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 //mui
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -13,7 +13,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { defaultItemData } from "./datas/defaultGameData";
 
 //style
-import { handleStyle } from "./components/editor/handleStyle";
+import { handleStyle, handleStyleVertical } from "./components/editor/handleStyle";
 
 //my components
 import MainTabs from "./components/editor/MainTabs";
@@ -53,6 +53,8 @@ import useEditFunctions from "./hooks/editor/useEditFunctions";
 import ItemSettings from "./components/editor/settings/ItemSettings";
 import ConfigSettings from "./components/editor/settings/ConfigSettings";
 import Config from "./components/Config";
+import ScenarioEditor from "./components/editor/ScenarioEditor";
+import useScenarioEditor from "./hooks/editor/useScenarioEditor";
 
 // 空の定義
 const noop = () => {};
@@ -90,10 +92,39 @@ export default function EditorApp() {
   
   // resize window--------------------------------------------------------------------
   const { ref, boxRef } = useResizeWindow({gameData});
-  
+
+  // scenario editor------------------------------------------------------
+  // 循環依存解決: onBeforeTextChangeはrefで後から設定
+  const onBeforeTextChangeRef = useRef(() => {});
+  const {
+    currentFilePath,
+    currentLabel,
+    textareaRef,
+    loadEventFile,
+    handleTextChange,
+    saveAllDirtyFiles,
+    hasDirtyFiles: _hasDirtyFiles,
+    status: scenarioStatus,
+    loadBufferFromIndexedDB,
+    fileNotFound,
+    createNewFile,
+    closeFile,
+    eventBufferRef,
+    restoreEventBuffer,
+  } = useScenarioEditor({
+    setIsSaved,
+    onBeforeTextChange: () => onBeforeTextChangeRef.current()
+  });
+
   // undo redo--------------------------------------------------------
   const { debouncedDoAction, undo, redo, canUndo, canRedo }
-  = useUndoRedo({setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem});
+  = useUndoRedo({
+    setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem,
+    eventBufferRef, restoreEventBuffer
+  });
+
+  // debouncedDoActionをシナリオエディタに渡す
+  onBeforeTextChangeRef.current = debouncedDoAction;
 
   // handle change----------------------------------------------------------------------------------
   const { handleMainTabChange, handleAddArrayItem, handleDeleteKey, handleDatasetChange} = useHandleChange({setGameData, setMainTab, setIsSaved, debouncedDoAction});
@@ -120,6 +151,15 @@ export default function EditorApp() {
     mainTab
 });
 
+  // 保存処理を統合（gamedata.json + イベントファイル）
+  const saveAll = useCallback(async () => {
+    const result = await saveAllDirtyFiles();
+    if (!result.ok) {
+      console.error("イベントファイル保存エラー:", result.errors);
+    }
+    saveFile();
+  }, [saveAllDirtyFiles, saveFile]);
+
   // keydown-------------------------
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -127,7 +167,7 @@ export default function EditorApp() {
       // 保存
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        saveFile();
+        saveAll();
       }
       // アンドゥ/リドゥ: フォーム内外を問わず統一動作
       else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "z") {
@@ -166,7 +206,7 @@ export default function EditorApp() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [undo, redo, copyBykey, pasteByKey, saveFile, deleteByKey]);
+  }, [undo, redo, copyBykey, pasteByKey, saveAll, deleteByKey]);
 
   // 最新 gameData を ref に保持
   useEffect(() => {
@@ -179,8 +219,9 @@ export default function EditorApp() {
   useEffect(() => {
     if(loadFirst){
       loadFirst();
+      loadBufferFromIndexedDB();
     }
-  },[loadFirst])
+  },[loadFirst, loadBufferFromIndexedDB])
 
   // IndexedDB自動保存 フォーカス外れ等によるページリロード対策
   const timeoutRef = useRef(null);
@@ -254,6 +295,7 @@ export default function EditorApp() {
         state={nowState}
         states={stateList}
         handleDatasetChange={handleDatasetChange}
+        loadEventFile={loadEventFile}
       />,
     "items":
       <ItemSettings
@@ -269,6 +311,7 @@ export default function EditorApp() {
         state={nowState}
         states={stateList}
         handleDatasetChange={handleDatasetChange}
+        loadEventFile={loadEventFile}
       />,
   }
   const sceneItemPanel =
@@ -333,7 +376,7 @@ export default function EditorApp() {
     <Box sx={{ display: "flex", flexDirection: "column", height: "100vh", width: "100vw" }}>
       {/* Header */}
       <MyAppBar
-        save={saveFile}
+        save={saveAll}
         isSaved={isSaved}
         undo={undo}
         redo={redo}
@@ -556,12 +599,23 @@ export default function EditorApp() {
                 }
               </Panel>
 
-              {/* NOTE: アプリ化する場合のイベントエディタ */}
-              {/*
-              <PanelResizeHandle style={handleStyleVertical} />
-              <Panel>
-                <Box sx={{ height: "100%" }}>Center Bottom</Box>
-              </Panel>*/}
+              {/* シナリオエディタ: シーン/アイテムタブでのみ表示 */}
+              {(mainTab === "scenes" || mainTab === "items") && <>
+                <PanelResizeHandle style={handleStyleVertical} />
+                <Panel defaultSize={35} minSize={0}>
+                  <ScenarioEditor
+                    currentFilePath={currentFilePath}
+                    currentLabel={currentLabel}
+                    textareaRef={textareaRef}
+                    handleTextChange={handleTextChange}
+                    status={scenarioStatus}
+                    loadEventFile={loadEventFile}
+                    fileNotFound={fileNotFound}
+                    createNewFile={createNewFile}
+                    closeFile={closeFile}
+                  />
+                </Panel>
+              </>}
 
             </PanelGroup>
           </Panel>

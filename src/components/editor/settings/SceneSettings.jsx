@@ -11,7 +11,7 @@ import MyAutoComplete from "../MyAutoComplete";
 import MyAccordion from "../MyAccordion";
 import StyledCheckbox from "../StyledCheckBox";
 import { Box, IconButton } from "@mui/material";
-import { Add, Delete } from "@mui/icons-material";
+import { Add, Delete, Edit } from "@mui/icons-material";
 import { inputPropsFontWeight, inputPropsDefaultNum, inputPropsZIndex } from "./inputProps";
 import NameWarn from "../NameWarn";
 
@@ -27,7 +27,8 @@ const SceneSettings = ({
   hotspot,
   state,
   states,
-  handleDatasetChange
+  handleDatasetChange,
+  loadEventFile
 }) => {
   if(scene == null || scene === undefined) return null;
 
@@ -68,12 +69,23 @@ const SceneSettings = ({
       <SectionDivider />
 
       <FormField label="シーン訪問イベント ファイル名">
-        <StyledInput
-          value={scene.visitEvent.file?.replace(/^\.\/(.*)$/, "$1") || ""}
-          onChange={handleDatasetChange}
-          data-path={`${scenePath}.visitEvent.file`}
-          data-type="path"
-        />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+          <StyledInput
+            value={scene.visitEvent.file?.replace(/^\.\/(.*)$/, "$1") || ""}
+            onChange={handleDatasetChange}
+            data-path={`${scenePath}.visitEvent.file`}
+            data-type="path"
+          />
+          <IconButton
+            size="small"
+            onClick={() => loadEventFile(scene.visitEvent.file, scene.visitEvent.label)}
+            disabled={!scene.visitEvent.file}
+            title="シナリオエディタで開く"
+            sx={{ p: 0.25 }}
+          >
+            <Edit sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Box>
       </FormField>
 
       <FormField label="シーン訪問イベント ラベル名">
@@ -367,12 +379,23 @@ const SceneSettings = ({
         <SectionDivider />
 
         <FormField label="クリックイベント ファイル">
-          <StyledInput
-            value={state.onClick.file?.replace(/^\.\/(.*)$/, "$1") || ""}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.onClick.file`}
-            data-type="path"
-          />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+            <StyledInput
+              value={state.onClick.file?.replace(/^\.\/(.*)$/, "$1") || ""}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.onClick.file`}
+              data-type="path"
+            />
+            <IconButton
+              size="small"
+              onClick={() => loadEventFile(state.onClick.file, state.onClick.label)}
+              disabled={!state.onClick.file}
+              title="シナリオエディタで開く"
+              sx={{ p: 0.25 }}
+            >
+              <Edit sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Box>
         </FormField>
 
         <FormField label="クリックイベント ラベル">
@@ -392,6 +415,7 @@ const SceneSettings = ({
           selectedThirdItem = {selectedThirdItem}
           deleteUsedItem = {deleteUsedItem}
           statePath={statePath}
+          loadEventFile={loadEventFile}
         />
         
         <Box sx={{textAlign: "right"}}>
@@ -412,7 +436,8 @@ const UsedItemFormSet = memo(({
   itemList,
   handleDatasetChange,
   deleteUsedItem,
-  statePath
+  statePath,
+  loadEventFile
 }) => {
   return(
     usedItems.map((u, index) => {
@@ -432,12 +457,23 @@ const UsedItemFormSet = memo(({
           />
 
           <FormField label="アイテム使用イベント ファイル">
-            <StyledInput
-              value={u.file?.replace(/^\.\/(.*)$/, "$1") || ""}
-              onChange={handleDatasetChange}
-              data-path={`${indexPath}.file`}
-              data-type="path"
-            />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+              <StyledInput
+                value={u.file?.replace(/^\.\/(.*)$/, "$1") || ""}
+                onChange={handleDatasetChange}
+                data-path={`${indexPath}.file`}
+                data-type="path"
+              />
+              <IconButton
+                size="small"
+                onClick={() => loadEventFile(u.file, u.label)}
+                disabled={!u.file}
+                title="シナリオエディタで開く"
+                sx={{ p: 0.25 }}
+              >
+                <Edit sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Box>
           </FormField>
 
           <FormField label="アイテム使用イベント ラベル">
