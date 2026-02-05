@@ -9,13 +9,13 @@ export default function useMoveHotspot({
   setGameData,
   setSelectedSubItem,
   setSelectedThirdItem,
-  doAction
+  debouncedDoAction
 }){
     const onDragStart = useCallback((e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        doAction();
+        debouncedDoAction(true);
     
         const startX = e.clientX;
         const startY = e.clientY;
@@ -88,7 +88,7 @@ export default function useMoveHotspot({
     const handleResizeStart = (e) => {
       e.stopPropagation();
 
-      doAction();
+      debouncedDoAction(true);
     
       const hIndex = Number(e.currentTarget.parentElement.dataset.hindex);
       const sIndex = Number(e.currentTarget.parentElement.dataset.sindex); 
@@ -203,7 +203,7 @@ export default function useMoveHotspot({
     const handleRotateStart = (e) => {
       e.stopPropagation();
 
-      doAction();
+      debouncedDoAction(true);
     
       const hIndex = Number(e.currentTarget.parentElement.dataset.hindex);
       const sIndex = Number(e.currentTarget.parentElement.dataset.sindex); 

@@ -18,6 +18,8 @@ build
 
 .env.local
 
+.claude
+
 memo.md
 
 # Editor directories and files

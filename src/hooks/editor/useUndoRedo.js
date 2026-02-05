@@ -1,40 +1,72 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 
 const MAX_HISTORY = 50; // 最大履歴数
+const DEBOUNCE_MS = 500; // デバウンス時間
 
 export default function useUndoRedo({
     setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem
 }){
     const historyRef = useRef([]);
     const futureRef = useRef([]);
+    const [canUndo, setCanUndo] = useState(false);
+    const [canRedo, setCanRedo] = useState(false);
+
+    // デバウンス用
+    const debounceRef = useRef(null);
+    const isEditingRef = useRef(false);
+
+    // 最新値を ref に保持（undo/redo コールバックの安定化のため）
+    const latestRef = useRef({ mainTab, selectedItem, selectedSubItem, selectedThirdItem, setSelectedItem, setSelectedSubItem, setSelectedThirdItem });
+    latestRef.current = { mainTab, selectedItem, selectedSubItem, selectedThirdItem, setSelectedItem, setSelectedSubItem, setSelectedThirdItem };
 
     // 選択中の値をバグらせないようにするための関数
       const checkSelected = useCallback((newData) => {
-        if(mainTab === "characters" ){
-          setSelectedItem(Math.min(newData.characters.length - 1, selectedItem));
-          setSelectedSubItem(Math.min((newData.characters[selectedItem]?.expressions.length || 1) - 1, selectedSubItem));
+        const { mainTab: tab, selectedItem: item, selectedSubItem: sub, selectedThirdItem: third,
+                setSelectedItem: setItem, setSelectedSubItem: setSub, setSelectedThirdItem: setThird } = latestRef.current;
+        if(tab === "characters" ){
+          setItem(Math.min(newData.characters.length - 1, item));
+          setSub(Math.min((newData.characters[item]?.expressions.length || 1) - 1, sub));
         }
-        else if(mainTab === "scenes"){
-          setSelectedItem(Math.min(newData.scenes.length - 1, selectedItem));
-          setSelectedSubItem(Math.min((newData.scenes[selectedItem]?.hotspots.length || 1) - 1, selectedSubItem));
-          setSelectedThirdItem(Math.min((newData.scenes[selectedItem]?.hotspots[selectedSubItem]?.states.length || 1) - 1, selectedThirdItem));
+        else if(tab === "scenes"){
+          setItem(Math.min(newData.scenes.length - 1, item));
+          setSub(Math.min((newData.scenes[item]?.hotspots.length || 1) - 1, sub));
+          setThird(Math.min((newData.scenes[item]?.hotspots[sub]?.states.length || 1) - 1, third));
         }
-      },[mainTab, selectedItem, selectedSubItem, selectedThirdItem]);
-      
-      const doAction = useCallback(() => {
-        const snapshot = structuredClone(gameDataRef.current);
-
-        historyRef.current = [
-          ...historyRef.current,
-          snapshot
-        ].slice(-MAX_HISTORY);
-
-        futureRef.current = [];
       }, []);
-    
+
+      // デバウンス付きスナップショット
+      // immediate=true: 構造変更やドラッグ開始時に、進行中のバーストを強制終了して新しいスナップショットを取る
+      const debouncedDoAction = useCallback((immediate = false) => {
+        // immediate: 進行中のバーストを強制終了
+        if (immediate && isEditingRef.current) {
+          clearTimeout(debounceRef.current);
+          isEditingRef.current = false;
+        }
+
+        // バースト開始時のみスナップショットを取る
+        if (!isEditingRef.current) {
+          const snapshot = structuredClone(gameDataRef.current);
+          historyRef.current = [...historyRef.current, snapshot].slice(-MAX_HISTORY);
+          futureRef.current = [];
+          isEditingRef.current = true;
+          setCanUndo(true);
+          setCanRedo(false);
+        }
+
+        // デバウンスタイマーリセット
+        clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+          isEditingRef.current = false;
+        }, DEBOUNCE_MS);
+      }, []);
+
       const undo = useCallback(() => {
         const history = historyRef.current;
         if (history.length === 0) return;
+
+        // 編集中バーストをリセット（次の変更で新しいスナップショットが取られるようにする）
+        clearTimeout(debounceRef.current);
+        isEditingRef.current = false;
 
         // 1つ前のスナップショット
         const previous = history[history.length - 1];
@@ -48,13 +80,19 @@ export default function useUndoRedo({
           ...futureRef.current,
         ];
 
+        setCanUndo(historyRef.current.length > 0);
+        setCanRedo(true);
         checkSelected(previous);
         setGameData(previous);
       }, [checkSelected, setGameData]);
-    
+
       const redo = useCallback(() => {
         const future = futureRef.current;
         if (future.length === 0) return;
+
+        // 編集中バーストをリセット
+        clearTimeout(debounceRef.current);
+        isEditingRef.current = false;
 
         const next = future[0];
 
@@ -67,14 +105,18 @@ export default function useUndoRedo({
           structuredClone(gameDataRef.current),
         ];
 
+        setCanUndo(true);
+        setCanRedo(futureRef.current.length > 0);
         checkSelected(next);
         setGameData(next);
       }, [checkSelected, setGameData]);
 
 
     return ({
-        doAction,
+        debouncedDoAction,
         undo,
-        redo
+        redo,
+        canUndo,
+        canRedo
     })
 }

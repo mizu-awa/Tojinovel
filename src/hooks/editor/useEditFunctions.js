@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import { defaultCharacterData, defaultExpressionData, defaultHotspotData, defaultItemData, defaultSceneData, defaultStateData, defaultUsedItemData } from "../../datas/defaultGameData";
 
 export default function useEditFunctions({
-    gameDataRef, doAction, handleAddArrayItem, handleDeleteKey, 
+    gameDataRef, handleAddArrayItem, handleDeleteKey,
     selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem,
     mainTab
 }){
@@ -13,242 +13,242 @@ export default function useEditFunctions({
         if (data && data.nativeEvent) {
             data = defaultCharacterData;
         }
-        doAction();
+
         handleAddArrayItem("characters", data);
         setSelectedItem(gameDataRef.current.characters.length);
-    }, [doAction, handleAddArrayItem, setSelectedItem])
+    }, [handleAddArrayItem, setSelectedItem])
 
     const copyCharacter = useCallback(() => {
         if(gameDataRef.current.characters[selectedItem]){
-        doAction();
+
         handleAddArrayItem("characters", gameDataRef.current.characters[selectedItem]);
         setSelectedItem(gameDataRef.current.characters.length);
         }
-    },[selectedItem, doAction, handleAddArrayItem, setSelectedItem])
+    },[selectedItem, handleAddArrayItem, setSelectedItem])
 
     const deleteCharacter = useCallback(() => {
         if(gameDataRef.current.characters[selectedItem]){
-        doAction();
+
         handleDeleteKey(`characters.${selectedItem}`);
         setSelectedItem(Math.min(gameDataRef.current.characters.length - 2, selectedItem));
         }
-    },[doAction, handleDeleteKey, setSelectedItem, selectedItem])
+    },[handleDeleteKey, setSelectedItem, selectedItem])
 
     const addExpression = useCallback((data=defaultExpressionData) => {
         if(gameDataRef.current.characters[selectedItem]){
             if (data && data.nativeEvent) {
                 data = defaultExpressionData;
             }
-            doAction();
+    
             handleAddArrayItem(`characters.${selectedItem}.expressions`, data);
             setSelectedSubItem(gameDataRef.current.characters[selectedItem].expressions.length);
             }
-    },[ doAction, handleAddArrayItem, setSelectedSubItem, selectedItem ])
+    },[ handleAddArrayItem, setSelectedSubItem, selectedItem ])
 
     const copyExpression = useCallback(() => {
         if(gameDataRef.current.characters[selectedItem]?.expressions[selectedSubItem]){
-        doAction();
+
         handleAddArrayItem(
             `characters.${selectedItem}.expressions`,
             gameDataRef.current.characters[selectedItem].expressions[selectedSubItem]
         );
         setSelectedSubItem(gameDataRef.current.characters[selectedItem].expressions.length);
         }
-    },[doAction, handleAddArrayItem, setSelectedSubItem, selectedItem, selectedSubItem])
+    },[handleAddArrayItem, setSelectedSubItem, selectedItem, selectedSubItem])
 
     const deleteExpression = useCallback(() => {
         if(gameDataRef.current.characters[selectedItem]?.expressions[selectedSubItem]){
-        doAction();
+
         handleDeleteKey(`characters.${selectedItem}.expressions.${selectedSubItem}`);
         setSelectedSubItem(Math.min(gameDataRef.current.characters[selectedItem].expressions.length - 2, selectedSubItem));
         }
-    },[doAction, handleDeleteKey, setSelectedSubItem, selectedItem, selectedSubItem])
+    },[handleDeleteKey, setSelectedSubItem, selectedItem, selectedSubItem])
 
     const addScene = useCallback((data=defaultSceneData) => {
         if (data && data.nativeEvent) {
             data = defaultSceneData;
         }
-        doAction();
+
         handleAddArrayItem("scenes", data);
         setSelectedItem(gameDataRef.current.scenes.length);
-    },[doAction, handleAddArrayItem, setSelectedItem])
+    },[handleAddArrayItem, setSelectedItem])
 
     const copyScene = useCallback(() => {
         if(gameDataRef.current.scenes[selectedItem]){
-        doAction();
+
         handleAddArrayItem("scenes", gameDataRef.current.scenes[selectedItem]);
         setSelectedItem(gameDataRef.current.scenes.length);
         }
-    },[doAction, handleAddArrayItem, setSelectedItem,selectedItem])
+    },[handleAddArrayItem, setSelectedItem,selectedItem])
 
     const deleteScene = useCallback(() => {
         if(gameDataRef.current.scenes[selectedItem]){
-        doAction();
+
         handleDeleteKey(`scenes.${selectedItem}`);
         setSelectedItem(Math.min(gameDataRef.current.scenes.length - 2, selectedItem));
         }
-    },[doAction, handleDeleteKey, setSelectedItem, selectedItem])
+    },[handleDeleteKey, setSelectedItem, selectedItem])
 
     const addItem = useCallback((data=defaultItemData) => {
         if (data && data.nativeEvent) {
             data = defaultItemData;
         }
-        doAction();
+
         handleAddArrayItem("items", data);
         setSelectedItem(gameDataRef.current.items.length);
-    },[doAction, handleAddArrayItem, setSelectedItem])
+    },[handleAddArrayItem, setSelectedItem])
 
     const copyItem = useCallback(() => {
         if(gameDataRef.current.items[selectedItem]){
-        doAction();
+
         handleAddArrayItem("items", gameDataRef.current.items[selectedItem]);
         setSelectedItem(gameDataRef.current.items.length);
         }
-    },[doAction, handleAddArrayItem, setSelectedItem, selectedItem])
+    },[handleAddArrayItem, setSelectedItem, selectedItem])
 
     const deleteItem = useCallback(() => {
         if(gameDataRef.current.items[selectedItem]){
-        doAction();
+
         handleDeleteKey(`items.${selectedItem}`);
         setSelectedItem(Math.min(gameDataRef.current.items.length - 2, selectedItem));
         }
-    },[doAction, handleDeleteKey, setSelectedItem, selectedItem])
+    },[handleDeleteKey, setSelectedItem, selectedItem])
 
     const addHotspot = useCallback((data=defaultHotspotData) => {
         if(gameDataRef.current.scenes[selectedItem]){
             if (data && data.nativeEvent) {
                 data = defaultHotspotData;
             }
-            doAction();
+    
             handleAddArrayItem(`scenes.${selectedItem}.hotspots`, data);
             setSelectedSubItem(gameDataRef.current.scenes[selectedItem].hotspots.length);
         }
-    }, [doAction, handleAddArrayItem, setSelectedSubItem, selectedItem])
+    }, [handleAddArrayItem, setSelectedSubItem, selectedItem])
 
     const copyHotspot = useCallback(() => {
         if(gameDataRef.current.scenes[selectedItem]?.hotspots[selectedSubItem]){
-        doAction();
+
         handleAddArrayItem(`scenes.${selectedItem}.hotspots`, structuredClone(gameDataRef.current.scenes[selectedItem]?.hotspots[selectedSubItem]));
         setSelectedSubItem(gameDataRef.current.scenes[selectedItem].hotspots.length);
         }
-    }, [doAction, handleAddArrayItem, setSelectedSubItem, selectedItem, selectedSubItem])
+    }, [handleAddArrayItem, setSelectedSubItem, selectedItem, selectedSubItem])
 
     const deleteHotspot = useCallback(() => {
         if(gameDataRef.current.scenes[selectedItem]?.hotspots[selectedSubItem]){
-        doAction();
+
         handleDeleteKey(`scenes.${selectedItem}.hotspots.${selectedSubItem}`);
         setSelectedSubItem(Math.min((gameDataRef.current.scenes[selectedItem].hotspots.length) - 2, selectedSubItem));
         }
-    }, [doAction, handleDeleteKey, setSelectedSubItem, selectedItem, selectedSubItem])
+    }, [handleDeleteKey, setSelectedSubItem, selectedItem, selectedSubItem])
 
     const addState = useCallback((data=defaultStateData) => {
         if(gameDataRef.current.scenes[selectedItem]?.hotspots[selectedSubItem]){
             if (data && data.nativeEvent) {
                 data = defaultStateData;
             }
-            doAction();
+    
             handleAddArrayItem(`scenes.${selectedItem}.hotspots.${selectedSubItem}.states`, data);
             setSelectedThirdItem(gameDataRef.current.scenes[selectedItem].hotspots[selectedSubItem].states.length);
         }
-    },[doAction, handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem])
+    },[handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem])
 
     const copyState = useCallback(() => {
         if(gameDataRef.current.scenes[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]){
-        doAction();
+
         handleAddArrayItem(`scenes.${selectedItem}.hotspots.${selectedSubItem}.states`, gameDataRef.current.scenes[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]);
         setSelectedThirdItem(gameDataRef.current.scenes[selectedItem].hotspots[selectedSubItem].states.length);
         }
-    },[doAction, handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
+    },[handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
 
     const deleteState = useCallback(() => {
         if(gameDataRef.current.scenes[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]){
-        doAction();
+
         handleDeleteKey(`scenes.${selectedItem}.hotspots.${selectedSubItem}.states.${selectedThirdItem}`);
         setSelectedThirdItem(Math.min((gameDataRef.current.scenes[selectedItem].hotspots[selectedSubItem].states.length ?? 0) - 2, selectedThirdItem));
         }
-    },[doAction, handleDeleteKey, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
+    },[handleDeleteKey, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
 
     const addItemHotspot = useCallback((data=defaultHotspotData) => {
         if(gameDataRef.current.items[selectedItem]){
             if (data && data.nativeEvent) {
                 data = defaultHotspotData;
             }
-            doAction();
+    
             handleAddArrayItem(`items.${selectedItem}.hotspots`, data);
             setSelectedSubItem(gameDataRef.current.items[selectedItem].hotspots.length);
         }
-    }, [doAction, handleAddArrayItem, setSelectedSubItem, selectedItem])
+    }, [handleAddArrayItem, setSelectedSubItem, selectedItem])
 
     const copyItemHotspot = useCallback(() => {
         if(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]){
-        doAction();
+
         handleAddArrayItem(`items.${selectedItem}.hotspots`, structuredClone(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]));
         setSelectedSubItem(gameDataRef.current.items[selectedItem].hotspots.length);
         }
-    }, [doAction, handleAddArrayItem, setSelectedSubItem, selectedItem, selectedSubItem])
+    }, [handleAddArrayItem, setSelectedSubItem, selectedItem, selectedSubItem])
 
     const deleteItemHotspot = useCallback(() => {
         if(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]){
-        doAction();
+
         handleDeleteKey(`items.${selectedItem}.hotspots.${selectedSubItem}`);
         setSelectedSubItem(Math.min(gameDataRef.current.items[selectedItem].hotspots.length - 2, selectedSubItem));
         }
-    }, [doAction, handleDeleteKey, setSelectedSubItem, selectedItem, selectedSubItem])
+    }, [handleDeleteKey, setSelectedSubItem, selectedItem, selectedSubItem])
 
     const addItemState = useCallback((data=defaultStateData) => {
         if(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]){
             if (data && data.nativeEvent) {
                 data = defaultStateData;
             }
-            doAction();
+    
             handleAddArrayItem(`items.${selectedItem}.hotspots.${selectedSubItem}.states`, data);
             setSelectedThirdItem(gameDataRef.current.items[selectedItem].hotspots[selectedSubItem].states.length);
         }
-    },[doAction, handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem])
+    },[handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem])
 
     const copyItemState = useCallback(() => {
         if(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]){
-        doAction();
+
         handleAddArrayItem(`items.${selectedItem}.hotspots.${selectedSubItem}.states`, gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]);
         setSelectedThirdItem(gameDataRef.current.items[selectedItem].hotspots[selectedSubItem]);
         }
-    },[doAction, handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
+    },[handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
 
     const deleteItemState = useCallback(() => {
         if(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]){
-        doAction();
+
         handleDeleteKey(`items.${selectedItem}.hotspots.${selectedSubItem}.states.${selectedThirdItem}`);
         setSelectedThirdItem(Math.min(gameDataRef.current.items[selectedItem].hotspots[selectedSubItem].states.length - 2, selectedThirdItem));
         }
-    },[doAction, handleDeleteKey, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
+    },[handleDeleteKey, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
 
     const addUsedItem = useCallback(() => {
         if(gameDataRef.current.scenes[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]?.usedItems){
-        doAction();
+
         handleAddArrayItem(`scenes.${selectedItem}.hotspots.${selectedSubItem}.states.${selectedThirdItem}.usedItems`, defaultUsedItemData);
         }
-    }, [doAction, handleAddArrayItem, selectedItem, selectedSubItem, selectedThirdItem])
+    }, [handleAddArrayItem, selectedItem, selectedSubItem, selectedThirdItem])
 
     const deleteUsedItem = useCallback((index) => {
         if(gameDataRef.current.scenes[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]?.usedItems[index]){
-        doAction();
+
         handleDeleteKey(`scenes.${selectedItem}.hotspots.${selectedSubItem}.states.${selectedThirdItem}.usedItems.${index}`);
         }
-    },[doAction, handleDeleteKey, selectedItem, selectedSubItem, selectedThirdItem])
+    },[handleDeleteKey, selectedItem, selectedSubItem, selectedThirdItem])
 
     const addUsedItemItem = useCallback(() => {
         if(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]?.usedItems){
-        doAction();
+
         handleAddArrayItem(`items.${selectedItem}.hotspots.${selectedSubItem}.states.${selectedThirdItem}.usedItems`, defaultUsedItemData);
         }
-    }, [doAction, handleAddArrayItem, selectedItem, selectedSubItem, selectedThirdItem])
+    }, [handleAddArrayItem, selectedItem, selectedSubItem, selectedThirdItem])
 
     const deleteUsedItemItem = useCallback((index) => {
         if(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]?.usedItems[index]){
-        doAction();
+
         handleDeleteKey(`items.${selectedItem}.hotspots.${selectedSubItem}.states.${selectedThirdItem}.usedItems.${index}`);
         }
-    },[doAction, handleDeleteKey, selectedItem, selectedSubItem, selectedThirdItem])
+    },[handleDeleteKey, selectedItem, selectedSubItem, selectedThirdItem])
 
     // キーを使った削除
     const deleteByKey = useCallback(() => {

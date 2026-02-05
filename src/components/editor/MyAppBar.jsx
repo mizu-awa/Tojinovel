@@ -1,8 +1,8 @@
-import { Save } from "@mui/icons-material";
+import { Redo, Save, Undo } from "@mui/icons-material";
 import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material"
 import { memo } from "react";
 
-const MyAppBar = memo(({save, isSaved}) => {
+const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo}) => {
   return(
     <AppBar position="static" color="secondary">
       <Toolbar>
@@ -14,6 +14,12 @@ const MyAppBar = memo(({save, isSaved}) => {
         </Typography>
 
         <Box sx={{display: "flex"}}>
+          <IconButton onClick={undo} disabled={!canUndo} title="元に戻す (Ctrl+Z)" sx={{color: "primary.contrastText", "&.Mui-disabled": {color: "action.disabled"}}}>
+            <Undo />
+          </IconButton>
+          <IconButton onClick={redo} disabled={!canRedo} title="やり直し (Ctrl+Y)" sx={{color: "primary.contrastText", "&.Mui-disabled": {color: "action.disabled"}}}>
+            <Redo />
+          </IconButton>
           <IconButton onClick={save} title="gamedata.jsonに保存" sx={{color: "primary.contrastText"}}>
             <Save />
           </IconButton>
