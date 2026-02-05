@@ -207,7 +207,7 @@ func noCache(next http.Handler) http.Handler {
 
 		ext := strings.ToLower(filepath.Ext(r.URL.Path))
 
-		if ext == ".html" || ext == ".txt" {
+		if ext == ".html" || ext == ".txt" || ext == ".json" {
 			w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
 			w.Header().Set("Pragma", "no-cache")
 			w.Header().Set("Expires", "0")
