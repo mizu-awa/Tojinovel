@@ -91,17 +91,16 @@ export default function EditorApp() {
   // resize window--------------------------------------------------------------------
   const { ref, boxRef } = useResizeWindow({gameData});
   
-  // handle change----------------------------------------------------------------------------------
-  const { handleMainTabChange, handleAddArrayItem, handleDeleteKey, handleDatasetChange} = useHandleChange({setGameData, setMainTab, setIsSaved});
-
-
   // undo redo--------------------------------------------------------
-  const { doAction, undo, redo }
+  const { debouncedDoAction, undo, redo, canUndo, canRedo }
   = useUndoRedo({setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem});
+
+  // handle change----------------------------------------------------------------------------------
+  const { handleMainTabChange, handleAddArrayItem, handleDeleteKey, handleDatasetChange} = useHandleChange({setGameData, setMainTab, setIsSaved, debouncedDoAction});
 
   // edit hotspot-------------------------------------------------------
   const { onDragStart, handleResizeStart, handleRotateStart }
-    = useMoveHotspot({gameDataRef, ref, hotspotRefs, mainTab, selectedItem, setGameData, setSelectedSubItem, setSelectedThirdItem, doAction});
+    = useMoveHotspot({gameDataRef, ref, hotspotRefs, mainTab, selectedItem, setGameData, setSelectedSubItem, setSelectedThirdItem, debouncedDoAction});
 
   // edit---------------------------------------------------------------------------
   const {
@@ -116,7 +115,7 @@ export default function EditorApp() {
     addUsedItem,deleteUsedItem,addUsedItemItem,deleteUsedItemItem,
     copy, paste, copyBykey, pasteByKey, deleteByKey
     } = useEditFunctions({
-    gameDataRef, doAction, handleAddArrayItem, handleDeleteKey, 
+    gameDataRef, handleAddArrayItem, handleDeleteKey,
     selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem,
     mainTab
 });
@@ -130,6 +129,15 @@ export default function EditorApp() {
         e.preventDefault();
         saveFile();
       }
+      // アンドゥ/リドゥ: フォーム内外を問わず統一動作
+      else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "z") {
+        e.preventDefault();
+        undo();
+      }
+      else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && e.key === "z"))) {
+        e.preventDefault();
+        redo();
+      }
       else{ // フォームと関連があるショートカット
         const isInput =
         e.target.tagName === "INPUT" ||
@@ -141,15 +149,8 @@ export default function EditorApp() {
         const hasTextSelection = selection && selection.toString().length > 0;
         if (isInput || hasTextSelection) return; // フォームはブラウザに任せる
 
-        if ((e.ctrlKey || e.metaKey) && e.key === "z") {
-          e.preventDefault();
-          undo();
-        } else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && e.key === "z"))) {
-          e.preventDefault();
-          redo();
-        }
         // --- コピー & ペースト機能 ---
-        else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
           e.preventDefault();
           copyBykey(); // 自作のコピー関数を呼ぶ
         } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
@@ -334,6 +335,10 @@ export default function EditorApp() {
       <MyAppBar
         save={saveFile}
         isSaved={isSaved}
+        undo={undo}
+        redo={redo}
+        canUndo={canUndo}
+        canRedo={canRedo}
       />
 
       {/* Main Tabs */}

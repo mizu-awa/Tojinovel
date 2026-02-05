@@ -3,7 +3,8 @@ import { useCallback } from "react";
 export default function useHsndleChange({
     setGameData,
     setMainTab,
-    setIsSaved
+    setIsSaved,
+    debouncedDoAction
 }){
     // mainタブ用の関数
       const handleMainTabChange = useCallback((event, newValue) => {
@@ -12,6 +13,7 @@ export default function useHsndleChange({
 
     // ネストしたJSONの更新に対応するhandleChange
       const handleNestedChange = useCallback((path, options = {}) => (event) => {
+        debouncedDoAction();
         setGameData((prev) => {
           const keys = path.split(".");
     
@@ -89,7 +91,7 @@ export default function useHsndleChange({
         });
 
         setIsSaved(false);
-      }, [setGameData, setIsSaved]);
+      }, [setGameData, setIsSaved, debouncedDoAction]);
 
       // datasetから取得するバージョン
       const handleDatasetChange = useCallback((e) => {
@@ -103,7 +105,7 @@ export default function useHsndleChange({
       // newItem は追加したい値（オブジェクトや文字列など）
       const handleAddArrayItem = useCallback((path, newItem) => {
         if(!newItem) return null;
-        
+        debouncedDoAction(true);
         setGameData((prev) => {
           const keys = path.split(".");
           const newData = { ...prev }; // ✅ 一番上だけ浅いコピー
@@ -144,10 +146,11 @@ export default function useHsndleChange({
         });
 
         setIsSaved(false);
-      },[setGameData, setIsSaved]);
-    
+      },[setGameData, setIsSaved, debouncedDoAction]);
+
       // パスを指定してキーを削除する関数（配列でもいける）
       const handleDeleteKey = useCallback((path) => {
+        debouncedDoAction(true);
         setGameData((prev) => {
           const keys = path.split(".");
           const newData = { ...prev }; // ✅ 最上位だけ浅いコピー
@@ -193,7 +196,7 @@ export default function useHsndleChange({
         });
 
         setIsSaved(false);
-      }, [setGameData, setIsSaved]);
+      }, [setGameData, setIsSaved, debouncedDoAction]);
 
     return ({
         handleMainTabChange,
