@@ -93,6 +93,32 @@ npm run dev
 
 ---
 
+## 🧬 ユニットテスト
+
+Vitest を使用したユニットテストを実行できます。
+
+### テストの実行
+
+```bash
+# ウォッチモードで実行（ファイル変更を監視）
+npm run test
+
+# 一回だけ実行
+npm run test:run
+```
+
+### テスト対象
+
+現在、以下のモジュールがテスト対象です：
+
+- `src/hooks/eventExecutionUtils.js` - イベント実行エンジンのユーティリティ関数
+  - 条件式の評価（`evalCondition`）
+  - フラグ計算（`calcFlag`）
+  - 変数展開（`expandVars`, `expandVarsShallow`）
+  - テキスト解析（`parseLineText`）
+
+---
+
 ## プロジェクト構造
 /   
 ├─ src/             # React（Vite）側 リソース   

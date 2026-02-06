@@ -1,4 +1,12 @@
 import { useEffect, useState, useRef } from "react";
+import {
+    parseIfNumber,
+    evalCondition,
+    calcFlag,
+    random,
+    expandVarsShallow,
+    parseLineText
+} from "./eventExecutionUtils.js";
 
 export default function useEventViewer({ 
   lines,
@@ -125,93 +133,6 @@ export default function useEventViewer({
         return slots;
     }
 
-    // 変数・数値・文字列リテラルを判定
-    function parseOperand(str, variables) {
-        str = str.trim();
-
-        // 数値
-        if (!isNaN(Number(str))) {
-            return Number(str);
-        }
-
-        // 文字列リテラル（"abc" または 'abc'）
-        if (/^".*"$/.test(str) || /^'.*'$/.test(str)) {
-            return str.slice(1, -1);
-        }
-
-        // それ以外は変数名として扱う
-        const variable = variables.find((v) => v.name === str);
-        if(variable){
-            return parseIfNumber(variable.value);
-        }
-
-        return str;
-    }
-
-    // 条件式パーサー 
-    function evalCondition(cond, variables) {
-        // 左辺/右辺/演算子に分解
-        const regex = /^(.+?)\s*(==|!=|<=|>=|<|>)\s*(.+)$/;
-
-        const match = cond.match(regex);
-        if (!match) throw new Error(`不正な条件式: ${cond}`);
-
-        const [, leftRaw, op, rightRaw] = match;
-        const leftVal = parseOperand(leftRaw, variables);
-        const rightVal = parseOperand(rightRaw, variables);
-
-        switch (op) {
-            case "==": return leftVal == rightVal;
-            case "!=": return leftVal != rightVal;
-            case "<":  return leftVal < rightVal;
-            case ">":  return leftVal > rightVal;
-            case "<=": return leftVal <= rightVal;
-            case ">=": return leftVal >= rightVal;
-            default: throw new Error(`未知の演算子: ${op}`);
-        }
-    }
-
-    // 数値に変換できる場合変換する関数
-    function parseIfNumber(value) {
-        // 空文字や null, undefined はそのまま返す
-        if (value === "" || value == null) return value;
-
-        // 数値として変換できるか確認
-        const num = Number(value);
-
-        // NaN でないなら数値と判断
-        return isNaN(num) ? value : num;
-    }
-
-    // フラグ式パース&実行
-    function calcFlag(variables, formula){
-        const regex = /^(.+?)\s*(\+|-|=|\*|\/|%)\s*(.+)$/;
-        const match = formula.match(regex);
-        if (!match) throw new Error(`不正な数式: ${formula}`);
-
-        const [, left, op, rightRaw] = match;
-        const rightVal = parseOperand(rightRaw, variables);
-
-        const leftIndex = variables.findIndex(v => v.name === left);
-        if(leftIndex !== -1){
-            const leftVar = variables[leftIndex];
-            const leftVal = parseIfNumber(leftVar.value);
-            switch(op){
-                case "+":  variables[leftIndex].value = leftVal + rightVal; break;
-                case "-": variables[leftIndex].value = leftVal - rightVal; break;
-                case "*": variables[leftIndex].value = leftVal * rightVal; break;
-                case "/": variables[leftIndex].value = Math.floor(leftVal / rightVal); break;
-                case "%": variables[leftIndex].value = leftVal % rightVal; break;
-                case "=": variables[leftIndex].value = rightVal; break;
-            }
-        }
-        else if(op === "="){// 無い場合は変数を追加する（テキストでも変数定義可能）
-            variables.push({name: left, value: rightVal});
-        }
-        
-        return variables;
-    }
-
     // 選択肢をクリックしたとき
     const choiceOption = (option) => {
         // 選んだ選択肢を登録
@@ -231,82 +152,10 @@ export default function useEventViewer({
         handleClick(lines);
     }
 
-    // 乱数を返す関数
-    const randomInt = (min, max) => {
-        // 両端含む整数 [min, max]
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    // 変数に乱数を格納
-    const random = (variables, varName, min, max) => {
-        // 数値化（NaNの場合も考慮してデフォルト値を設定）
-        const minNum = Number(min);
-        const maxNum = Number(max);
-
-        // 無効な値だった場合のフォールバック（例: min > max や NaN）
-        const safeMin = isNaN(minNum) ? 0 : minNum;
-        const safeMax = isNaN(maxNum) ? safeMin + 1 : Math.max(safeMin, maxNum);
-
-        const index = variables.findIndex(v => v.name === varName);
-        if (index !== -1) {
-            variables[index].value = randomInt(safeMin, safeMax);
-        }
-        return variables;
-    };
-
     function openLink(url, target = "_blank") {
         if (!url) return;
         const safeTarget = target || "_blank";
         window.open(url, safeTarget, "noopener,noreferrer");
-    }
-
-    /* 変数を展開 */
-    const expandVars = (str, vars) => {
-        return str.replace(/\[([^\]]+)\]/g, (_, name) => {
-            const variable = vars.find(v => v.name === name);
-            return variable ? variable.value : `[${name}]`;
-        });
-    }
-
-    function expandVarsShallow(block, vars) {
-        const result = {};
-
-        for (const key in block) {
-        const value = block[key];
-
-        if (typeof value === "string") {
-            // 値が文字列なら直接展開
-            result[key] = expandVars(value, vars);
-        } 
-        else if (Array.isArray(value)) {
-            // 1次元配列の場合 → 各要素が文字列である前提なので展開
-            result[key] = value.map(s => expandVars(s, vars));
-        }
-        else {
-            // 文字列でも配列でもない → そのまま（基本このケースは無い）
-            result[key] = value;
-        }
-        }
-
-        return result;
-    }
-
-    // 文を1文字ずつに解体
-    const parseLineText = (text) => {
-        let highlight = false;
-
-        let result = [];
-
-        for (const ch of text) {
-        if(ch === '"'){
-            highlight = !highlight; // 反転
-        }
-        else{
-            result.push({char: ch, highlight: highlight});
-        }
-        }
-
-        return result;
     }
 
     // クリック時処理

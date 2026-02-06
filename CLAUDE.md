@@ -28,7 +28,11 @@ Go サーバーのビルド:
 ./server/dev.ps1          # 開発用サーバー起動
 ```
 
-テストフレームワークは未導入。
+テスト:
+```bash
+npm run test              # Vitest ウォッチモードで実行
+npm run test:run          # 一回だけ実行
+```
 
 ## イベントテスト
 
@@ -96,6 +100,8 @@ src/
 ├── hooks/                       # カスタムフック
 │   ├── useGameData.js           # ゲームデータ読み込み・シーン管理
 │   ├── useEventExecution.js     # イベントコマンド実行エンジン
+│   ├── eventExecutionUtils.js   # イベント実行用ユーティリティ関数（テスト対象）
+│   ├── eventExecutionUtils.test.js  # ユニットテスト
 │   ├── useEventLines.js         # イベントテキストパーサー
 │   ├── useIndexedDBStorage.js   # IndexedDB セーブ/ロード
 │   ├── audioManager.js          # Howler.js ベースの音声管理
@@ -327,6 +333,34 @@ const executeEvent = () => { ... };
 // ホットスポットの usedItems で「鍵」使用時イベントを設定
 #アイテム破棄: 鍵
 #ステート変更: 玄関, ドア, unlocked
+```
+
+## ユニットテスト
+
+Vitest を使用したユニットテスト環境。テストファイルは `src/**/*.test.js` に配置。
+
+### テスト対象モジュール
+
+- `eventExecutionUtils.js`: イベント実行エンジンのユーティリティ関数
+  - `parseIfNumber`: 文字列を数値に変換（可能な場合）
+  - `parseOperand`: 変数・数値・文字列リテラルのパース
+  - `evalCondition`: 条件式（`==`, `!=`, `<`, `>` 等）の評価
+  - `calcFlag`: フラグ計算（`+`, `-`, `*`, `/`, `%`, `=`）
+  - `expandVars`, `expandVarsShallow`: 変数参照の展開
+  - `parseLineText`: セリフテキストの解析（ハイライト対応）
+  - `randomInt`, `random`: 乱数生成
+
+### テストの書き方
+
+```javascript
+import { describe, it, expect } from 'vitest';
+import { parseIfNumber } from './eventExecutionUtils.js';
+
+describe('parseIfNumber', () => {
+    it('数値文字列を数値に変換する', () => {
+        expect(parseIfNumber('42')).toBe(42);
+    });
+});
 ```
 
 ### コーディングルール
