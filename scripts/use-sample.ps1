@@ -42,3 +42,4 @@ Remove-Item $dest -Recurse -Force -ErrorAction Ignore
 Copy-Item $source $dest -Recurse
 
 Write-Host "OK: '$SampleName' のデータを public/data にコピーしました" -ForegroundColor Green
+exit 0
