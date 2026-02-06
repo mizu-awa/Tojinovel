@@ -46,6 +46,7 @@ src/
 │   └── editor/                  # エディタ専用コンポーネント
 │       ├── panels/              # パネル（Settings, Scene, Characters）
 │       ├── settings/            # 各種設定フォーム（17ファイル）
+│       ├── codemirror/          # CodeMirror言語・テーマ定義
 │       └── FormField.jsx 等     # 共通UIパーツ
 ├── hooks/                       # カスタムフック
 │   ├── useGameData.js           # ゲームデータ読み込み・シーン管理
@@ -238,8 +239,17 @@ const executeEvent = () => { ... };
 
 **アーキテクチャ:**
 - `useScenarioEditor.js`: バッファ管理、fetch、IndexedDB、保存ロジック
-- `ScenarioEditor.jsx`: UIコンポーネント（memo化、非制御textarea）
+- `ScenarioEditor.jsx`: UIコンポーネント（memo化、CodeMirrorエディタ）
 - `server.go`: `POST /save-event` エンドポイント
+
+**CodeMirror 6:**
+シナリオエディタでは CodeMirror 6 を使用してシンタックスハイライトと入力補完を提供。
+関連ファイルは `src/components/editor/codemirror/` に配置:
+- `eventLanguage.js`: イベントファイル用カスタム言語定義（StreamLanguage）
+  - トークン: `#コマンド`, `【ラベル】`, `「セリフ」`, `[変数]`, `// コメント`, `キャラ名（表情）` 等
+- `eventTheme.js`: エディタのテーマ定義（背景色、フォント、トークン色）
+- `eventCompletion.js`: 入力補完（コマンド、ラベル、変数名等）
+- `eventBrackets.js`: ブラケット（括弧）のマッチング設定
 
 **バッファ管理:**
 - `eventBufferRef = useRef(new Map())` でファイル内容をメモリ上に保持
@@ -252,8 +262,8 @@ const executeEvent = () => { ... };
 - 循環依存解決: `onBeforeTextChangeRef` を使用してフック間でコールバックを共有
 
 **注意点:**
-- textareaは非制御コンポーネント（`useState` に持たない）でパフォーマンス確保
-- `pendingContentRef` パターン: textareaマウント前のコンテンツを保持し、マウント時に適用
+- CodeMirrorは `EditorView` を `useRef` で保持し、`useEffect` でコンテンツを同期
+- `pendingContentRef` パターン: エディタマウント前のコンテンツを保持し、マウント時に適用
 - ファイルのフェッチ後にパスが変わっていたら結果を破棄（高速切替対策）
 
 ### よくある脱出ゲームのパターン
@@ -275,4 +285,8 @@ const executeEvent = () => { ... };
 ```
 
 ### コーディングルール
-新機能を追加するときは、必ず feature/機能名 のブランチを切ってから実装すること
+
+- **ブランチ運用**: 新機能や機能変更を行うときは、必ず `feature/機能名` のブランチを切ってから実装すること
+- **ドキュメント更新**: 機能変更後、以下を確認・更新すること:
+  - **CLAUDE.md**: 実装内容に合わせて追記・修正する
+  - **Wiki**: 矛盾が生じていないか確認し、必要に応じて修正する
