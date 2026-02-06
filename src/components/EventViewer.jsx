@@ -84,10 +84,27 @@ function EventViewer({
   }, [currentLine, visibleCount])
 
   // エンターキーでイベント進行
-  useEffect(() => {
+ useEffect(() => {
     const handleKeyDown = (e) => {
+
+      // 👇 フォーカス中の要素を取得
+      const active = document.activeElement;
+
+      // 👇 フォーム系なら何もしない
+      if (
+        active &&
+        (
+          active.tagName === "INPUT" ||
+          active.tagName === "TEXTAREA" ||
+          active.tagName === "SELECT" ||
+          active.isContentEditable
+        )
+      ) {
+        return;
+      }
+
       // 入力フォームまたは選択肢が表示されている場合は処理しない
-      if (currentInput || currentOptions) {
+      if (currentInput || currentOptions || !lines || forEdit) {
         return;
       }
       

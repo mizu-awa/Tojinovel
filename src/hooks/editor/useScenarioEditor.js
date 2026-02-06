@@ -19,42 +19,48 @@ async function getDB() {
   });
 }
 
-// ラベル位置を検索してスクロール
-function scrollToLabel(textarea, label) {
-  if (!textarea || !label) return;
+// CodeMirror EditorViewのコンテンツを取得
+function getEditorContent(editorView) {
+  if (!editorView) return "";
+  return editorView.state.doc.toString();
+}
 
-  const text = textarea.value;
+// CodeMirror EditorViewにコンテンツを設定
+function setEditorContent(editorView, content) {
+  if (!editorView) return;
+  editorView.dispatch({
+    changes: { from: 0, to: editorView.state.doc.length, insert: content },
+  });
+}
+
+// ラベル位置を検索してスクロール（CodeMirror EditorView対応）
+function scrollToLabel(editorView, label) {
+  if (!editorView || !label) return;
+
+  const text = editorView.state.doc.toString();
   // 【ラベル名】の形式を検索
   const labelPattern = `【${label}】`;
   const index = text.indexOf(labelPattern);
 
   if (index === -1) return;
 
-  // その行の先頭位置を取得
-  const lines = text.substring(0, index).split("\n");
-  const lineNumber = lines.length - 1;
-
-  // 1行あたりの高さを計算（概算）
-  const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20;
-  const scrollTop = lineNumber * lineHeight;
-
-  // スクロール
-  textarea.scrollTop = Math.max(0, scrollTop - 50); // 少し上に余裕を持たせる
-
-  // カーソルをラベル位置に移動
-  textarea.setSelectionRange(index, index + labelPattern.length);
-  textarea.focus();
+  // その位置にスクロールしてカーソルを移動
+  editorView.dispatch({
+    selection: { anchor: index, head: index + labelPattern.length },
+    scrollIntoView: true,
+  });
+  editorView.focus();
 }
 
 export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
   // ref-------------------------------------------------------------------------------------------
   // key: ファイルパス（"./events/room1.txt"）, value: { content: string, dirty: boolean }
   const eventBufferRef = useRef(new Map());
-  const textareaRef = useRef(null);
+  const editorViewRef = useRef(null);
   const currentFilePathRef = useRef(null);
   const currentLabelRef = useRef("");
   const idbTimeoutRef = useRef(null);
-  // textarea がマウントされた時に適用する pending content
+  // エディタがマウントされた時に適用する pending content
   const pendingContentRef = useRef(null);
 
   // state（ヘッダー表示用の最小限）-----------------------------------------------------------------
@@ -88,12 +94,12 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     }
   }, []);
 
-  // textareaの現在の内容をバッファに書き戻す
+  // エディタの現在の内容をバッファに書き戻す
   const flushCurrentToBuffer = useCallback(() => {
     const path = currentFilePathRef.current;
-    if (!path || !textareaRef.current) return;
+    if (!path || !editorViewRef.current) return;
 
-    const currentContent = textareaRef.current.value;
+    const currentContent = getEditorContent(editorViewRef.current);
     const existing = eventBufferRef.current.get(path);
 
     if (!existing || existing.content !== currentContent) {
@@ -106,32 +112,26 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
   const scheduleIDBSave = useCallback(() => {
     if (idbTimeoutRef.current) clearTimeout(idbTimeoutRef.current);
     idbTimeoutRef.current = setTimeout(() => {
-      // 保存前にtextareaの最新内容をバッファに反映
+      // 保存前にエディタの最新内容をバッファに反映
       flushCurrentToBuffer();
       saveBufferToIndexedDB();
     }, 2000);
   }, [flushCurrentToBuffer, saveBufferToIndexedDB]);
 
-  // textareaにpending contentを適用する関数
-  const applyPendingContent = useCallback((textarea) => {
-    if (!textarea) return;
+  // pending contentを適用する関数
+  const applyPendingContent = useCallback(() => {
+    if (!editorViewRef.current) return;
 
     if (pendingContentRef.current !== null) {
-      textarea.value = pendingContentRef.current;
+      setEditorContent(editorViewRef.current, pendingContentRef.current);
       pendingContentRef.current = null;
 
       // ラベル位置にスクロール
       if (currentLabelRef.current) {
-        setTimeout(() => scrollToLabel(textarea, currentLabelRef.current), 50);
+        setTimeout(() => scrollToLabel(editorViewRef.current, currentLabelRef.current), 50);
       }
     }
   }, []);
-
-  // textarea ref のコールバック（マウント時に pending content を適用）
-  const setTextareaRef = useCallback((textarea) => {
-    textareaRef.current = textarea;
-    applyPendingContent(textarea);
-  }, [applyPendingContent]);
 
   // ファイルを閉じる
   const closeFile = useCallback(() => {
@@ -143,7 +143,9 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     setCurrentLabel("");
     setStatus(null);
     setFileNotFound(false);
-    if (textareaRef.current) textareaRef.current.value = "";
+    if (editorViewRef.current) {
+      setEditorContent(editorViewRef.current, "");
+    }
   }, [flushCurrentToBuffer]);
 
   // ファイルを開く
@@ -161,13 +163,13 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
       setCurrentLabel(label || "");
       currentLabelRef.current = label || "";
       // ラベル位置にスクロール
-      if (label && textareaRef.current) {
-        setTimeout(() => scrollToLabel(textareaRef.current, label), 50);
+      if (label && editorViewRef.current) {
+        setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
       }
       return;
     }
 
-    // 現在のtextareaの内容をバッファに退避
+    // 現在のエディタの内容をバッファに退避
     flushCurrentToBuffer();
 
     // 新しいファイルパスとラベルを設定
@@ -181,16 +183,15 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
 
     if (existing) {
       // バッファにある場合はそこから表示
-      // textareaがまだマウントされていない可能性があるため、pending contentに保存
       pendingContentRef.current = existing.content;
 
-      if (textareaRef.current) {
-        // textareaが既に存在する場合は直接設定
-        textareaRef.current.value = existing.content;
+      if (editorViewRef.current) {
+        // エディタが既に存在する場合は直接設定
+        setEditorContent(editorViewRef.current, existing.content);
         pendingContentRef.current = null;
         // ラベル位置にスクロール
         if (label) {
-          setTimeout(() => scrollToLabel(textareaRef.current, label), 50);
+          setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
         }
       }
       setStatus(existing.dirty ? "未保存" : null);
@@ -212,7 +213,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
           setFileNotFound(true);
           setStatus("ファイルが存在しません");
           pendingContentRef.current = "";
-          if (textareaRef.current) textareaRef.current.value = "";
+          if (editorViewRef.current) setEditorContent(editorViewRef.current, "");
           return;
         }
         if (contentType && contentType.startsWith("text/")) {
@@ -223,12 +224,12 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
           // pending contentに保存
           pendingContentRef.current = text;
 
-          if (textareaRef.current) {
-            textareaRef.current.value = text;
+          if (editorViewRef.current) {
+            setEditorContent(editorViewRef.current, text);
             pendingContentRef.current = null;
             // ラベル位置にスクロール
             if (label) {
-              setTimeout(() => scrollToLabel(textareaRef.current, label), 50);
+              setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
             }
           }
           setStatus(null);
@@ -237,14 +238,14 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
           setFileNotFound(true);
           setStatus("ファイルが存在しません");
           pendingContentRef.current = "";
-          if (textareaRef.current) textareaRef.current.value = "";
+          if (editorViewRef.current) setEditorContent(editorViewRef.current, "");
         }
       } else {
         // 404等 → ファイルが存在しない
         setFileNotFound(true);
         setStatus("ファイルが存在しません");
         pendingContentRef.current = "";
-        if (textareaRef.current) textareaRef.current.value = "";
+        if (editorViewRef.current) setEditorContent(editorViewRef.current, "");
       }
     } catch {
       // ネットワークエラー → ファイルが存在しない扱い
@@ -252,7 +253,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
       setFileNotFound(true);
       setStatus("ファイルが存在しません");
       pendingContentRef.current = "";
-      if (textareaRef.current) textareaRef.current.value = "";
+      if (editorViewRef.current) setEditorContent(editorViewRef.current, "");
     }
   }, [flushCurrentToBuffer, closeFile]);
 
@@ -264,8 +265,8 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     // 空の内容でバッファに追加（dirty=trueで保存対象に）
     eventBufferRef.current.set(path, { content: "", dirty: true });
     pendingContentRef.current = "";
-    if (textareaRef.current) {
-      textareaRef.current.value = "";
+    if (editorViewRef.current) {
+      setEditorContent(editorViewRef.current, "");
       pendingContentRef.current = null;
     }
     setFileNotFound(false);
@@ -277,17 +278,17 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     scheduleIDBSave();
   }, [setIsSaved, scheduleIDBSave]);
 
-  // textarea入力時のハンドラ（onInputイベント用）
+  // エディタ入力時のハンドラ（CodeMirror updateListener用）
   const handleTextChange = useCallback(() => {
     const path = currentFilePathRef.current;
-    if (!path || !textareaRef.current) return;
+    if (!path || !editorViewRef.current) return;
 
     // undo/redo用スナップショット（変更前の状態を保存）
     if (onBeforeTextChange) {
       onBeforeTextChange();
     }
 
-    const currentContent = textareaRef.current.value;
+    const currentContent = getEditorContent(editorViewRef.current);
     eventBufferRef.current.set(path, { content: currentContent, dirty: true });
     setHasDirtyFiles(true);
     setIsSaved(false);
@@ -299,7 +300,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
 
   // 全dirtyファイルをサーバーに保存
   const saveAllDirtyFiles = useCallback(async () => {
-    // 最新のtextarea内容をバッファに退避
+    // 最新のエディタ内容をバッファに退避
     flushCurrentToBuffer();
 
     const errors = [];
@@ -365,14 +366,14 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     eventBufferRef.current = new Map(Object.entries(serializedBuffer));
     updateHasDirtyFiles();
 
-    // 現在開いているファイルの内容をtextareaに反映
+    // 現在開いているファイルの内容をエディタに反映
     const path = currentFilePathRef.current;
     if (path) {
       const entry = eventBufferRef.current.get(path);
       if (entry) {
         pendingContentRef.current = entry.content;
-        if (textareaRef.current) {
-          textareaRef.current.value = entry.content;
+        if (editorViewRef.current) {
+          setEditorContent(editorViewRef.current, entry.content);
           pendingContentRef.current = null;
         }
         setStatus(entry.dirty ? "未保存" : null);
@@ -380,8 +381,8 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
       } else {
         // ファイルがバッファにない（削除された等）
         pendingContentRef.current = "";
-        if (textareaRef.current) {
-          textareaRef.current.value = "";
+        if (editorViewRef.current) {
+          setEditorContent(editorViewRef.current, "");
           pendingContentRef.current = null;
         }
         setStatus(null);
@@ -392,7 +393,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
   return {
     currentFilePath,
     currentLabel,
-    textareaRef: setTextareaRef, // コールバック ref を返す
+    editorViewRef,
     loadEventFile,
     handleTextChange,
     saveAllDirtyFiles,
@@ -402,6 +403,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     fileNotFound,
     createNewFile,
     closeFile,
+    applyPendingContent,
     // undo/redo用
     eventBufferRef,
     restoreEventBuffer,

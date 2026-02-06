@@ -1,5 +1,5 @@
 //react
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 //mui
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -99,7 +99,7 @@ export default function EditorApp() {
   const {
     currentFilePath,
     currentLabel,
-    textareaRef,
+    editorViewRef,
     loadEventFile,
     handleTextChange,
     saveAllDirtyFiles,
@@ -109,12 +109,19 @@ export default function EditorApp() {
     fileNotFound,
     createNewFile,
     closeFile,
+    applyPendingContent,
     eventBufferRef,
     restoreEventBuffer,
   } = useScenarioEditor({
     setIsSaved,
     onBeforeTextChange: () => onBeforeTextChangeRef.current()
   });
+
+  // シナリオエディタ最大化状態
+  const [isScenarioEditorMaximized, setIsScenarioEditorMaximized] = useState(false);
+  const toggleScenarioEditorMaximize = useCallback(() => {
+    setIsScenarioEditorMaximized(prev => !prev);
+  }, []);
 
   // undo redo--------------------------------------------------------
   const { debouncedDoAction, undo, redo, canUndo, canRedo }
@@ -606,13 +613,16 @@ export default function EditorApp() {
                   <ScenarioEditor
                     currentFilePath={currentFilePath}
                     currentLabel={currentLabel}
-                    textareaRef={textareaRef}
+                    editorViewRef={editorViewRef}
                     handleTextChange={handleTextChange}
                     status={scenarioStatus}
                     loadEventFile={loadEventFile}
                     fileNotFound={fileNotFound}
                     createNewFile={createNewFile}
                     closeFile={closeFile}
+                    applyPendingContent={applyPendingContent}
+                    isMaximized={isScenarioEditorMaximized}
+                    onToggleMaximize={toggleScenarioEditorMaximize}
                   />
                 </Panel>
               </>}
