@@ -47,6 +47,78 @@ go run server.go
 ```
 config.jsonに記載のポート番号で起動します。
 
+---
+
+## 🧪 イベントテスト
+
+サンプルデータを使ってイベントの動作確認を行う手順。
+
+### クイックスタート（一括起動）
+
+```powershell
+./scripts/dev-test.ps1 event_test
+```
+
+これだけで：
+1. サンプルデータを `public/data` にコピー
+2. Go サーバーを新しいターミナルで起動
+3. Vite 開発サーバーを新しいターミナルで起動
+
+ブラウザで http://localhost:5173/debug.html を開いてテスト。
+
+### 個別に実行する場合
+
+```powershell
+# サンプルデータをコピー
+./scripts/use-sample.ps1 event_test
+
+# フロントエンド（別ターミナル）
+npm run dev
+
+# バックエンド（別ターミナル）
+./server/dev.ps1
+```
+
+### 利用可能なサンプル
+
+| サンプル名 | 説明 |
+|-----------|------|
+| `event_test` | イベントコマンドのテスト用 |
+| `simple_demo` | 基本的なゲームデモ |
+
+```powershell
+# 一覧表示
+./scripts/use-sample.ps1
+```
+
+---
+
+## 🧬 ユニットテスト
+
+Vitest を使用したユニットテストを実行できます。
+
+### テストの実行
+
+```bash
+# ウォッチモードで実行（ファイル変更を監視）
+npm run test
+
+# 一回だけ実行
+npm run test:run
+```
+
+### テスト対象
+
+現在、以下のモジュールがテスト対象です：
+
+- `src/hooks/eventExecutionUtils.js` - イベント実行エンジンのユーティリティ関数
+  - 条件式の評価（`evalCondition`）
+  - フラグ計算（`calcFlag`）
+  - 変数展開（`expandVars`, `expandVarsShallow`）
+  - テキスト解析（`parseLineText`）
+
+---
+
 ## プロジェクト構造
 /   
 ├─ src/             # React（Vite）側 リソース   
