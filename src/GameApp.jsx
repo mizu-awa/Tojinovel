@@ -639,6 +639,7 @@ export default function GameApp({ debug }) {
         stopTimer={stopTimer}
         restartTimer={restartTimer}
         onConsoleLog={addConsoleLog.current}
+        configVisible={viewConfig}
       />
 
       {/* イベント表示(バックグラウンド) */}
@@ -687,6 +688,8 @@ export default function GameApp({ debug }) {
         se={gameData.game.sound.se}
         voice={gameData.game.sound.voice}
         speed={gameData.game.textBox.speed}
+        autoEnabled={gameData.game.auto?.enabled ?? false}
+        autoSpeed={gameData.game.auto?.speed ?? 2000}
         updateGameData={updateGameData}
       />
     </div>

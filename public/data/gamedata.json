@@ -56,7 +56,9 @@
       "visibleSE": true,
       "visibleSpeed": true,
       "visibleVoice": true,
-      "voiceText": "ボイス音量"
+      "visibleAuto": true,
+      "voiceText": "ボイス音量",
+      "autoText": "オート"
     },
     "direction": {
       "hover": "none",
@@ -228,6 +230,10 @@
       800,
       480
     ],
+    "auto": {
+      "enabled": false,
+      "speed": 2000
+    },
     "sound": {
       "bgm": 0.8,
       "se": 1,
@@ -264,6 +270,9 @@
       "nameStyle": {
         "backgroundColor": "rgba(0, 0, 0, 0.6)",
         "backgroundImage": ""
+      },
+      "indicator": {
+        "text": "▼"
       }
     },
     "title": "Game title"
