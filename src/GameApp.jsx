@@ -176,13 +176,15 @@ export default function GameApp({ debug }) {
 
   // 画像読み込み関数
   const preloadImages = (urls) => {
+    // 空文字・undefined・null を除外
+    const validUrls = urls.filter(url => url);
     return Promise.all(
-      urls.map(
+      validUrls.map(
         (url) =>
           new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => resolve(url);
-            img.onerror = () => reject();
+            img.onerror = () => reject(new Error(`画像の読み込みに失敗: ${url}`));
             img.src = url;
           })
       )
@@ -397,8 +399,10 @@ export default function GameApp({ debug }) {
         })
       });
 
-      preloadImages(urls);
-    } 
+      preloadImages(urls).catch((err) => {
+        console.warn("画像のプリロードに失敗:", err.message);
+      });
+    }
   }, [gameData]);
 
   // リサイズ時の挙動を指定してスケール対応(絶対座標で指定するためにこの方式をとっている)

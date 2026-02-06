@@ -1,27 +1,17 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useEffect, useRef } from "react";
 import { Box, Typography, IconButton, TextField, Button } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { Description, FolderOpen, Close, NoteAdd } from "@mui/icons-material";
+import { styled, useTheme } from "@mui/material/styles";
+import { Description, FolderOpen, Close, NoteAdd, Fullscreen, FullscreenExit } from "@mui/icons-material";
 
-// テーマ対応のtextarea
-const StyledTextarea = styled("textarea")(({ theme }) => ({
-  width: "100%",
-  height: "100%",
-  resize: "none",
-  border: "none",
-  outline: "none",
-  padding: "8px",
-  fontSize: "13px",
-  fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
-  lineHeight: 1.5,
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
-  boxSizing: "border-box",
-  tabSize: 2,
-  "&::placeholder": {
-    color: theme.palette.text.disabled,
-  },
-}));
+// CodeMirror
+import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from "@codemirror/view";
+import { EditorState } from "@codemirror/state";
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { LanguageSupport } from "@codemirror/language";
+import eventLanguage from "./codemirror/eventLanguage";
+import { eventCompletionExtension } from "./codemirror/eventCompletion";
+import { lightExtensions, darkExtensions } from "./codemirror/eventTheme";
+import { closeBracketsExtension } from "./codemirror/eventBrackets";
 
 // 小さめのテキストフィールド
 const SmallTextField = styled(TextField)(() => ({
@@ -41,20 +31,134 @@ const SmallTextField = styled(TextField)(() => ({
   },
 }));
 
+// ラベル位置を検索してスクロール
+function scrollToLabel(view, label) {
+  if (!view || !label) return;
+
+  const text = view.state.doc.toString();
+  const labelPattern = `【${label}】`;
+  const index = text.indexOf(labelPattern);
+
+  if (index === -1) return;
+
+  // その位置にスクロールしてカーソルを移動
+  view.dispatch({
+    selection: { anchor: index, head: index + labelPattern.length },
+    scrollIntoView: true,
+  });
+  view.focus();
+}
+
 function ScenarioEditor({
   currentFilePath,
   currentLabel,
-  textareaRef,
+  editorViewRef,
   handleTextChange,
   status,
   loadEventFile,
   fileNotFound,
   createNewFile,
   closeFile,
+  applyPendingContent,
+  isMaximized,
+  onToggleMaximize,
 }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+  const editorContainerRef = useRef(null);
+  const viewRef = useRef(null);
+  const handleTextChangeRef = useRef(handleTextChange);
+  const editorViewRefStable = useRef(editorViewRef);
+  const applyPendingContentRef = useRef(applyPendingContent);
+
   // 手動入力用のローカルstate
   const [inputFilePath, setInputFilePath] = useState("");
   const [inputLabel, setInputLabel] = useState("");
+
+  // handleTextChangeの最新値をrefに保持
+  useEffect(() => {
+    handleTextChangeRef.current = handleTextChange;
+  }, [handleTextChange]);
+
+  // editorViewRefの最新値をrefに保持
+  useEffect(() => {
+    editorViewRefStable.current = editorViewRef;
+  }, [editorViewRef]);
+
+  // applyPendingContentの最新値をrefに保持
+  useEffect(() => {
+    applyPendingContentRef.current = applyPendingContent;
+  }, [applyPendingContent]);
+
+  // CodeMirror エディタの初期化
+  useEffect(() => {
+    if (!editorContainerRef.current) return;
+
+    // 既存のエディタがあれば破棄
+    if (viewRef.current) {
+      viewRef.current.destroy();
+    }
+
+    // テキスト変更時のコールバック（refを使って最新のhandleTextChangeを呼び出す）
+    const updateListener = EditorView.updateListener.of((update) => {
+      if (update.docChanged) {
+        handleTextChangeRef.current();
+      }
+    });
+
+    // 言語サポート
+    const language = new LanguageSupport(eventLanguage);
+
+    // エディタを作成
+    const state = EditorState.create({
+      doc: "",
+      extensions: [
+        lineNumbers(),
+        highlightActiveLine(),
+        highlightActiveLineGutter(),
+        history(),
+        keymap.of([...defaultKeymap, ...historyKeymap]),
+        language,
+        eventCompletionExtension,
+        closeBracketsExtension,
+        updateListener,
+        ...(isDark ? darkExtensions : lightExtensions),
+        EditorView.lineWrapping,
+      ],
+    });
+
+    const view = new EditorView({
+      state,
+      parent: editorContainerRef.current,
+    });
+
+    viewRef.current = view;
+
+    // 外部からアクセスできるようにrefに設定
+    if (editorViewRefStable.current) {
+      editorViewRefStable.current.current = view;
+    }
+
+    // pending contentがあれば適用
+    if (applyPendingContentRef.current) {
+      applyPendingContentRef.current();
+    }
+
+    return () => {
+      view.destroy();
+      viewRef.current = null;
+      if (editorViewRefStable.current) {
+        editorViewRefStable.current.current = null;
+      }
+    };
+  }, [isDark]); // テーマ変更時に再作成
+
+  // currentLabelが変わったらスクロール
+  useEffect(() => {
+    if (viewRef.current && currentLabel) {
+      setTimeout(() => scrollToLabel(viewRef.current, currentLabel), 50);
+    }
+  }, [currentLabel, currentFilePath]);
 
   // ファイルを開く
   const handleOpen = useCallback(() => {
@@ -72,7 +176,19 @@ function ScenarioEditor({
   }, [handleOpen]);
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <Box sx={{
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+      position: isMaximized ? "fixed" : "relative",
+      top: isMaximized ? 0 : "auto",
+      left: isMaximized ? 0 : "auto",
+      right: isMaximized ? 0 : "auto",
+      bottom: isMaximized ? 0 : "auto",
+      zIndex: isMaximized ? 1300 : "auto",
+      backgroundColor: theme.palette.background.paper,
+    }}>
       {/* 手動入力フォーム */}
       <Box sx={{
         display: "flex",
@@ -109,6 +225,16 @@ function ScenarioEditor({
         >
           <FolderOpen sx={{ fontSize: 18 }} />
         </IconButton>
+        {onToggleMaximize && (
+          <IconButton
+            size="small"
+            onClick={onToggleMaximize}
+            title={isMaximized ? "元に戻す" : "最大化"}
+            sx={{ p: 0.5 }}
+          >
+            {isMaximized ? <FullscreenExit sx={{ fontSize: 18 }} /> : <Fullscreen sx={{ fontSize: 18 }} />}
+          </IconButton>
+        )}
       </Box>
 
       {/* 現在のファイル情報ヘッダー */}
@@ -145,45 +271,52 @@ function ScenarioEditor({
         </Box>
       )}
 
-      {/* テキストエリア / ファイル未存在メッセージ */}
-      <Box sx={{ flex: 1, overflow: "hidden" }}>
-        {currentFilePath ? (
-          fileNotFound ? (
-            // ファイルが存在しない場合
-            <Box sx={{
+      {/* エディタ / ファイル未存在メッセージ */}
+      <Box sx={{ flex: 1, overflow: "hidden", position: "relative" }}>
+        {/* CodeMirrorエディタ（常にマウント、条件で表示/非表示） */}
+        <Box
+          ref={editorContainerRef}
+          sx={{
+            height: "100%",
+            display: (currentFilePath && !fileNotFound) ? "block" : "none",
+            "& .cm-editor": {
               height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 2,
-              color: "text.disabled",
-              fontSize: "0.85rem",
-            }}>
-              <Typography color="error">ファイルが存在しません</Typography>
-              <Typography variant="caption" sx={{ color: "text.disabled" }}>
-                {currentFilePath.replace(/^\.\//, "")}
-              </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<NoteAdd />}
-                onClick={createNewFile}
-              >
-                新規ファイルを作成
-              </Button>
-            </Box>
-          ) : (
-            // 通常のテキストエリア
-            <StyledTextarea
-              ref={textareaRef}
-              onInput={handleTextChange}
-              placeholder="イベントテキストを入力..."
-              spellCheck={false}
-            />
-          )
-        ) : (
-          // ファイル未選択
+            },
+            "& .cm-scroller": {
+              overflow: "auto",
+            },
+          }}
+        />
+
+        {/* ファイルが存在しない場合 */}
+        {currentFilePath && fileNotFound && (
+          <Box sx={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            color: "text.disabled",
+            fontSize: "0.85rem",
+          }}>
+            <Typography color="error">ファイルが存在しません</Typography>
+            <Typography variant="caption" sx={{ color: "text.disabled" }}>
+              {currentFilePath.replace(/^\.\//, "")}
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<NoteAdd />}
+              onClick={createNewFile}
+            >
+              新規ファイルを作成
+            </Button>
+          </Box>
+        )}
+
+        {/* ファイル未選択 */}
+        {!currentFilePath && (
           <Box sx={{
             height: "100%",
             display: "flex",
