@@ -29,15 +29,16 @@ const ItemSettings = ({
   handleDatasetChange,
   loadEventFile
 }) => {
+  // 固定値（フックはearly returnの前に配置）
+  const stateListFix = useMemo(() => states || [], [states?.join("") || ""]);
+  const itemListFix = useMemo(() => itemList || [], [itemList?.join("") || ""]);
+
+  const isItWarn = useMemo(() => (item && itemListFix.filter(s => s === item.name).length >= 2), [itemListFix, item?.name]);
+  const isStWarn = useMemo(() => (stateListFix?.filter(s => s === state?.name).length >= 2), [stateListFix, state?.name]);
+
   if(!item) return null
 
-  // 固定値
-  const stateListFix = useMemo(() => states, [states?.join("") || ""]);
-  const itemListFix = useMemo(() => itemList, [itemList?.join("") || ""]);
-
-  const isItWarn = useMemo(() => (itemListFix.filter(s => s === item.name).length >= 2), [itemListFix, item.name]);
   const isHsWarn = item.hotspots.filter(h => h.name === hotspot?.name).length >= 2;
-  const isStWarn = useMemo(() => (stateListFix?.filter(s => s === state?.name).length >= 2), [stateListFix, state?.name]);
 
   const itemPath = `items.${selectedItem}`;
   const hotspotPath = `${itemPath}.hotspots.${selectedSubItem}`;

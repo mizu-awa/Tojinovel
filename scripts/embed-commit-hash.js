@@ -14,7 +14,7 @@ try {
   if (result) {
     commitHash = result;
   }
-} catch (e) {
+} catch {
   // Gitが無い / リポジトリでない / その他の失敗
   console.warn("Git hash 取得に失敗しました。'unknown' を使用します。");
 }

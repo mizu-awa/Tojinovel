@@ -95,7 +95,7 @@ export default function useHsndleChange({
 
       // datasetから取得するバージョン
       const handleDatasetChange = useCallback((e) => {
-        const { value, dataset } = e.target;
+        const { dataset } = e.target;
         const options = dataset.type ? { type: dataset.type } : {};
 
         handleNestedChange(dataset.path, options)(e);

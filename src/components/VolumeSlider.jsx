@@ -1,6 +1,6 @@
 import { styled } from "@mui/material";
 
-export const VolumeSlider = styled("input")(({ theme, trackStyle, thumbStyle }) => ({
+export const VolumeSlider = styled("input")(({ trackStyle, thumbStyle }) => ({
   ...trackStyle,
   WebkitAppearance: "none",
   appearance: "none",

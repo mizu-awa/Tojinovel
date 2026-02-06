@@ -1,4 +1,3 @@
-import { memo } from "react";
 
 function SceneWrap({
     children,
