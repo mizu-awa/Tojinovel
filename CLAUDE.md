@@ -30,6 +30,51 @@ Go サーバーのビルド:
 
 テストフレームワークは未導入。
 
+## イベントテスト
+
+サンプルデータを使ってイベントの動作確認を行う手順。
+
+### クイックスタート（一括起動）
+
+```powershell
+./scripts/dev-test.ps1 event_test
+```
+
+これだけでサンプルデータのコピーと開発サーバー起動が完了。
+ブラウザで http://localhost:5173/debug.html を開いてテスト。
+
+### 個別に実行する場合
+
+```powershell
+# 1. テスト用サンプルデータを public/data にコピー
+./scripts/use-sample.ps1 event_test
+
+# 2. 開発サーバーを起動（別々のターミナルで実行）
+npm run dev              # フロントエンド（Vite、ポート 5173）
+./server/dev.ps1         # バックエンド（Go、ポート 42736）
+
+# 3. ブラウザでデバッグプレイヤーを開く
+# http://localhost:5173/debug.html
+```
+
+### use-sample.ps1
+
+`samples/` フォルダ内のサンプルデータを `public/data` にコピーするスクリプト。
+
+```powershell
+# 利用可能なサンプル一覧を表示
+./scripts/use-sample.ps1
+
+# 特定のサンプルを使用
+./scripts/use-sample.ps1 event_test
+./scripts/use-sample.ps1 simple_demo
+```
+
+### 利用可能なサンプル
+
+- `event_test`: イベントコマンドのテスト用
+- `simple_demo`: 基本的なゲームデモ
+
 ## ディレクトリ構成
 
 ```

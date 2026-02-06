@@ -150,16 +150,24 @@ func handleSaveEvent(w http.ResponseWriter, r *http.Request) {
 
 // --- 設定ファイル読み込み ---
 func loadConfig() {
-	f, err := os.Open("config.json")
+	// 開発モードではconfig.dev.jsonを優先
+	configFile := "config.json"
+	if isDev {
+		configFile = "config.dev.json"
+	}
+
+	f, err := os.Open(configFile)
 	if err != nil {
-		log.Println("config.json が見つかりません。デフォルト値を使用します。")
+		log.Printf("%s が見つかりません。デフォルト値を使用します。\n", configFile)
 		setPortFromDistDir()
 		return
 	}
 	defer f.Close()
 
 	if err := json.NewDecoder(f).Decode(&cfg); err != nil {
-		log.Println("config.json の読み込みに失敗しました:", err)
+		log.Printf("%s の読み込みに失敗しました: %v\n", configFile, err)
+	} else {
+		log.Printf("設定ファイル %s を読み込みました\n", configFile)
 	}
 
 	// Portが空文字の場合はDistDirのハッシュから生成
@@ -235,18 +243,25 @@ func main() {
 	// サーバー起動
 	url := "http://localhost:" + cfg.Port
 	fmt.Println("Server started:", url)
-	openBrowser(url)
 
-	// debug.html が存在する場合のみ開く
-	editorPath_debug := filepath.Join(cfg.DistDir, "debug.html")
-	if _, err := os.Stat(editorPath_debug); err == nil {
-		openBrowser(url + "/debug.html")
-	}
+	// 開発モードではブラウザ自動起動を無効化（Viteが別ポートで動作するため）
+	if !isDev {
+		openBrowser(url)
 
-	// editor.html が存在する場合のみ開く
-	editorPath := filepath.Join(cfg.DistDir, "editor.html")
-	if _, err := os.Stat(editorPath); err == nil {
-		openBrowser(url + "/editor.html")
+		// debug.html が存在する場合のみ開く
+		editorPath_debug := filepath.Join(cfg.DistDir, "debug.html")
+		if _, err := os.Stat(editorPath_debug); err == nil {
+			openBrowser(url + "/debug.html")
+		}
+
+		// editor.html が存在する場合のみ開く
+		editorPath := filepath.Join(cfg.DistDir, "editor.html")
+		if _, err := os.Stat(editorPath); err == nil {
+			openBrowser(url + "/editor.html")
+		}
+	} else {
+		fmt.Println("開発モード: ブラウザ自動起動を無効化")
+		fmt.Println("Vite開発サーバー: http://localhost:5173")
 	}
 
 	err := http.ListenAndServe(addr, nil)

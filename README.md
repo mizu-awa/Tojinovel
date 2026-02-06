@@ -47,6 +47,52 @@ go run server.go
 ```
 config.jsonに記載のポート番号で起動します。
 
+---
+
+## 🧪 イベントテスト
+
+サンプルデータを使ってイベントの動作確認を行う手順。
+
+### クイックスタート（一括起動）
+
+```powershell
+./scripts/dev-test.ps1 event_test
+```
+
+これだけで：
+1. サンプルデータを `public/data` にコピー
+2. Go サーバーを新しいターミナルで起動
+3. Vite 開発サーバーを新しいターミナルで起動
+
+ブラウザで http://localhost:5173/debug.html を開いてテスト。
+
+### 個別に実行する場合
+
+```powershell
+# サンプルデータをコピー
+./scripts/use-sample.ps1 event_test
+
+# フロントエンド（別ターミナル）
+npm run dev
+
+# バックエンド（別ターミナル）
+./server/dev.ps1
+```
+
+### 利用可能なサンプル
+
+| サンプル名 | 説明 |
+|-----------|------|
+| `event_test` | イベントコマンドのテスト用 |
+| `simple_demo` | 基本的なゲームデモ |
+
+```powershell
+# 一覧表示
+./scripts/use-sample.ps1
+```
+
+---
+
 ## プロジェクト構造
 /   
 ├─ src/             # React（Vite）側 リソース   
