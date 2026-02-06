@@ -83,6 +83,25 @@ function EventViewer({
     }
   }, [currentLine, visibleCount])
 
+  // エンターキーでイベント進行
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // 入力フォームまたは選択肢が表示されている場合は処理しない
+      if (currentInput || currentOptions) {
+        return;
+      }
+      
+      // エンターキーが押された場合
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleClick(lines);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lines, currentInput, currentOptions, handleClick])
+
 
   // calc const---------------------------------------------------------------------------------------------------------------
   const dir = gameData ? (gameData.game.itemBox.position === "right" || gameData.game.itemBox.position === "left") ? "row"
