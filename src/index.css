@@ -184,6 +184,16 @@ button:focus-visible {
   }
 }
 
+/* クリック待ちインジケーター */
+.click-indicator {
+  animation: blink 0.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 .fade-in {
   animation: fadeIn 1s linear forwards;
 }

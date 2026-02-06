@@ -42,6 +42,14 @@ function ConfigSetting({gameConfig, handleDatasetChange}) {
                 />
             </FormField>
 
+            <FormField label="オート設定表示">
+                <StyledCheckbox
+                    checked={gameConfig.visibleAuto ?? true}
+                    onChange={handleDatasetChange}
+                    data-path="game.config.visibleAuto"
+                />
+            </FormField>
+
             <SectionDivider />
 
             <FormField label="BGM音量テキスト">
@@ -73,6 +81,14 @@ function ConfigSetting({gameConfig, handleDatasetChange}) {
                     value={gameConfig.speedText}
                     onChange={handleDatasetChange}
                     data-path="game.config.speedText"
+                />
+            </FormField>
+
+            <FormField label="オートテキスト">
+                <StyledInput
+                    value={gameConfig.autoText ?? "オート"}
+                    onChange={handleDatasetChange}
+                    data-path="game.config.autoText"
                 />
             </FormField>
 

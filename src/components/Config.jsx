@@ -31,18 +31,22 @@ const containerStyle = {
   boxSizing: "border-box"
 };
 
-function Config({ visible, config, close, bgm, se, voice, speed, updateGameData }) {
+function Config({ visible, config, close, bgm, se, voice, speed, autoEnabled, autoSpeed, updateGameData }) {
   // 🔹 ローカルstate（操作中だけ即時反映）
   const [tempBGM, setTempBGM] = useState(bgm);
   const [tempSE, setTempSE] = useState(se);
   const [tempVoice, setTempVoice] = useState(voice);
   const [tempSpeed, setTempSpeed] = useState(speed);
+  const [tempAutoEnabled, setTempAutoEnabled] = useState(autoEnabled);
+  const [tempAutoSpeed, setTempAutoSpeed] = useState(autoSpeed);
 
   // 🔹 外部値が変わったら同期（設定画面開き直したとき用）
   useEffect(() => setTempBGM(bgm), [bgm]);
   useEffect(() => setTempSE(se), [se]);
   useEffect(() => setTempVoice(voice), [voice]);
   useEffect(() => setTempSpeed(speed), [speed]);
+  useEffect(() => setTempAutoEnabled(autoEnabled), [autoEnabled]);
+  useEffect(() => setTempAutoSpeed(autoSpeed), [autoSpeed]);
 
   // 🔹 共通のデバウンズ関数
   const useDebouncedUpdate = (value, path) => {
@@ -56,6 +60,14 @@ function Config({ visible, config, close, bgm, se, voice, speed, updateGameData 
           else if (path === "se") target.sound.se = value;
           else if (path === "voice") target.sound.voice = value;
           else if (path === "speed") target.textBox.speed = value;
+          else if (path === "autoEnabled") {
+            if (!target.auto) target.auto = {};
+            target.auto.enabled = value;
+          }
+          else if (path === "autoSpeed") {
+            if (!target.auto) target.auto = {};
+            target.auto.speed = value;
+          }
           return next;
         });
       }, 150); // 🔸 150〜300msが快適
@@ -68,6 +80,8 @@ function Config({ visible, config, close, bgm, se, voice, speed, updateGameData 
   useDebouncedUpdate(tempSE, "se");
   useDebouncedUpdate(tempVoice, "voice");
   useDebouncedUpdate(tempSpeed, "speed");
+  useDebouncedUpdate(tempAutoEnabled, "autoEnabled");
+  useDebouncedUpdate(tempAutoSpeed, "autoSpeed");
 
   if (!visible) return null;
 
@@ -139,6 +153,32 @@ function Config({ visible, config, close, bgm, se, voice, speed, updateGameData 
               onChange={(e) => setTempSpeed(Number(e.target.value))}
             />
             <p>{tempSpeed}</p>
+          </div>
+        )}
+
+        {config.visibleAuto && (
+          <div style={rowStyle}>
+            <label>{config.autoText ?? "オート"}</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <input
+                type="checkbox"
+                checked={tempAutoEnabled}
+                onChange={(e) => setTempAutoEnabled(e.target.checked)}
+                style={{ width: 16, height: 16, cursor: "pointer", flexShrink: 0 }}
+              />
+              <VolumeSlider
+                type="range"
+                min="500"
+                max="5000"
+                step="100"
+                trackStyle={config.trackStyle}
+                thumbStyle={config.thumbStyle}
+                value={tempAutoSpeed}
+                onChange={(e) => setTempAutoSpeed(Number(e.target.value))}
+                disabled={!tempAutoEnabled}
+              />
+            </div>
+            <p>{tempAutoSpeed}</p>
           </div>
         )}
       </div>

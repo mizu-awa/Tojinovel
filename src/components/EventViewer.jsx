@@ -24,7 +24,8 @@ function EventViewer({
   audioManager,
   openConfig,
   startTimer, stopTimer, restartTimer,
-  onConsoleLog
+  onConsoleLog,
+  configVisible
 }) {
 
   // states-----------------------------------------------------------------------------------------------------------------------
@@ -82,6 +83,23 @@ function EventViewer({
       }
     }
   }, [currentLine, visibleCount])
+
+  // オート文字送り
+  useEffect(() => {
+    // オートが無効、または条件を満たさない場合は何もしない
+    if (!gameData?.game?.auto?.enabled) return;
+    if (!currentLine?.text) return;
+    if (visibleCount < currentLine.text.length) return; // 表示中
+    if (currentOptions || currentInput) return; // 選択肢・入力フォーム表示中
+    if (forEdit) return; // エディタモード
+    if (configVisible) return; // コンフィグ表示中
+
+    const timer = setTimeout(() => {
+      handleClick(lines);
+    }, gameData.game.auto.speed ?? 2000);
+
+    return () => clearTimeout(timer);
+  }, [visibleCount, currentLine, currentOptions, currentInput, gameData?.game?.auto, lines, handleClick, forEdit, configVisible])
 
   // エンターキーでイベント進行
  useEffect(() => {
@@ -291,6 +309,12 @@ function EventViewer({
               : (part.char)
             )}
         </span>
+        {/* クリック待ちインジケーター（インライン表示） */}
+        {visibleCount === currentLine.text.length && !currentOptions && !currentInput && (
+          <span className="click-indicator">
+            {gameData.game.textBox.indicator?.text ?? "▼"}
+          </span>
+        )}
       </div>}
 
       {/* クリック要素（通常） */}

@@ -181,6 +181,9 @@ export const defaultGameData = {
       "nameStyle":{
         "backgroundColor": "rgba(0,0,0,0.6)",
         "backgroundImage": ""
+      },
+      "indicator": {
+        "text": "▼"
       }
     },
     "direction":{
@@ -274,6 +277,8 @@ export const defaultGameData = {
       "visibleSE": true,
       "visibleVoice": true,
       "visibleSpeed": true,
+      "visibleAuto": true,
+      "autoText": "オート",
       "backStyle": {
         "backgroundColor": "rgba(255,255,255,1)",
         "backgroundImage": ""
@@ -303,6 +308,10 @@ export const defaultGameData = {
         "borderStyle": "solid",
         "borderWidth": "2px"
       }
+    },
+    "auto": {
+      "enabled": false,
+      "speed": 2000
     },
     "sound": {
         "bgm": 0.8,

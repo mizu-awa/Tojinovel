@@ -209,7 +209,18 @@ const TextBoxSettings = ({
           data-path="game.textBox.highlightStyle.strokeColor"
         />
       </FormField>
-      
+
+      <SectionDivider />
+
+      <FormField label="インジケーター文字">
+        <StyledInput
+          type="text"
+          value={gameTextBox.indicator?.text ?? "▼"}
+          onChange={handleDatasetChange}
+          data-path="game.textBox.indicator.text"
+        />
+      </FormField>
+
     </>
   )
 }
