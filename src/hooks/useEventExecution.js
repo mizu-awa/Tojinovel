@@ -298,7 +298,7 @@ export default function useEventViewer({
         let result = [];
 
         for (const ch of text) {
-        if(ch === '\"'){
+        if(ch === '"'){
             highlight = !highlight; // 反転
         }
         else{
@@ -782,7 +782,7 @@ export default function useEventViewer({
             }
 
             // ゲームデータを更新
-            updateGameData(prev => newGameData);
+            updateGameData(() => newGameData);
 
             // ファイルジャンプ
             if(fj){

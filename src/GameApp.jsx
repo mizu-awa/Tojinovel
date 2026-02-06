@@ -182,7 +182,7 @@ export default function GameApp({ debug }) {
           new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => resolve(url);
-            img.onerror = (e) => reject;
+            img.onerror = () => reject();
             img.src = url;
           })
       )

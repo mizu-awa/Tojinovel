@@ -30,16 +30,17 @@ const SceneSettings = ({
   handleDatasetChange,
   loadEventFile
 }) => {
+  // 固定値（フックはearly returnの前に配置）
+  const sceneListFix = useMemo(() => sceneList || [], [sceneList?.join("") || ""]);
+  const stateListFix = useMemo(() => states || [], [states?.join("") || ""]);
+  const itemListFix = useMemo(() => itemList || [], [itemList?.join("") || ""]);
+
+  const isScWarn = useMemo(() => (scene && sceneListFix.filter(s => s === scene.name).length >= 2), [sceneListFix, scene?.name]);
+  const isStWarn = useMemo(() => (stateListFix?.filter(s => s === state?.name).length >= 2), [stateListFix, state?.name]);
+
   if(scene == null || scene === undefined) return null;
 
-  // 固定値
-  const sceneListFix = useMemo(() => sceneList, [sceneList?.join("") || ""]);
-  const stateListFix = useMemo(() => states, [states?.join("") || ""]);
-  const itemListFix = useMemo(() => itemList, [itemList?.join("") || ""]);
-
-  const isScWarn = useMemo(() => (sceneListFix.filter(s => s === scene.name).length >= 2), [sceneListFix, scene.name]);
   const isHsWarn = scene.hotspots?.filter(h => h.name === hotspot?.name).length >= 2;
-  const isStWarn = useMemo(() => (stateListFix?.filter(s => s === state?.name).length >= 2), [stateListFix, state?.name]);
 
   const scenePath = `scenes.${selectedItem}`;
   const hotspotPath = `${scenePath}.hotspots.${selectedSubItem}`;

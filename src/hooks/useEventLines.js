@@ -18,7 +18,7 @@ export async function loadEventLines(url, startLabel, characters) {
     // 4. パースして返す
     return parseEventText(text, startLabel, characters);
 
-  } catch (e) {
+  } catch {
     // fetch の例外（ネットワークエラーなど）
     return null;
   }
@@ -134,37 +134,41 @@ function parseEventText(text, label, characters) {
           blocks.push({ type: "discardItem", itemName: command.replace("アイテム破棄:", "").trim() });
           break;
 
-        case command.startsWith("ステート変更:"):// ステート変更
+        case command.startsWith("ステート変更:"): {// ステート変更
           const match = command.match(/^ステート変更:(.*?),(.*?),(.*?)$/);
           if (match) {
             // シーン名、ホットスポット名、ステート名を登録
             blocks.push({ type: "changeState", scene: match[1].trim(), hotspot: match[2].trim(), state: match[3].trim() });
           }
           break;
+        }
 
-        case command.startsWith("ステート一括変更:"):// ステート変更
+        case command.startsWith("ステート一括変更:"): {// ステート変更
           const match2 = command.match(/^ステート一括変更:(.*?),(.*?)$/);
           if (match2) {
             // シーン名、ホットスポット名、ステート名を登録
             blocks.push({ type: "changeStateAll", scene: match2[1].trim(), state: match2[2].trim() });
           }
           break;
+        }
 
-        case command.startsWith("アイテムステート変更:"):// ステート変更
+        case command.startsWith("アイテムステート変更:"): {// ステート変更
           const match9 = command.match(/^アイテムステート変更:(.*?),(.*?),(.*?)$/);
           if (match9) {
             // シーン名、ホットスポット名、ステート名を登録
             blocks.push({ type: "changeItemState", item: match9[1].trim(), hotspot: match9[2].trim(), state: match9[3].trim() });
           }
           break;
+        }
 
-        case command.startsWith("アイテムステート一括変更:"):// ステート変更
+        case command.startsWith("アイテムステート一括変更:"): {// ステート変更
           const match10 = command.match(/^アイテムステート一括変更:(.*?),(.*?)$/);
           if (match10) {
             // シーン名、ホットスポット名、ステート名を登録
             blocks.push({ type: "changeItemStateAll", item: match10[1].trim(), state: match10[2].trim() });
           }
           break;
+        }
 
         case (command === "選択肢" || command === "選択肢:"):// 選択肢
           opDepth++;
@@ -179,20 +183,22 @@ function parseEventText(text, label, characters) {
           opDepth--;
           break;
 
-        case command.startsWith("ファイルジャンプ:"):// ファイルジャンプ（=終了）
-          const [file, label] = command.replace("ファイルジャンプ:","").split(",");
+        case command.startsWith("ファイルジャンプ:"): {// ファイルジャンプ（=終了）
+          const [file, fjLabel] = command.replace("ファイルジャンプ:","").split(",");
           if(isView){
             blocks.push({ type: "click" });// クリック待ち実行後にファイルジャンプ
           }
-          blocks.push({type: "fileJump", file: file.trim(), label: label.trim()});
+          blocks.push({type: "fileJump", file: file.trim(), label: fjLabel.trim()});
           //start = false;
           break;
+        }
 
-        case command.startsWith("背景:"): //背景変更
+        case command.startsWith("背景:"): {//背景変更
           isView = true;
           const [back, animation] = command.replace("背景:","").split(",");
           blocks.push({type: "back", back: normalizeRelativeUrl(back?.trim()), animation: animation?.trim()});
           break;
+        }
 
         case command.startsWith("背景クリア"):
           isView = true;
@@ -240,15 +246,17 @@ function parseEventText(text, label, characters) {
           blocks.push({type: "moveScene", scene: command.replace("シーン移動:","").trim()});
           break;
 
-        case command.startsWith("シーン背景変更:"): //シーン背景変更
+        case command.startsWith("シーン背景変更:"): {//シーン背景変更
           const match3 = command.match(/^シーン背景変更:(.*?),(.*?)$/);
           blocks.push({type: "sceneBack", scene: match3[1].trim(), back: normalizeRelativeUrl(match3[2].trim())});
           break;
+        }
 
-        case command.startsWith("アイテム背景変更:"): //アイテム背景変更
+        case command.startsWith("アイテム背景変更:"): {//アイテム背景変更
           const match4 = command.match(/^アイテム背景変更:(.*?),(.*?)$/);
           blocks.push({type: "itemBack", item: match4[1].trim(), back: normalizeRelativeUrl(match4[2].trim())});
           break;
+        }
 
         case command.startsWith("アイテム画面:"):
           blocks.push({type: "openItemWindow", itemName: command.replace("アイテム画面:","")});
@@ -266,17 +274,19 @@ function parseEventText(text, label, characters) {
           blocks.push({type: "stopBGM"});
           break;
 
-        case command.startsWith("SE:"):
+        case command.startsWith("SE:"): {
           const se = command.replace("SE:", "");
           blocks.push({type: "SE", url: normalizeRelativeUrl(se.trim())});
           break;
+        }
 
-        case command.startsWith("乱数:"):
+        case command.startsWith("乱数:"): {
           const match5 = command.match(/^乱数:(.*?),(.*?),(.*?)$/);
           blocks.push({type: "random", varName: match5[1].trim(), min: match5[2].trim(), max: match5[3].trim()});
           break;
+        }
 
-        case command.startsWith("ハイパーリンク:"):
+        case command.startsWith("ハイパーリンク:"): {
           const match6 = command.match(/^ハイパーリンク:(.*?),(.*?)$/);
           if(match6){
             blocks.push({type: "hyperlink", url: normalizeRelativeUrl(match6[1].trim()), target: match6[2].trim()});
@@ -285,6 +295,7 @@ function parseEventText(text, label, characters) {
             blocks.push({type: "hyperlink", url: normalizeRelativeUrl(command.replace("ハイパーリンク:", "").trim()), target: null});
           }
           break;
+        }
         
         case command === "セーブ画面":
           blocks.push({type: "openSave"});
@@ -322,7 +333,7 @@ function parseEventText(text, label, characters) {
           blocks.push({type: "textSpeed", speed: command.replace("文字送り速度:", "").trim()});
           break;
 
-        case command.startsWith("タイマー:"):
+        case command.startsWith("タイマー:"): {
           const match7 = command.match(/^タイマー:(.*?),(.*?),(.*?),(.*?),(.*?)$/);
           if(match7){
             blocks.push({type: "timer", varName: match7[1].trim(), start: match7[2].trim(), end: match7[3].trim(), file: match7[4].trim(), label: match7[5].trim()});
@@ -334,6 +345,7 @@ function parseEventText(text, label, characters) {
             }
           }
           break;
+        }
 
         case command.startsWith("タイマー一時停止:"):
           blocks.push({type: "stopTimer", varName: command.replace("タイマー一時停止:", "").trim()});

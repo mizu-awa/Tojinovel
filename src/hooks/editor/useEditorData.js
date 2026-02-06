@@ -50,7 +50,7 @@ export default function useEditorData(){
         a.href = url;
         a.download = "gamedata.json"; // ダウンロードされるファイル名
         a.click();
-S    
+
         // 一時URLを破棄してメモリを解放
         URL.revokeObjectURL(url);
       },[]);
@@ -101,7 +101,7 @@ S
             const json = await res.json();
             setGameData(mergeDefault(json));
             console.log("JSONファイルを読み込み");
-          } catch (err) {
+          } catch {
             console.log("データが存在しないため新規作成");
           }
 
