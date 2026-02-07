@@ -140,7 +140,10 @@
 ```jsonc
 {
   "name": "shelf",
-  "area": [0, 0, 100, 100],
+  "x": 0,
+  "y": 0,
+  "width": 100,
+  "height": 100,
   "background": "./data/shelf.png",
   "text": "",
   "zIndex": 10,
@@ -157,7 +160,10 @@
 | Key        | 型                | 説明               |
 |------------|--------------------|--------------------|
 |name🔑	|string	|ステート名
-|area	|number[]	|表示位置の座標（x0,y0,x1,y1）
+|x	|number	|X座標（左上基準）
+|y	|number	|Y座標（左上基準）
+|width	|number	|幅
+|height	|number	|高さ
 |background	|string	|背景画像のパス
 |text |string | 表示文字列
 |zIndex |number |重なり順（大きいほうが前）
@@ -501,7 +507,8 @@
   "speed": 80,
   "style": {...},
   "highlightStyle": {...},
-  "nameStyle": {...}
+  "nameStyle": {...},
+  "indicator": {...}
 }
 ```
 
@@ -513,6 +520,7 @@
 | style          | object        | テキストボックススタイル |
 | highlightStyle | object        | 文字強調表示のスタイル       |
 | nameStyle | object        | 名前表示部分のスタイル       |
+| indicator | object        | クリック待ちインジケーター |
 
 #### 8.6.1 Style
 ```jsonc
@@ -568,6 +576,16 @@
 | ---------------------------------- | ------ | ----- |
 | backgroundColor      | string | 背景色     |
 | backgroundImage      | string | 背景画像    |
+
+#### 8.6.4 Indicator
+```jsonc
+{
+  "text": "▼"
+}
+```
+| Key                                | 型      | 説明    |
+| ---------------------------------- | ------ | ----- |
+| text      | string | クリック待ちに表示するテキスト |
 
 ### 8.7 Direction
 方向移動ボタンの設定
@@ -813,10 +831,12 @@
   "seText": "SE音量",
   "voiceText": "ボイス音量",
   "speedText": "文字送り速度",
+  "autoText": "オート",
   "visibleBGM": true,
   "visibleSE": true,
   "visibleVoice": true,
   "visibleSpeed": true,
+  "visibleAuto": true,
   "backStyle": {...},
   "containerStyle": {...},
   "trackStyle": {...},
@@ -830,10 +850,12 @@
 | seText         | string  | SE ラベル     |
 | voiceText      | string  | ボイスラベル     |
 | speedText      | string  | 速度ラベル      |
+| autoText       | string  | オートラベル     |
 | visibleBGM     | boolean | BGM 表示可否   |
 | visibleSE      | boolean | SE 表示可否    |
 | visibleVoice   | boolean | ボイス表示可否    |
 | visibleSpeed   | boolean | 速度表示可否     |
+| visibleAuto    | boolean | オート表示可否    |
 | backStyle      | object  | 背景スタイル     |
 | containerStyle | object  | UIコンテナスタイル |
 | trackStyle     | object  | スライダーのバーのスタイル   |
@@ -916,7 +938,8 @@
 | borderStyle     | string | 枠線種類   |
 | borderWidth     | string | 枠線太さ   |
 
-### 8.13
+### 8.13 Sound
+音量設定
 ```jsonc
 {
   "bgm": 0.8,
@@ -929,3 +952,16 @@
 | bgm   | number | BGM 初期音量 |
 | se    | number | SE 初期音量  |
 | voice | number | ボイス初期音量  |
+
+### 8.14 Auto
+オート文字送り設定
+```jsonc
+{
+  "enabled": false,
+  "speed": 2000
+}
+```
+| Key         | 型      | 説明     |
+| ----------- | ------ | ------ |
+| enabled   | boolean | オート文字送りの初期状態 |
+| speed    | number | オート文字送りの待機時間（ミリ秒）  |

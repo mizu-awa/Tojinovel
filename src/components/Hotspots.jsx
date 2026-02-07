@@ -56,14 +56,12 @@ function Hotspots({
 
         if (!hss || !hss.visibility) return null;
 
-        const area = hss.area;
-        const width = area[2] - area[0];
-        const height = area[3] - area[1];
+        const { x, y, width, height } = hss;
 
         const style = {
           position: "absolute",
-          left: area[0],
-          top: area[1],
+          left: x,
+          top: y,
           width,
           height,
           zIndex: 500 + hss.zIndex,

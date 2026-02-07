@@ -181,39 +181,39 @@ const SceneSettings = ({
           />
         </FormField>
 
-        <FormField label="始点（x）">
+        <FormField label="X座標">
           <StyledInput
             type="number"
-            value={state.area[0]}
+            value={state.x}
             onChange={handleDatasetChange}
-            data-path={`${statePath}.area.0`}
+            data-path={`${statePath}.x`}
           />
         </FormField>
 
-        <FormField label="始点（y）">
+        <FormField label="Y座標">
           <StyledInput
             type="number"
-            value={state.area[1]}
+            value={state.y}
             onChange={handleDatasetChange}
-            data-path={`${statePath}.area.1`}
+            data-path={`${statePath}.y`}
           />
         </FormField>
 
-        <FormField label="終点（x）">
+        <FormField label="幅">
           <StyledInput
             type="number"
-            value={state.area[2]}
+            value={state.width}
             onChange={handleDatasetChange}
-            data-path={`${statePath}.area.2`}
+            data-path={`${statePath}.width`}
           />
         </FormField>
 
-        <FormField label="終点（y）">
+        <FormField label="高さ">
           <StyledInput
             type="number"
-            value={state.area[3]}
+            value={state.height}
             onChange={handleDatasetChange}
-            data-path={`${statePath}.area.3`}
+            data-path={`${statePath}.height`}
           />
         </FormField>
 

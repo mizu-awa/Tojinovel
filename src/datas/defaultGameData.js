@@ -17,7 +17,10 @@ export const defaultUsedItemData = {
 
 export const defaultStateData = {
     "name": "default",
-    "area": [0, 0, 100, 100],
+    "x": 0,
+    "y": 0,
+    "width": 100,
+    "height": 100,
     "background": "",
     "text": "",
     "zIndex": 10,

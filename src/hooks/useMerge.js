@@ -1,5 +1,61 @@
 import { defaultGameData } from "../datas/defaultGameData";
 
+// 古いデータ形式（area: [x0, y0, x1, y1]）を新形式（x, y, width, height）に変換
+function convertAreaToXYWH(state) {
+  if (state.area && state.x === undefined) {
+    state.x = state.area[0];
+    state.y = state.area[1];
+    state.width = state.area[2] - state.area[0];
+    state.height = state.area[3] - state.area[1];
+    delete state.area;
+    return true; // 変換が行われた
+  }
+  return false;
+}
+
+// すべてのホットスポットのステートを変換
+function convertAllStates(gameData) {
+  let converted = false;
+
+  // シーンのホットスポット
+  if (gameData.scenes) {
+    for (const scene of gameData.scenes) {
+      if (scene.hotspots) {
+        for (const hotspot of scene.hotspots) {
+          if (hotspot.states) {
+            for (const state of hotspot.states) {
+              if (convertAreaToXYWH(state)) {
+                converted = true;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // アイテムのホットスポット
+  if (gameData.items) {
+    for (const item of gameData.items) {
+      if (item.hotspots) {
+        for (const hotspot of item.hotspots) {
+          if (hotspot.states) {
+            for (const state of hotspot.states) {
+              if (convertAreaToXYWH(state)) {
+                converted = true;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (converted) {
+    console.log("古いデータ形式（area）を新形式（x, y, width, height）に変換しました");
+  }
+}
+
 function deepMergeWithDefaults(schema, data, path="", changes = []) {
   if (Array.isArray(schema)) {
     if (Array.isArray(data)) {
@@ -32,5 +88,9 @@ export function mergeDefault(gameData){
     const result = deepMergeWithDefaults(defaultGameData, gameData, "", changes);
     console.log("データ補完を実施 補完箇所を表示")
     console.table(changes);
+
+    // 古いデータ形式（area）を新形式（x, y, width, height）に変換
+    convertAllStates(result);
+
     return result;
 }
