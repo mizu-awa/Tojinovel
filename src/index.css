@@ -165,6 +165,23 @@ button:focus-visible {
   transform: scale(1.05);
 }
 
+/* キーボード選択時のアクティブ状態（ホバーと同じ見た目） */
+.hoverOp.active {
+  opacity: 0.5;
+}
+
+.hoverBt.active {
+  filter: brightness(1.2);
+}
+
+.hoverDk.active {
+  filter: brightness(0.7);
+}
+
+.hoverZm.active {
+  transform: scale(1.05);
+}
+
 @keyframes shine {
   0% {
     left: -75%;

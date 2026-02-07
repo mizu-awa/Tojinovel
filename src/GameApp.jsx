@@ -172,6 +172,7 @@ export default function GameApp({ debug }) {
   // アイテムドロワーの背景をクリックしたときの処理
   function handleItemBackClick(){
     setViewItemName(null);
+    selectItem(null);  // アイテム選択も解除
   }
 
   // 画像読み込み関数
