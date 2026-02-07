@@ -16,26 +16,27 @@ export default function useMoveHotspot({
         e.stopPropagation();
 
         debouncedDoAction(true);
-    
-        const startX = e.clientX;
-        const startY = e.clientY;
+
+        const startMouseX = e.clientX;
+        const startMouseY = e.clientY;
     
         const hIndex = Number(e.currentTarget.dataset.hindex);
         const sIndex = Number(e.currentTarget.dataset.sindex); 
     
         // ✅ 最新データをrefから取得
         const current = gameDataRef.current;
-        const area =
+        const stateData =
           mainTab === "scenes"
-            ? current.scenes[selectedItem]?.hotspots[hIndex]?.states[sIndex]?.area
+            ? current.scenes[selectedItem]?.hotspots[hIndex]?.states[sIndex]
             : mainTab === "items"
-            ? current.items[selectedItem]?.hotspots[hIndex]?.states[sIndex]?.area
+            ? current.items[selectedItem]?.hotspots[hIndex]?.states[sIndex]
             : null;
-    
-        if (!area) return;
-    
-        const startArea = [...area]; // コピーして固定
-    
+
+        if (!stateData) return;
+
+        const startX = stateData.x;
+        const startY = stateData.y;
+
         // 拡大率を取得しておく
         const match = ref.current.style.transform.match(/scale\(([^)]+)\)/);
         const scale = ( match ? parseFloat(match[1]) : 1 ); // scaleがなければ1を返す
@@ -46,27 +47,23 @@ export default function useMoveHotspot({
         if (!hotspotEl) return;
     
         const onMouseMove = (e) => {
-          const dx = (e.clientX - startX) / scale;
-          const dy = (e.clientY - startY) / scale;
-    
+          const dx = (e.clientX - startMouseX) / scale;
+          const dy = (e.clientY - startMouseY) / scale;
+
           // 即時描画
-          const newX1 = startArea[0] + dx;
-          const newY1 = startArea[1] + dy;
-          const newX2 = startArea[2] + dx;
-          const newY2 = startArea[3] + dy;
-    
-          hotspotEl.style.left = `${newX1}px`;
-          hotspotEl.style.top = `${newY1}px`;
-    
+          const newX = startX + dx;
+          const newY = startY + dy;
+
+          hotspotEl.style.left = `${newX}px`;
+          hotspotEl.style.top = `${newY}px`;
+
           // refデータを最新化しておく（再レンダーなし）
           if (mainTab === "scenes") {
-            current.scenes[selectedItem].hotspots[hIndex].states[sIndex].area = [
-              Math.floor(newX1), Math.floor(newY1), Math.floor(newX2), Math.floor(newY2),
-            ];
+            current.scenes[selectedItem].hotspots[hIndex].states[sIndex].x = Math.floor(newX);
+            current.scenes[selectedItem].hotspots[hIndex].states[sIndex].y = Math.floor(newY);
           } else if (mainTab === "items") {
-            current.items[selectedItem].hotspots[hIndex].states[sIndex].area = [
-              Math.floor(newX1), Math.floor(newY1), Math.floor(newX2), Math.floor(newY2),
-            ];
+            current.items[selectedItem].hotspots[hIndex].states[sIndex].x = Math.floor(newX);
+            current.items[selectedItem].hotspots[hIndex].states[sIndex].y = Math.floor(newY);
           }
         };
     
@@ -95,21 +92,24 @@ export default function useMoveHotspot({
     
       // ✅ 最新データをrefから取得
       const current = gameDataRef.current;
-      const area =
+      const stateData =
         mainTab === "scenes"
-          ? current.scenes[selectedItem]?.hotspots[hIndex]?.states[sIndex]?.area
+          ? current.scenes[selectedItem]?.hotspots[hIndex]?.states[sIndex]
           : mainTab === "items"
-          ? current.items[selectedItem]?.hotspots[hIndex]?.states[sIndex]?.area
+          ? current.items[selectedItem]?.hotspots[hIndex]?.states[sIndex]
           : null;
-    
-      if (!area) return;
-    
+
+      if (!stateData) return;
+
       // ✅ hotspot要素への参照（ドラッグ中、これを直接動かす）
       const hotspotEl = hotspotRefs.current?.[`${hIndex}-${sIndex}`];
       if (!hotspotEl) return;
-    
-      const startArea = [...area]; // コピーして固定
-    
+
+      const startX = stateData.x;
+      const startY = stateData.y;
+      const startWidth = stateData.width;
+      const startHeight = stateData.height;
+
       const rotate =
         mainTab === "scenes"
           ? current.scenes[selectedItem]?.hotspots[hIndex]?.states[sIndex]?.style.rotate || 0
@@ -123,17 +123,15 @@ export default function useMoveHotspot({
       const scale = ( match ? parseFloat(match[1]) : 1 ) ; // scaleがなければ1を返す
     
       const corner = e.target.dataset.corner;
-      const startX = e.clientX;
-      const startY = e.clientY;
-    
-      const startWidth = startArea[2] - startArea[0];
-      const startHeight = startArea[3] - startArea[1];
-      const startCx = (startArea[0] + startArea[2]) / 2;
-      const startCy = (startArea[1] + startArea[3]) / 2;
+      const startMouseX = e.clientX;
+      const startMouseY = e.clientY;
+
+      const startCx = startX + startWidth / 2;
+      const startCy = startY + startHeight / 2;
     
       const onMouseMove = (e) => {
-        const dx = (e.clientX - startX) / scale;
-        const dy = (e.clientY - startY) / scale;
+        const dx = (e.clientX - startMouseX) / scale;
+        const dy = (e.clientY - startMouseY) / scale;
     
         // --- 回転角を逆方向に適用して、ローカル座標系での変化に変換する ---
         const localDx = dx * Math.cos(-rad) - dy * Math.sin(-rad);
@@ -166,24 +164,25 @@ export default function useMoveHotspot({
         const newCx = startCx + offsetX * Math.cos(rad) - offsetY * Math.sin(rad);
         const newCy = startCy + offsetX * Math.sin(rad) + offsetY * Math.cos(rad);
     
-        // newRect = [x1, y1, x2, y2]
-        const newRect = [
-          newCx - newWidth / 2,
-          newCy - newHeight / 2,
-          newCx + newWidth / 2,
-          newCy + newHeight / 2
-        ];
-    
-        hotspotEl.style.left = `${newRect[0]}px`;
-        hotspotEl.style.top = `${newRect[1]}px`;
+        // 新しい左上座標
+        const newX = newCx - newWidth / 2;
+        const newY = newCy - newHeight / 2;
+
+        hotspotEl.style.left = `${newX}px`;
+        hotspotEl.style.top = `${newY}px`;
         hotspotEl.style.width = `${newWidth}px`;
         hotspotEl.style.height = `${newHeight}px`;
-    
+
         // refデータを最新化しておく（再レンダーなし）
-        if (mainTab === "scenes") {
-          current.scenes[selectedItem].hotspots[hIndex].states[sIndex].area = newRect.map(Math.floor);
-        } else if (mainTab === "items") {
-          current.items[selectedItem].hotspots[hIndex].states[sIndex].area = newRect.map(Math.floor);
+        const targetState = mainTab === "scenes"
+          ? current.scenes[selectedItem].hotspots[hIndex].states[sIndex]
+          : current.items[selectedItem].hotspots[hIndex].states[sIndex];
+
+        if (targetState) {
+          targetState.x = Math.floor(newX);
+          targetState.y = Math.floor(newY);
+          targetState.width = Math.floor(newWidth);
+          targetState.height = Math.floor(newHeight);
         }
     
       }
