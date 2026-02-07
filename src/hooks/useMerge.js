@@ -84,13 +84,14 @@ function deepMergeWithDefaults(schema, data, path="", changes = []) {
 }
 
 export function mergeDefault(gameData){
+    // 古いデータ形式（area）を新形式（x, y, width, height）に変換
+    // デフォルト値補完より先に実行する必要がある（補完後だと x が既に存在し変換がスキップされる）
+    convertAllStates(gameData);
+
     const changes = [];
     const result = deepMergeWithDefaults(defaultGameData, gameData, "", changes);
     console.log("データ補完を実施 補完箇所を表示")
     console.table(changes);
-
-    // 古いデータ形式（area）を新形式（x, y, width, height）に変換
-    convertAllStates(result);
 
     return result;
 }
