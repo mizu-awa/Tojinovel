@@ -370,6 +370,45 @@ function ClickArea({onClick, zIndex}){
 
 // 選択肢
 function Options({options, config, choiceOption}){
+  // 初期値は null（どの選択肢も選択されていない）
+  const [selectedIndex, setSelectedIndex] = useState(null);
+
+  // 選択肢が変わったらインデックスをリセット
+  useEffect(() => {
+    if (options) {
+      setSelectedIndex(null);
+    }
+  }, [options]);
+
+  // キーボードイベントハンドラ
+  useEffect(() => {
+    if (!options) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex(prev => {
+          // 未選択時は最初の選択肢を選択
+          if (prev === null) return 0;
+          return Math.max(0, prev - 1);
+        });
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex(prev => {
+          // 未選択時は最初の選択肢を選択
+          if (prev === null) return 0;
+          return Math.min(options.length - 1, prev + 1);
+        });
+      } else if (e.key === "Enter" && selectedIndex !== null) {
+        e.preventDefault();
+        choiceOption(options[selectedIndex]);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [options, selectedIndex, choiceOption]);
+
   // 選択肢がない場合は非表示
   if(!options) return null;
   return(
@@ -393,11 +432,12 @@ function Options({options, config, choiceOption}){
           gap: config.gap
         }}
       >
-        {options.map(option => {
+        {options.map((option, index) => {
+          const isSelected = index === selectedIndex;
           return(
             <div
               key={option}
-              className={config.hover}
+              className={`${config.hover}${isSelected ? " active" : ""}`}
               style={{
                 ...config.style,
                 width: config.size,
@@ -526,6 +566,13 @@ function Input({config, inputVar, inputValue, handleChange, commitInput }){
           type="text"
           onChange={handleChange}
           value={inputValue}
+          onKeyDown={(e) => {
+            // IME変換確定時のEnterは無視
+            if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+              e.preventDefault();
+              commitInput();
+            }
+          }}
           style={{
             ...config.inputStyle,
             display: "block",
