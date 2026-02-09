@@ -89,7 +89,7 @@ const ItemBoxSettings = ({
           value={parseInt(gameItemBox.itemStyle.borderRadius)|| 0}
           onChange={handleDatasetChange}
           inputProps={inputPropsDefaultNum}
-          data-path="game.itemBox.boxStyle.borderRadius"
+          data-path="game.itemBox.itemStyle.borderRadius"
           data-type="px"
         />
       </FormField>

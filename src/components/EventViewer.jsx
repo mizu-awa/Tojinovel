@@ -234,7 +234,7 @@ function EventViewer({
       {currentLine.char &&
         <div
           style={{
-            ...{...gameData.game.textBox.nameStyle, padding: "10px"},
+            ...gameData.game.textBox.nameStyle,
             position: "absolute",
             color: gameData.game.textBox.style.color,
             left: gameData.game.textBox.position[0],
@@ -250,7 +250,8 @@ function EventViewer({
             minWidth: "15%",
             zIndex: 2002,
             boxSizing: "border-box",
-            fontSize: gameData.game.textBox.style.fontSize
+            fontSize: gameData.game.textBox.style.fontSize,
+            padding: `${gameData.game.textBox.style.padding * 0.75}px`
           }}
         >
           <span>{currentLine.char}</span>

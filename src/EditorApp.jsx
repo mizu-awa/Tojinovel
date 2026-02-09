@@ -578,6 +578,7 @@ export default function EditorApp() {
                           saveClick={noop}
                           loadClick={noop}
                           closeSaveLoad={noop}
+                          screenSize={gameData.game.screenSize}
                         />}
                       
                       {/* 設定画面 */}

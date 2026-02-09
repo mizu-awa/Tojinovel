@@ -83,6 +83,8 @@ function Config({ visible, config, close, bgm, se, voice, speed, autoEnabled, au
   useDebouncedUpdate(tempAutoEnabled, "autoEnabled");
   useDebouncedUpdate(tempAutoSpeed, "autoSpeed");
 
+  const centralFontSize = parseInt(config?.containerStyle?.fontSize) || 16;
+
   if (!visible) return null;
 
   return (
@@ -164,7 +166,7 @@ function Config({ visible, config, close, bgm, se, voice, speed, autoEnabled, au
                 type="checkbox"
                 checked={tempAutoEnabled}
                 onChange={(e) => setTempAutoEnabled(e.target.checked)}
-                style={{ width: 16, height: 16, cursor: "pointer", flexShrink: 0 }}
+                style={{ width: centralFontSize, height: centralFontSize, cursor: "pointer", flexShrink: 0 }}
               />
               <VolumeSlider
                 type="range"
