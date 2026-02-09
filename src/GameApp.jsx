@@ -678,6 +678,7 @@ export default function GameApp({ debug }) {
         saveClick={saveGame}
         loadClick={loadGame}
         closeSaveLoad={closeSaveLoad}
+        screenSize={gameData.game.screenSize}
       />
 
       {/* 設定画面 */}

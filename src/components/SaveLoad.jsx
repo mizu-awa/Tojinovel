@@ -2,11 +2,12 @@ import { X } from "lucide-react";
 import { memo } from "react";
 
 function SaveLoad({
-    saveLoadSlots,
-    save,
-    saveClick,
-    loadClick,
-    closeSaveLoad
+  saveLoadSlots,
+  save,
+  saveClick,
+  loadClick,
+  closeSaveLoad,
+  screenSize
 }){
     // 2桁ゼロ埋め関数
     const pad = (n) => n.toString().padStart(2, '0');
@@ -25,6 +26,8 @@ function SaveLoad({
 
     if(!saveLoadSlots) return null;
 
+    const titleFontSize = screenSize ? Math.max(12, Math.round(screenSize[1] * 0.04)) : (parseInt(save?.buttonStyle?.fontSize) || 16);
+
     return(
         <div
           style={{
@@ -40,7 +43,7 @@ function SaveLoad({
             boxSizing: "border-box"
           }}
         >
-          <h2>
+          <h2 style={{ padding: `${titleFontSize / 2}px`, fontSize: `${titleFontSize}px` }}>
             {saveLoadSlots.type === "save" ? save.saveText : save.loadText}
           </h2>
           <div
@@ -92,11 +95,13 @@ function SaveLoad({
             style={{
               position: "absolute",
               top: 10,
-              right: 10
+              right: 10,
+              padding: `${titleFontSize / 2}px`,
+              cursor: "pointer"
             }}
             onClick={closeSaveLoad}
           >
-            <X />
+            <X size={titleFontSize} />
           </div>
         </div>
     )
