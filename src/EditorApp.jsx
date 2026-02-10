@@ -209,11 +209,39 @@ export default function EditorApp() {
           e.preventDefault();
           deleteByKey();//TODO: リストが更新されない！！解決できなかったら消すしかない…
         }
+        // --- 矢印キー: ホットスポット移動/サイズ変更 ---
+        else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+          if ((mainTab === "scenes" || mainTab === "items") && selectedSubItem >= 0 && selectedThirdItem >= 0) {
+            const current = gameDataRef.current;
+            const stateData =
+              mainTab === "scenes"
+                ? current.scenes[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]
+                : current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem];
+            if (stateData) {
+              e.preventDefault();
+              debouncedDoAction(true);
+              if (e.shiftKey) {
+                // Shift + 矢印: サイズ変更
+                if (e.key === "ArrowRight") stateData.width += 1;
+                if (e.key === "ArrowLeft") stateData.width = Math.max(1, stateData.width - 1);
+                if (e.key === "ArrowDown") stateData.height += 1;
+                if (e.key === "ArrowUp") stateData.height = Math.max(1, stateData.height - 1);
+              } else {
+                // 矢印キー: 1px移動
+                if (e.key === "ArrowRight") stateData.x += 1;
+                if (e.key === "ArrowLeft") stateData.x -= 1;
+                if (e.key === "ArrowDown") stateData.y += 1;
+                if (e.key === "ArrowUp") stateData.y -= 1;
+              }
+              setGameData(structuredClone(current));
+            }
+          }
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [undo, redo, copyBykey, pasteByKey, saveAll, deleteByKey]);
+  }, [undo, redo, copyBykey, pasteByKey, saveAll, deleteByKey, mainTab, selectedItem, selectedSubItem, selectedThirdItem, debouncedDoAction, setGameData]);
 
   // 最新 gameData を ref に保持
   useEffect(() => {
