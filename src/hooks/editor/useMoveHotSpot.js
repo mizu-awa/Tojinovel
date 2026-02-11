@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { calcSnapMove, calcSnapResize, getVisibleHotspotRects } from "./useSnap";
 
 export default function useMoveHotspot({
   gameDataRef,
@@ -9,8 +10,18 @@ export default function useMoveHotspot({
   setGameData,
   setSelectedSubItem,
   setSelectedThirdItem,
-  debouncedDoAction
+  debouncedDoAction,
+  screenSize,
+  setGuideLines,
 }){
+    // ホットスポット一覧を取得するヘルパー
+    const getHotspots = () => {
+      const current = gameDataRef.current;
+      if (mainTab === "scenes") return current.scenes[selectedItem]?.hotspots;
+      if (mainTab === "items") return current.items[selectedItem]?.hotspots;
+      return null;
+    };
+
     const onDragStart = useCallback((e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -34,11 +45,17 @@ export default function useMoveHotspot({
 
         const startX = stateData.x;
         const startY = stateData.y;
+        const width = stateData.width;
+        const height = stateData.height;
 
         // 拡大率を取得しておく
         const match = ref.current.style.transform.match(/scale\(([^)]+)\)/);
         const scale = ( match ? parseFloat(match[1]) : 1 ); // scaleがなければ1を返す
 
+        // スナップ用: 他ホットスポットの位置情報を事前に取得
+        const hotspots = getHotspots();
+        const otherRects = getVisibleHotspotRects(hotspots, hIndex);
+        const snapScreenSize = screenSize || current.game?.screenSize || [800, 600];
 
         // ✅ hotspot要素への参照（ドラッグ中、これを直接動かす）
         const hotspotEl = hotspotRefs.current?.[`${hIndex}-${sIndex}`];
@@ -65,10 +82,20 @@ export default function useMoveHotspot({
             }
           }
 
-          // 即時描画
-          const newX = startX + dx;
-          const newY = startY + dy;
+          let newX = startX + dx;
+          let newY = startY + dy;
 
+          // ガイドラインスナップ（Alt未押下時）
+          if (!e.altKey) {
+            const snap = calcSnapMove(newX, newY, width, height, otherRects, snapScreenSize);
+            newX = snap.x;
+            newY = snap.y;
+            setGuideLines(snap.guideLines);
+          } else {
+            setGuideLines([]);
+          }
+
+          // 即時描画
           hotspotEl.style.left = `${newX}px`;
           hotspotEl.style.top = `${newY}px`;
 
@@ -86,6 +113,9 @@ export default function useMoveHotspot({
           window.removeEventListener("mousemove", onMouseMove);
           window.removeEventListener("mouseup", onMouseUp);
 
+          // ガイドラインをクリア
+          setGuideLines([]);
+
           // ✅ 実際に移動した場合のみ state 更新
           if (hasMoved) {
             setGameData(structuredClone(gameDataRef.current));
@@ -93,20 +123,20 @@ export default function useMoveHotspot({
           setSelectedSubItem(hIndex); // ホットスポットを選択状態に
           setSelectedThirdItem(sIndex); // ステートも選択状態に
         };
-    
+
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("mouseup", onMouseUp);
-      }, [mainTab, selectedItem, setGameData, setSelectedSubItem, setSelectedThirdItem]);
-    
-    
+      }, [mainTab, selectedItem, setGameData, setSelectedSubItem, setSelectedThirdItem, screenSize, setGuideLines]);
+
+
     const handleResizeStart = (e) => {
       e.stopPropagation();
 
       debouncedDoAction(true);
-    
+
       const hIndex = Number(e.currentTarget.parentElement.dataset.hindex);
-      const sIndex = Number(e.currentTarget.parentElement.dataset.sindex); 
-    
+      const sIndex = Number(e.currentTarget.parentElement.dataset.sindex);
+
       // ✅ 最新データをrefから取得
       const current = gameDataRef.current;
       const stateData =
@@ -134,16 +164,21 @@ export default function useMoveHotspot({
           ? current.items[selectedItem]?.hotspots[hIndex]?.states[sIndex]?.style.rotate || 0
           : 0;
       const rad = rotate / 180 * Math.PI;
-    
+
       // 拡大率を取得しておく
       const match = ref.current.style.transform.match(/scale\(([^)]+)\)/);
       const scale = ( match ? parseFloat(match[1]) : 1 ) ; // scaleがなければ1を返す
-    
+
       const corner = e.target.dataset.corner;
       const startMouseX = e.clientX;
       const startMouseY = e.clientY;
 
       const aspectRatio = startWidth / startHeight;
+
+      // スナップ用: 他ホットスポットの位置情報を事前に取得
+      const hotspots = getHotspots();
+      const otherRects = getVisibleHotspotRects(hotspots, hIndex);
+      const snapScreenSize = screenSize || current.game?.screenSize || [800, 600];
 
       const onMouseMove = (e) => {
         const dx = (e.clientX - startMouseX) / scale;
@@ -212,8 +247,20 @@ export default function useMoveHotspot({
         // 新しい左上座標（ローカル補正 → グローバルに変換）
         const globalOffsetX = offsetX * Math.cos(rad) - offsetY * Math.sin(rad);
         const globalOffsetY = offsetX * Math.sin(rad) + offsetY * Math.cos(rad);
-        const newX = startX + globalOffsetX;
-        const newY = startY + globalOffsetY;
+        let newX = startX + globalOffsetX;
+        let newY = startY + globalOffsetY;
+
+        // ガイドラインスナップ（Alt未押下時、回転なしの場合のみ）
+        if (!e.altKey && rotate === 0) {
+          const snap = calcSnapResize(newX, newY, newWidth, newHeight, corner, otherRects, snapScreenSize);
+          newX = snap.x;
+          newY = snap.y;
+          newWidth = snap.width;
+          newHeight = snap.height;
+          setGuideLines(snap.guideLines);
+        } else {
+          setGuideLines([]);
+        }
 
         hotspotEl.style.left = `${newX}px`;
         hotspotEl.style.top = `${newY}px`;
@@ -231,29 +278,32 @@ export default function useMoveHotspot({
           targetState.width = Math.floor(newWidth);
           targetState.height = Math.floor(newHeight);
         }
-    
+
       }
-    
+
       const onMouseUp = () => {
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
-    
+
+        // ガイドラインをクリア
+        setGuideLines([]);
+
         // ✅ 確定時のみ state 更新
         setGameData(structuredClone(gameDataRef.current));
       };
-    
+
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
     };
-    
+
     const handleRotateStart = (e) => {
       e.stopPropagation();
 
       debouncedDoAction(true);
-    
+
       const hIndex = Number(e.currentTarget.parentElement.dataset.hindex);
-      const sIndex = Number(e.currentTarget.parentElement.dataset.sindex); 
-    
+      const sIndex = Number(e.currentTarget.parentElement.dataset.sindex);
+
       // ✅ 最新データをrefから取得
       const current = gameDataRef.current;
       const rotate =
@@ -262,19 +312,19 @@ export default function useMoveHotspot({
           : mainTab === "items"
           ? current.items[selectedItem]?.hotspots[hIndex]?.states[sIndex]?.style.rotate || 0
           : 0;
-    
+
       // ✅ hotspot要素への参照（ドラッグ中、これを直接動かす）
       const hotspotEl = hotspotRefs.current?.[`${hIndex}-${sIndex}`];
       if (!hotspotEl) return;
-    
+
       // ✅ ホットスポットの中心座標を取得
       const rect = hotspotEl.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-    
+
       // ✅ 回転開始時の角度
       const startAngle = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI);
-    
+
       const onMouseMove = (e) => {
         // 現在の角度
         const currentAngle = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI);
@@ -286,26 +336,26 @@ export default function useMoveHotspot({
         if (e.shiftKey) {
           newRotate = Math.round(newRotate / 15) * 15;
         }
-    
+
         hotspotEl.style.transform = `rotate(${newRotate}deg)`;/* TODO: rptate以外の設定項目がある場合は変更必要 */
-    
+
         // refデータを最新化しておく（再レンダーなし）
         if (mainTab === "scenes") {
           current.scenes[selectedItem].hotspots[hIndex].states[sIndex].style.rotate = Math.floor(newRotate);
         } else if (mainTab === "items") {
           current.items[selectedItem].hotspots[hIndex].states[sIndex].style.rotate = Math.floor(newRotate);
         }
-    
+
       }
-    
+
       const onMouseUp = () => {
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
-    
+
         // ✅ 確定時のみ state 更新
         setGameData(structuredClone(gameDataRef.current));
       };
-    
+
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
     };
