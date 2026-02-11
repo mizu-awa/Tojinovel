@@ -134,11 +134,18 @@ export default function EditorApp() {
   onBeforeTextChangeRef.current = debouncedDoAction;
 
   // handle change----------------------------------------------------------------------------------
-  const { handleMainTabChange, handleAddArrayItem, handleDeleteKey, handleDatasetChange} = useHandleChange({setGameData, setMainTab, setIsSaved, debouncedDoAction});
+  const { handleMainTabChange, handleNestedChange, handleAddArrayItem, handleDeleteKey, handleDatasetChange} = useHandleChange({setGameData, setMainTab, setIsSaved, debouncedDoAction});
 
   // edit hotspot-------------------------------------------------------
   const { onDragStart, handleResizeStart, handleRotateStart }
     = useMoveHotspot({gameDataRef, ref, hotspotRefs, mainTab, selectedItem, setGameData, setSelectedSubItem, setSelectedThirdItem, debouncedDoAction});
+
+  // ホットスポットのテキストをインライン編集するコールバック
+  const handleHotspotTextChange = useCallback((hIndex, sIndex, newText) => {
+    const collection = mainTab === "scenes" ? "scenes" : "items";
+    const path = `${collection}.${selectedItem}.hotspots.${hIndex}.states.${sIndex}.text`;
+    handleNestedChange(path)({ target: { value: newText } });
+  }, [mainTab, selectedItem, handleNestedChange]);
 
   // edit---------------------------------------------------------------------------
   const {
@@ -511,6 +518,7 @@ export default function EditorApp() {
                             handleResizeStart={handleResizeStart}
                             handleRotateStart={handleRotateStart}
                             variables={gameData.variables}
+                            onTextChange={handleHotspotTextChange}
                           />}
 
                         {/* 方向移動ボタン */}
