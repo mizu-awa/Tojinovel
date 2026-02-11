@@ -96,6 +96,7 @@ src/
 │       ├── panels/              # パネル（Settings, Scene, Characters）
 │       ├── settings/            # 各種設定フォーム（17ファイル）
 │       ├── codemirror/          # CodeMirror言語・テーマ定義
+│       ├── SnapOverlay.jsx     # ガイドライン描画（スナップ時のマゼンタ線）
 │       └── FormField.jsx 等     # 共通UIパーツ
 ├── hooks/                       # カスタムフック
 │   ├── useGameData.js           # ゲームデータ読み込み・シーン管理
@@ -110,6 +111,7 @@ src/
 │       ├── useEditorData.js     # エディタ状態管理
 │       ├── useUndoRedo.js       # Undo/Redo（履歴50件、gameData + eventBuffer）
 │       ├── useHandleChange.js   # ネストされたデータの更新ハンドラ
+│       ├── useSnap.js          # ガイドラインスナップ計算ロジック
 │       └── useScenarioEditor.js # シナリオエディタ（イベントファイル編集）
 ├── datas/
 │   └── defaultGameData.js       # デフォルトスキーマ定義

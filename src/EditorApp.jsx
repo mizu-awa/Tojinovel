@@ -55,6 +55,7 @@ import ConfigSettings from "./components/editor/settings/ConfigSettings";
 import Config from "./components/Config";
 import ScenarioEditor from "./components/editor/ScenarioEditor";
 import useScenarioEditor from "./hooks/editor/useScenarioEditor";
+import SnapOverlay from "./components/editor/SnapOverlay";
 
 // 空の定義
 const noop = () => {};
@@ -136,9 +137,22 @@ export default function EditorApp() {
   // handle change----------------------------------------------------------------------------------
   const { handleMainTabChange, handleNestedChange, handleAddArrayItem, handleDeleteKey, handleDatasetChange} = useHandleChange({setGameData, setMainTab, setIsSaved, debouncedDoAction});
 
+  // snap guide lines-----------------------------------------------------
+  const [guideLines, setGuideLines] = useState([]);
+
+  // シーンエリアのサイズ（アイテムボックスを除いた領域）
+  const sceneSize = useMemo(() => {
+    if (!gameData?.game) return [800, 600];
+    const [sw, sh] = gameData.game.screenSize;
+    const itemBox = gameData.game.itemBox;
+    const boxSize = itemBox.foldable ? 0 : itemBox.size;
+    const isHorizontal = itemBox.position === "right" || itemBox.position === "left";
+    return isHorizontal ? [sw - boxSize, sh] : [sw, sh - boxSize];
+  }, [gameData?.game?.screenSize, gameData?.game?.itemBox?.size, gameData?.game?.itemBox?.position, gameData?.game?.itemBox?.foldable]);
+
   // edit hotspot-------------------------------------------------------
   const { onDragStart, handleResizeStart, handleRotateStart }
-    = useMoveHotspot({gameDataRef, ref, hotspotRefs, mainTab, selectedItem, setGameData, setSelectedSubItem, setSelectedThirdItem, debouncedDoAction});
+    = useMoveHotspot({gameDataRef, ref, hotspotRefs, mainTab, selectedItem, setGameData, setSelectedSubItem, setSelectedThirdItem, debouncedDoAction, screenSize: sceneSize, setGuideLines});
 
   // ホットスポットのテキストをインライン編集するコールバック
   const handleHotspotTextChange = useCallback((hIndex, sIndex, newText) => {
@@ -503,6 +517,10 @@ export default function EditorApp() {
                             left: 0
                           }}
                         />
+
+                        {/* ガイドライン表示 */}
+                        {(mainTab === "scenes" || mainTab === "items") &&
+                          <SnapOverlay guideLines={guideLines} screenSize={sceneSize} />}
 
                         {/* シーンホットスポット */}
                         {mainTab === "scenes" &&
