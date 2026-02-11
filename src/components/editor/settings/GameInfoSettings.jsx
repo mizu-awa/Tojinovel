@@ -1,3 +1,4 @@
+import { memo } from "react";
 import FormField from "../FormField";
 import MyAutoComplete from "../MyAutoComplete";
 import { StyledInput } from "../StyledInput";
@@ -25,4 +26,4 @@ const GameInfoSettings = ({
   )
 }
 
-export default GameInfoSettings;
+export default memo(GameInfoSettings);

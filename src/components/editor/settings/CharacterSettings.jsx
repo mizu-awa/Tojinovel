@@ -1,3 +1,4 @@
+import { memo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
 import MyAutoComplete from "../MyAutoComplete";
@@ -66,4 +67,4 @@ const CharacterSettings = ({
 
 }
 
-export default CharacterSettings;
+export default memo(CharacterSettings);

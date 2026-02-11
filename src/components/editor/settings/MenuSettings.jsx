@@ -150,4 +150,4 @@ const PositionSelect = memo(({value, onChange, "data-path": dataPath}) => {
   )
 })
 
-export default MenuSettings;
+export default memo(MenuSettings);

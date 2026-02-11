@@ -1,3 +1,4 @@
+import { memo } from "react";
 
 function SceneWrap({
     children,
@@ -40,4 +41,4 @@ function SceneWrap({
     )
 }
 
-export default SceneWrap;
+export default memo(SceneWrap);

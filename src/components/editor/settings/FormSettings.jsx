@@ -1,3 +1,4 @@
+import { memo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
 import RgbaColorInput from "../RgbaColorInput";
@@ -265,4 +266,4 @@ const FormSettings = ({
   )
 }
 
-export default FormSettings;
+export default memo(FormSettings);

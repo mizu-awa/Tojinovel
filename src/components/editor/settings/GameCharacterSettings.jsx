@@ -1,3 +1,4 @@
+import { memo } from "react";
 import FormField from "../FormField"
 import { StyledInput } from "../StyledInput"
 import { inputPropsDefaultNum } from "./inputProps";
@@ -21,4 +22,4 @@ const GameCharacterSettings = (({
   )
 })
 
-export default GameCharacterSettings;
+export default memo(GameCharacterSettings);

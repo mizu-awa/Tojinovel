@@ -1,3 +1,4 @@
+import { memo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
 import RgbaColorInput from "../RgbaColorInput";
@@ -103,4 +104,4 @@ const EventImageSettings = ({
   )
 }
 
-export default EventImageSettings;
+export default memo(EventImageSettings);
