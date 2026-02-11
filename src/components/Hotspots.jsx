@@ -1,5 +1,5 @@
 import { RotateRight } from "@mui/icons-material";
-import { memo } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 
 const editBorderStyle = {
   position: "absolute",
@@ -29,18 +29,33 @@ function expandVariables(text, variables) {
 }
 
 function Hotspots({
-  type, 
-  edit = false, 
-  hotspotIndex = null, 
+  type,
+  edit = false,
+  hotspotIndex = null,
   stateIndex,
   hotspots,
   variables,
-  handleHotspotClick, 
-  onMouseDown, 
+  handleHotspotClick,
+  onMouseDown,
   hotspotRefs = null,
   handleResizeStart,
-  handleRotateStart
+  handleRotateStart,
+  onTextChange
 }) {
+  // インラインテキスト編集用の状態
+  const [editingKey, setEditingKey] = useState(null);
+  const [editingText, setEditingText] = useState("");
+  const inputRef = useRef(null);
+  const committedRef = useRef(false); // Enter/Escapeで確定済みフラグ（onBlurの二重呼び出し防止）
+
+  // 編集開始時にinputにフォーカス
+  useEffect(() => {
+    if (editingKey && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingKey]);
+
   if (!hotspots) return null;
 
   return (
@@ -94,16 +109,63 @@ function Hotspots({
               e.stopPropagation();
               handleHotspotClick(hss)
             }}
+            onDoubleClick={edit ? (e) => {
+              e.stopPropagation();
+              const key = `${index}-${hssIndex}`;
+              committedRef.current = false;
+              setEditingKey(key);
+              setEditingText(hss.text || "");
+            } : undefined}
             className={(hss.hover === "none" || hss.hover === "hoverSh" || hss.hover === "hoverSp") ? null : hss.hover}
             ref={(el) => {
               if (el && hotspotRefs) hotspotRefs.current[`${index}-${hssIndex}`] = el;
             }}
-            onMouseDown={ edit ? onMouseDown : () => {} }
+            onMouseDown={ edit ? (e) => { if (e.detail < 2) onMouseDown(e); } : () => {} }
             data-hindex={index}
             data-sindex={hssIndex}
           >
-            {hss.text &&
-              <span style={{textAlign: "center" }}>{expandVariables(hss.text, variables)}</span>}
+            {edit && editingKey === `${index}-${hssIndex}` ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={editingText}
+                onChange={(e) => setEditingText(e.target.value)}
+                onBlur={() => {
+                  if (!committedRef.current) {
+                    if (onTextChange && editingText !== (hss.text || "")) onTextChange(index, hssIndex, editingText);
+                  }
+                  setEditingKey(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    committedRef.current = true;
+                    if (onTextChange && editingText !== (hss.text || "")) onTextChange(index, hssIndex, editingText);
+                    setEditingKey(null);
+                  } else if (e.key === "Escape") {
+                    committedRef.current = true;
+                    setEditingKey(null);
+                  }
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  border: "1px solid #1976d2",
+                  outline: "none",
+                  background: "rgba(255,255,255,0.9)",
+                  color: hss.style.color ?? "#000",
+                  fontSize: hss.style.fontSize ?? "0.8rem",
+                  fontFamily: hss.style.fontFamily ?? "inherit",
+                  fontWeight: hss.style.fontWeight ?? 400,
+                  textAlign: hss.style.textAlign ?? "left",
+                  padding: hss.style.textPadding ?? 0,
+                  boxSizing: "border-box",
+                }}
+              />
+            ) : (
+              hss.text &&
+                <span style={{textAlign: "center" }}>{expandVariables(hss.text, variables)}</span>
+            )}
             {edit && (
               <div
                 style={editBorderStyle}

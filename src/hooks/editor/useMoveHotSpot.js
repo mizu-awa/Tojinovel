@@ -15,14 +15,12 @@ export default function useMoveHotspot({
         e.preventDefault();
         e.stopPropagation();
 
-        debouncedDoAction(true);
-
         const startMouseX = e.clientX;
         const startMouseY = e.clientY;
-    
+
         const hIndex = Number(e.currentTarget.dataset.hindex);
-        const sIndex = Number(e.currentTarget.dataset.sindex); 
-    
+        const sIndex = Number(e.currentTarget.dataset.sindex);
+
         // ✅ 最新データをrefから取得
         const current = gameDataRef.current;
         const stateData =
@@ -40,13 +38,21 @@ export default function useMoveHotspot({
         // 拡大率を取得しておく
         const match = ref.current.style.transform.match(/scale\(([^)]+)\)/);
         const scale = ( match ? parseFloat(match[1]) : 1 ); // scaleがなければ1を返す
-    
-    
+
+
         // ✅ hotspot要素への参照（ドラッグ中、これを直接動かす）
         const hotspotEl = hotspotRefs.current?.[`${hIndex}-${sIndex}`];
         if (!hotspotEl) return;
-    
+
+        let hasMoved = false;
+
         const onMouseMove = (e) => {
+          // 実際に動いた時にだけundoスナップショットを取る
+          if (!hasMoved) {
+            debouncedDoAction(true);
+            hasMoved = true;
+          }
+
           let dx = (e.clientX - startMouseX) / scale;
           let dy = (e.clientY - startMouseY) / scale;
 
@@ -75,13 +81,15 @@ export default function useMoveHotspot({
             current.items[selectedItem].hotspots[hIndex].states[sIndex].y = Math.floor(newY);
           }
         };
-    
+
         const onMouseUp = () => {
           window.removeEventListener("mousemove", onMouseMove);
           window.removeEventListener("mouseup", onMouseUp);
-    
-          // ✅ 確定時のみ state 更新
-          setGameData(structuredClone(gameDataRef.current));
+
+          // ✅ 実際に移動した場合のみ state 更新
+          if (hasMoved) {
+            setGameData(structuredClone(gameDataRef.current));
+          }
           setSelectedSubItem(hIndex); // ホットスポットを選択状態に
           setSelectedThirdItem(sIndex); // ステートも選択状態に
         };
