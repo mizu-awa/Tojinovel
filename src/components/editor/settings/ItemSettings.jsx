@@ -451,4 +451,4 @@ const UsedItemForm = memo(({
   )
 })
 
-export default ItemSettings;
+export default memo(ItemSettings);

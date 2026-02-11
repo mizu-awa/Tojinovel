@@ -516,4 +516,4 @@ const UsedItemForm = memo(({
   )
 })
 
-export default SceneSettings;
+export default memo(SceneSettings);

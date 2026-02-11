@@ -61,6 +61,7 @@ import SnapOverlay from "./components/editor/SnapOverlay";
 const noop = () => {};
 const defaultRef0 = { current: 0 };
 const defaultRefNull = { current: null };
+const deselectOverlayStyle = { position: "absolute", width: "100%", height: "100%", top: 0, left: 0 };
 
 const itemsDataforEditor = Array.from({ length: 16 }, (_, i) => ({ ...defaultItemData, name: defaultItemData.name + i }));
 
@@ -306,126 +307,179 @@ export default function EditorApp() {
     [prefersDarkMode]
   );
 
+  // 施策5: ホットスポット選択解除のコールバックを安定化
+  const handleDeselectHotspot = useCallback(() => {
+    setSelectedSubItem(null);
+    setSelectedThirdItem(null);
+  }, []);
+
+  // 施策4: インラインスタイルをメモ化
+  const backWrapStyle = useMemo(() => {
+    if (!gameData?.game) return {};
+    return {
+      ...gameData.game.backStyle,
+      height: "100%",
+      width: "100%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative"
+    };
+  }, [gameData?.game?.backStyle]);
+
+  const gameWrapStyle = useMemo(() => {
+    if (!gameData?.game) return {};
+    return {
+      ...gameData.game.gameStyle,
+      boxShadow: `0 4px 12px ${gameData.game.gameStyle.shadowColor}`,
+      display: "flex",
+      width: gameData.game.screenSize[0],
+      height: gameData.game.screenSize[1],
+      userSelect: "none",
+      flexFlow: gameData.game.itemBox.position === "right" ? "row"
+              : gameData.game.itemBox.position === "left" ? "row-reverse"
+              : gameData.game.itemBox.position === "top" ? "column-reverse"
+              : gameData.game.itemBox.position === "bottom" ? "column"
+              : "row",
+      overflow: "clip"
+    };
+  }, [gameData?.game?.gameStyle, gameData?.game?.screenSize, gameData?.game?.itemBox?.position]);
+
   // render null-------------------------------------------------------
   if(!gameData) return null;
 
   // render const -------------------------------------------------------------------------------------
-  // OPTIMIZE: 三項演算子で書いたほうが軽いかも？
-  const gameSettingComponents = {
-    "ゲーム情報" : <GameInfoSettings game={gameData.game} scenes={gameData.scenes} handleDatasetChange={handleDatasetChange} />,
-    "ゲーム画面" : <ScreenSettings game={gameData.game} handleDatasetChange={handleDatasetChange} />,
-    "アイテムボックス" : <ItemBoxSettings gameItemBox={gameData.game.itemBox} handleDatasetChange={handleDatasetChange} />,
-    "アイテムドロワー" : <ItemDrawerSettings gameItemDrawer={gameData.game.itemDrawer} handleDatasetChange={handleDatasetChange} />,
-    "テキストボックス" : <TextBoxSettings gameTextBox={gameData.game.textBox} handleDatasetChange={handleDatasetChange} />,
-    "方向移動" : <DirectionSettings gameDirection={gameData.game.direction} handleDatasetChange={handleDatasetChange} />,
-    "選択肢" : <OptionSettings gameOption={gameData.game.option} handleDatasetChange={handleDatasetChange} />,
-    "画像表示" : <EventImageSettings gameImage={gameData.game.image} handleDatasetChange={handleDatasetChange} />,
-    "入力フォーム" : <FormSettings gameInput={gameData.game.input} handleDatasetChange={handleDatasetChange}/>,
-    "ゲームメニュー" : <MenuSettings gameMenu={gameData.game.menu} handleDatasetChange={handleDatasetChange}/>,
-    "セーブ・ロード" : <SaveLoadSettings gameSave={gameData.game.save} handleDatasetChange={handleDatasetChange} />,
-    "コンフィグ": <ConfigSettings gameConfig={gameData.game.config} handleDatasetChange={handleDatasetChange} />,
-    "キャラクター表示" : <GameCharacterSettings gameCharacter={gameData.game.character} handleDatasetChange={handleDatasetChange} />
-  }
-  // OPTIMIZE: 三項演算子で書いたほうが軽いかも？
-  const rightPanels = {
-   "settings" : gameSettingComponents[selectedItem],
-   "characters" : 
-    <CharacterSettings
-      characters={gameData.characters}
-      characterList={characterList}
-      index={selectedItem}
-      subIndex={selectedSubItem}
-      handleDatasetChange={handleDatasetChange}
-    />,
-    "scenes" :
-      <SceneSettings
-        scene={nowScene}
-        selectedItem={selectedItem}
-        selectedSubItem={selectedSubItem}
-        selectedThirdItem={selectedThirdItem}
-        sceneList={sceneList}
-        itemList={itemList}
-        addUsedItem={addUsedItem}
-        deleteUsedItem={deleteUsedItem}
-        hotspot={nowHotspot}
-        state={nowState}
-        states={stateList}
-        handleDatasetChange={handleDatasetChange}
-        loadEventFile={loadEventFile}
-      />,
-    "items":
-      <ItemSettings
-        item={nowItem}
-        selectedItem={selectedItem}
-        selectedSubItem={selectedSubItem}
-        selectedThirdItem={selectedThirdItem}
-        sceneList={sceneList}
-        itemList={itemList}
-        addUsedItem={addUsedItemItem}
-        deleteUsedItem={deleteUsedItemItem}
-        hotspot={nowHotspot}
-        state={nowState}
-        states={stateList}
-        handleDatasetChange={handleDatasetChange}
-        loadEventFile={loadEventFile}
-      />,
-  }
-  const sceneItemPanel =
-    <SceneItemPanel
-      mainTab={mainTab}
-      items={items}
-      selectedItem={selectedItem}
-      setSelectedItem={setSelectedItem}
-      addScene={addScene}
-      copyScene={copyScene}
-      deleteScene={deleteScene}
-      addItem={addItem}
-      copyItem={copyItem}
-      deleteItem={deleteItem}
-      subItems={subItems}
-      selectedSubItem={selectedSubItem}
-      setSelectedSubItem={setSelectedSubItem}
-      addHotspot={addHotspot}
-      copyHotspot={copyHotspot}
-      deleteHotspot={deleteHotspot}
-      addItemHotspot={addItemHotspot}
-      copyItemHotspot={copyItemHotspot}
-      deleteItemHotspot={deleteItemHotspot}
-      thirdItems={thirdItems}
-      selectedThirdItem={selectedThirdItem}
-      setSelectedThirdItem={setSelectedThirdItem}
-      addState={addState}
-      copyState={copyState}
-      deleteState={deleteState}
-      addItemState={addItemState}
-      copyItemState={copyItemState}
-      deleteItemState={deleteItemState}
-      copy={copy}
-      paste={paste}
-    />;
-  // OPTIMIZE: 三項演算子で書いたほうが軽いかも？
-  const leftPanels = {
-    "settings":<SettingsPanel items={items} selectedItem={selectedItem} setSelectedItem={setSelectedItem}/>,
-    "characters":
-      <CharactersPanel
-        items={items}
-        selectedItem={selectedItem}
-        setSelectedItem={setSelectedItem}
-        addCharacter={addCharacter}
-        duplicateCharacter={copyCharacter}
-        deleteCharacter={deleteCharacter}
-        subItems={subItems}
-        selectedSubItem={selectedSubItem}
-        setSelectedSubItem={setSelectedSubItem}
-        addExpression={addExpression}
-        duplicateExpression={copyExpression}
-        deleteExpression={deleteExpression}
-        copy={copy}
-        paste={paste}
-      />,
-    "scenes": sceneItemPanel,
-    "items": sceneItemPanel
-  }
+  // 施策1: 選択中のSettingsコンポーネントだけを生成
+  const renderGameSetting = () => {
+    switch(selectedItem) {
+      case "ゲーム情報": return <GameInfoSettings game={gameData.game} scenes={gameData.scenes} handleDatasetChange={handleDatasetChange} />;
+      case "ゲーム画面": return <ScreenSettings game={gameData.game} handleDatasetChange={handleDatasetChange} />;
+      case "アイテムボックス": return <ItemBoxSettings gameItemBox={gameData.game.itemBox} handleDatasetChange={handleDatasetChange} />;
+      case "アイテムドロワー": return <ItemDrawerSettings gameItemDrawer={gameData.game.itemDrawer} handleDatasetChange={handleDatasetChange} />;
+      case "テキストボックス": return <TextBoxSettings gameTextBox={gameData.game.textBox} handleDatasetChange={handleDatasetChange} />;
+      case "方向移動": return <DirectionSettings gameDirection={gameData.game.direction} handleDatasetChange={handleDatasetChange} />;
+      case "選択肢": return <OptionSettings gameOption={gameData.game.option} handleDatasetChange={handleDatasetChange} />;
+      case "画像表示": return <EventImageSettings gameImage={gameData.game.image} handleDatasetChange={handleDatasetChange} />;
+      case "入力フォーム": return <FormSettings gameInput={gameData.game.input} handleDatasetChange={handleDatasetChange}/>;
+      case "ゲームメニュー": return <MenuSettings gameMenu={gameData.game.menu} handleDatasetChange={handleDatasetChange}/>;
+      case "セーブ・ロード": return <SaveLoadSettings gameSave={gameData.game.save} handleDatasetChange={handleDatasetChange} />;
+      case "コンフィグ": return <ConfigSettings gameConfig={gameData.game.config} handleDatasetChange={handleDatasetChange} />;
+      case "キャラクター表示": return <GameCharacterSettings gameCharacter={gameData.game.character} handleDatasetChange={handleDatasetChange} />;
+      default: return null;
+    }
+  };
+
+  // 施策1: 表示中のタブの右パネルだけを生成
+  const renderRightPanel = () => {
+    switch(mainTab) {
+      case "settings": return renderGameSetting();
+      case "characters": return (
+        <CharacterSettings
+          characters={gameData.characters}
+          characterList={characterList}
+          index={selectedItem}
+          subIndex={selectedSubItem}
+          handleDatasetChange={handleDatasetChange}
+        />
+      );
+      case "scenes": return (
+        <SceneSettings
+          scene={nowScene}
+          selectedItem={selectedItem}
+          selectedSubItem={selectedSubItem}
+          selectedThirdItem={selectedThirdItem}
+          sceneList={sceneList}
+          itemList={itemList}
+          addUsedItem={addUsedItem}
+          deleteUsedItem={deleteUsedItem}
+          hotspot={nowHotspot}
+          state={nowState}
+          states={stateList}
+          handleDatasetChange={handleDatasetChange}
+          loadEventFile={loadEventFile}
+        />
+      );
+      case "items": return (
+        <ItemSettings
+          item={nowItem}
+          selectedItem={selectedItem}
+          selectedSubItem={selectedSubItem}
+          selectedThirdItem={selectedThirdItem}
+          sceneList={sceneList}
+          itemList={itemList}
+          addUsedItem={addUsedItemItem}
+          deleteUsedItem={deleteUsedItemItem}
+          hotspot={nowHotspot}
+          state={nowState}
+          states={stateList}
+          handleDatasetChange={handleDatasetChange}
+          loadEventFile={loadEventFile}
+        />
+      );
+      default: return null;
+    }
+  };
+
+  // 施策1: 表示中のタブの左パネルだけを生成
+  const renderLeftPanel = () => {
+    switch(mainTab) {
+      case "settings": return <SettingsPanel items={items} selectedItem={selectedItem} setSelectedItem={setSelectedItem}/>;
+      case "characters": return (
+        <CharactersPanel
+          items={items}
+          selectedItem={selectedItem}
+          setSelectedItem={setSelectedItem}
+          addCharacter={addCharacter}
+          duplicateCharacter={copyCharacter}
+          deleteCharacter={deleteCharacter}
+          subItems={subItems}
+          selectedSubItem={selectedSubItem}
+          setSelectedSubItem={setSelectedSubItem}
+          addExpression={addExpression}
+          duplicateExpression={copyExpression}
+          deleteExpression={deleteExpression}
+          copy={copy}
+          paste={paste}
+        />
+      );
+      case "scenes":
+      case "items": return (
+        <SceneItemPanel
+          mainTab={mainTab}
+          items={items}
+          selectedItem={selectedItem}
+          setSelectedItem={setSelectedItem}
+          addScene={addScene}
+          copyScene={copyScene}
+          deleteScene={deleteScene}
+          addItem={addItem}
+          copyItem={copyItem}
+          deleteItem={deleteItem}
+          subItems={subItems}
+          selectedSubItem={selectedSubItem}
+          setSelectedSubItem={setSelectedSubItem}
+          addHotspot={addHotspot}
+          copyHotspot={copyHotspot}
+          deleteHotspot={deleteHotspot}
+          addItemHotspot={addItemHotspot}
+          copyItemHotspot={copyItemHotspot}
+          deleteItemHotspot={deleteItemHotspot}
+          thirdItems={thirdItems}
+          selectedThirdItem={selectedThirdItem}
+          setSelectedThirdItem={setSelectedThirdItem}
+          addState={addState}
+          copyState={copyState}
+          deleteState={deleteState}
+          addItemState={addItemState}
+          copyItemState={copyItemState}
+          deleteItemState={deleteItemState}
+          copy={copy}
+          paste={paste}
+        />
+      );
+      default: return null;
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -455,7 +509,7 @@ export default function EditorApp() {
             minSize={10}
             style={{ height: "100%" }}
           >
-            {leftPanels[mainTab]}
+            {renderLeftPanel()}
           </Panel>
 
           <PanelResizeHandle style={handleStyle} />
@@ -468,32 +522,11 @@ export default function EditorApp() {
                   // ゲーム画面表示
                   <div
                     ref={boxRef}
-                    style={{
-                      ...gameData.game.backStyle,
-                      height: "100%",
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative"
-                    }}
+                    style={backWrapStyle}
                   >
                     <div
                       ref={ref}
-                      style={{
-                        ...gameData.game.gameStyle,
-                        boxShadow: `0 4px 12px ${gameData.game.gameStyle.shadowColor}`,
-                        display: "flex",
-                        width: gameData.game.screenSize[0],
-                        height: gameData.game.screenSize[1],
-                        userSelect: "none",
-                        flexFlow: gameData.game.itemBox.position === "right" ? "row"
-                                : gameData.game.itemBox.position === "left" ? "row-reverse"
-                                : gameData.game.itemBox.position === "top" ? "column-reverse"
-                                : gameData.game.itemBox.position === "bottom" ? "column"
-                                : "row",
-                        overflow: "clip"
-                      }}
+                      style={gameWrapStyle}
                     >
 
                       <SceneWrap
@@ -505,17 +538,8 @@ export default function EditorApp() {
                       >
                         {/* ホットスポット選択解除 */}
                         <div
-                          onClick={() => {
-                            setSelectedSubItem(null);
-                            setSelectedThirdItem(null);
-                          }}
-                          style={{
-                            position: "absolute",
-                            width: "100%",
-                            height: "100%",
-                            top: 0,
-                            left: 0
-                          }}
+                          onClick={handleDeselectHotspot}
+                          style={deselectOverlayStyle}
                         />
 
                         {/* ガイドライン表示 */}
@@ -690,7 +714,7 @@ export default function EditorApp() {
           {/* Right */}
           <Panel defaultSize={20}>
             <Box sx={{ height: "100%", p: 1, overflowY: "scroll" }}>
-                {rightPanels[mainTab]}
+                {renderRightPanel()}
                 <Box sx={{width: "100%", height: "2em"}} />{/* FIXME: スクロールが下まで行かない 暫定対策 */}
             </Box>
           </Panel>

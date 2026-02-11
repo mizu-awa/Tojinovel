@@ -1,3 +1,4 @@
+import { memo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
 import SectionDivider from "../SectionDivider";
@@ -198,4 +199,4 @@ const SaveLoadSettings = ({
   )
 }
 
-export default SaveLoadSettings;
+export default memo(SaveLoadSettings);

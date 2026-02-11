@@ -1,3 +1,4 @@
+import { memo } from "react";
 import FormField from "../FormField"
 import RgbaColorInput from "../RgbaColorInput"
 import { StyledInput } from "../StyledInput"
@@ -71,4 +72,4 @@ const ItemDrawerSettings = ({
   )
 }
 
-export default ItemDrawerSettings;
+export default memo(ItemDrawerSettings);

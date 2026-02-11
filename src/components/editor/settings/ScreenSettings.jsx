@@ -156,4 +156,4 @@ const SelectDirection = memo(({label, value, onChange, "data-path": dataPath}) =
   )
 })
 
-export default ScreenSettings;
+export default memo(ScreenSettings);

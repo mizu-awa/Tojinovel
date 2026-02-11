@@ -1,3 +1,4 @@
+import { memo } from "react";
 import FormField from "../FormField";
 import HoverSelector from "../HoverSelector";
 import RgbaColorInput from "../RgbaColorInput";
@@ -47,4 +48,4 @@ const DirectionSettings = ({
   )
 }
 
-export default DirectionSettings;
+export default memo(DirectionSettings);
