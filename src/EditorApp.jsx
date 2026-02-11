@@ -98,6 +98,7 @@ export default function EditorApp() {
   // scenario editor------------------------------------------------------
   // 循環依存解決: onBeforeTextChangeはrefで後から設定
   const onBeforeTextChangeRef = useRef(() => {});
+  const stableOnBeforeTextChange = useCallback(() => onBeforeTextChangeRef.current(), []);
   const {
     currentFilePath,
     currentLabel,
@@ -116,7 +117,7 @@ export default function EditorApp() {
     restoreEventBuffer,
   } = useScenarioEditor({
     setIsSaved,
-    onBeforeTextChange: () => onBeforeTextChangeRef.current()
+    onBeforeTextChange: stableOnBeforeTextChange
   });
 
   // シナリオエディタ最大化状態
