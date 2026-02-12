@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import { ChevronRight } from "@mui/icons-material";
 
-export default function MyAccordion({ title, children }) {
-  const [open, setOpen] = useState(true);
+export default function MyAccordion({ title, children, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
   const theme = useTheme();
 
   const textColor = theme.palette.text.primary;

@@ -102,7 +102,6 @@ const ItemSettings = ({
 
       {state &&
       <MyAccordion title="ステート設定">
-        <SectionDivider />
         <FormField label="ステート名">
           <StyledInput
             value={state.name}
@@ -111,8 +110,6 @@ const ItemSettings = ({
           />
           <NameWarn visible={isStWarn} />
         </FormField>
-
-        <SectionDivider />
 
         <FormField label="表示/非表示">
           <StyledCheckbox
@@ -123,310 +120,314 @@ const ItemSettings = ({
           />
         </FormField>
 
-        <FormField label="X座標">
-          <StyledInput
-            type="number"
-            value={state.x}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.x`}
-          />
-        </FormField>
-
-        <FormField label="Y座標">
-          <StyledInput
-            type="number"
-            value={state.y}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.y`}
-          />
-        </FormField>
-
-        <FormField label="幅">
-          <StyledInput
-            type="number"
-            value={state.width}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.width`}
-          />
-        </FormField>
-
-        <FormField label="高さ">
-          <StyledInput
-            type="number"
-            value={state.height}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.height`}
-          />
-        </FormField>
-
-        <FormField label="回転">
-          <StyledInput
-            type="number"
-            value={state.style.rotate}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.rotate`}
-          />
-        </FormField>
-
-        <FormField label="重なり順">
-          <StyledInput
-            type="number"
-            value={state.zIndex}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.zIndex`}
-            inputProps={inputPropsZIndex}
-          />
-        </FormField>
-
-        <SectionDivider />
-
-        <FormField label="画像">
-          <StyledInput
-            value={state.background?.replace(/^\.\/(.*)$/, "$1") || ""}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.background`}
-            data-type="path"
-          />
-        </FormField>
-
-        <FormField label="背景色">
-          <RgbaColorInput
-            value={state.style.backgroundColor}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.backgroundColor`}
-          />
-        </FormField>
-
-        <SectionDivider />
-
-        <FormField label="入力モード">
-          <StyledCheckbox
-            checked={state.inputMode}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.inputMode`}
-            data-type="checkbox"
-          />
-        </FormField>
-
-        {state.inputMode && (
-          <FormField label="バインド変数">
-            <MyAutoComplete
-              options={variableListFix}
-              value={state.inputVariable}
+        <MyAccordion title="位置・サイズ" defaultOpen={false}>
+          <FormField label="X座標">
+            <StyledInput
+              type="number"
+              value={state.x}
               onChange={handleDatasetChange}
-              data-path={`${statePath}.inputVariable`}
+              data-path={`${statePath}.x`}
             />
           </FormField>
-        )}
 
-        <FormField label="ドラッグ可能">
-          <StyledCheckbox
-            checked={state.draggable}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.draggable`}
-            data-type="checkbox"
-          />
-        </FormField>
-
-        {state.draggable && (
-          <>
-            <FormField label="ドラッグ完了イベント ファイル">
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-                <StyledInput
-                  value={state.onDragEnd?.file?.replace(/^\.\/(.*)$/, "$1") || ""}
-                  onChange={handleDatasetChange}
-                  data-path={`${statePath}.onDragEnd.file`}
-                  data-type="path"
-                />
-                <IconButton
-                  size="small"
-                  onClick={() => loadEventFile(state.onDragEnd?.file, state.onDragEnd?.label)}
-                  disabled={!state.onDragEnd?.file}
-                  title="シナリオエディタで開く"
-                  sx={{ p: 0.25 }}
-                >
-                  <Edit sx={{ fontSize: 16 }} />
-                </IconButton>
-              </Box>
-            </FormField>
-
-            <FormField label="ドラッグ完了イベント ラベル">
-              <StyledInput
-                value={state.onDragEnd?.label || ""}
-                onChange={handleDatasetChange}
-                data-path={`${statePath}.onDragEnd.label`}
-              />
-            </FormField>
-          </>
-        )}
-
-        <FormField label="テキスト">
-          <StyledInput
-            value={state.text}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.text`}
-          />
-        </FormField>
-
-        <FormField label="文字サイズ">
-          <StyledInput
-            type="number"
-            value={parseInt(state.style.fontSize) || 0}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.fontSize`}
-            data-type="px"
-            inputProps={inputPropsDefaultNum}
-          />
-        </FormField>
-
-        <FormField label="文字太さ">
-          <StyledInput
-            type="number"
-            value={state.style.fontWeight || 0}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.fontWeight`}
-            inputProps={inputPropsFontWeight}
-          />
-        </FormField>
-
-        <FormField label="文字色">
-          <RgbaColorInput
-            value={state.style.color}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.color`}
-          />
-        </FormField>
-
-        <FormField label="行揃え">
-          <TextAlignSelector
-            value={state.style.textAlign}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.textAlign`}
-          />
-        </FormField>
-
-        <FormField label="テキスト上下位置">
-          <TextVerticalAlignSelector
-            value={state.style.textVAlign}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.textVAlign`}
-          />
-        </FormField>
-
-        <FormField label="余白">
-          <StyledInput
-            type="number"
-            value={parseInt(state.style.textPadding) || 0}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.textPadding`}
-            data-type="px"
-            inputProps={inputPropsDefaultNum}
-          />
-        </FormField>
-
-        <SectionDivider />
-
-        <BorderStyleSelect
-          label="ボーダースタイル"
-          value={state.style.borderStyle}
-          onChange={handleDatasetChange}
-            data-path={`${statePath}.style.borderStyle`}
-        />
-
-        <FormField label="ボーダー太さ">
-          <StyledInput
-            type="number"
-            value={parseInt(state.style.borderWidth) || 0}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.borderWidth`}
-            data-type="px"
-            inputProps={inputPropsDefaultNum}
-          />
-        </FormField>
-
-        <FormField label="ボーダー色">
-          <RgbaColorInput
-            value={state.style.borderColor}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.borderColor`}
-          />
-        </FormField>
-
-        <FormField label="角丸">
-          <StyledInput
-            type="number"
-            value={state.style.borderRadius || 0}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.borderRadius`}
-            inputProps={inputPropsDefaultNum}
-          />
-        </FormField>
-
-        <SectionDivider />
-
-        <FormField label="影色">
-          <RgbaColorInput
-            value={state.style.shadowColor}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.style.shadowColor`}
-          />
-        </FormField>
-
-        <FormField label="ホバー時の見た目">
-          <HoverSelector
-            value={state.hover}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.hover`}
-          />
-        </FormField>
-
-        <SectionDivider />
-
-        <FormField label="クリックイベント ファイル">
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+          <FormField label="Y座標">
             <StyledInput
-              value={state.onClick.file?.replace(/^\.\/(.*)$/, "$1") || ""}
+              type="number"
+              value={state.y}
               onChange={handleDatasetChange}
-              data-path={`${statePath}.onClick.file`}
+              data-path={`${statePath}.y`}
+            />
+          </FormField>
+
+          <FormField label="幅">
+            <StyledInput
+              type="number"
+              value={state.width}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.width`}
+            />
+          </FormField>
+
+          <FormField label="高さ">
+            <StyledInput
+              type="number"
+              value={state.height}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.height`}
+            />
+          </FormField>
+
+          <FormField label="回転">
+            <StyledInput
+              type="number"
+              value={state.style.rotate}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.rotate`}
+            />
+          </FormField>
+
+          <FormField label="重なり順">
+            <StyledInput
+              type="number"
+              value={state.zIndex}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.zIndex`}
+              inputProps={inputPropsZIndex}
+            />
+          </FormField>
+        </MyAccordion>
+
+        <MyAccordion title="見た目" defaultOpen={false}>
+          <FormField label="画像">
+            <StyledInput
+              value={state.background?.replace(/^\.\/(.*)$/, "$1") || ""}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.background`}
               data-type="path"
             />
+          </FormField>
+
+          <FormField label="背景色">
+            <RgbaColorInput
+              value={state.style.backgroundColor}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.backgroundColor`}
+            />
+          </FormField>
+
+          <SectionDivider />
+
+          <BorderStyleSelect
+            label="ボーダースタイル"
+            value={state.style.borderStyle}
+            onChange={handleDatasetChange}
+            data-path={`${statePath}.style.borderStyle`}
+          />
+
+          <FormField label="ボーダー太さ">
+            <StyledInput
+              type="number"
+              value={parseInt(state.style.borderWidth) || 0}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.borderWidth`}
+              data-type="px"
+              inputProps={inputPropsDefaultNum}
+            />
+          </FormField>
+
+          <FormField label="ボーダー色">
+            <RgbaColorInput
+              value={state.style.borderColor}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.borderColor`}
+            />
+          </FormField>
+
+          <FormField label="角丸">
+            <StyledInput
+              type="number"
+              value={state.style.borderRadius || 0}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.borderRadius`}
+              inputProps={inputPropsDefaultNum}
+            />
+          </FormField>
+
+          <SectionDivider />
+
+          <FormField label="影色">
+            <RgbaColorInput
+              value={state.style.shadowColor}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.shadowColor`}
+            />
+          </FormField>
+
+          <FormField label="ホバー時の見た目">
+            <HoverSelector
+              value={state.hover}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.hover`}
+            />
+          </FormField>
+        </MyAccordion>
+
+        <MyAccordion title="テキスト" defaultOpen={false}>
+          <FormField label="テキスト">
+            <StyledInput
+              value={state.text}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.text`}
+            />
+          </FormField>
+
+          <FormField label="文字サイズ">
+            <StyledInput
+              type="number"
+              value={parseInt(state.style.fontSize) || 0}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.fontSize`}
+              data-type="px"
+              inputProps={inputPropsDefaultNum}
+            />
+          </FormField>
+
+          <FormField label="文字太さ">
+            <StyledInput
+              type="number"
+              value={state.style.fontWeight || 0}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.fontWeight`}
+              inputProps={inputPropsFontWeight}
+            />
+          </FormField>
+
+          <FormField label="文字色">
+            <RgbaColorInput
+              value={state.style.color}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.color`}
+            />
+          </FormField>
+
+          <FormField label="行揃え">
+            <TextAlignSelector
+              value={state.style.textAlign}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.textAlign`}
+            />
+          </FormField>
+
+          <FormField label="テキスト上下位置">
+            <TextVerticalAlignSelector
+              value={state.style.textVAlign}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.textVAlign`}
+            />
+          </FormField>
+
+          <FormField label="余白">
+            <StyledInput
+              type="number"
+              value={parseInt(state.style.textPadding) || 0}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.textPadding`}
+              data-type="px"
+              inputProps={inputPropsDefaultNum}
+            />
+          </FormField>
+        </MyAccordion>
+
+        <MyAccordion title="インタラクション" defaultOpen={false}>
+          <FormField label="入力モード">
+            <StyledCheckbox
+              checked={state.inputMode}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.inputMode`}
+              data-type="checkbox"
+            />
+          </FormField>
+
+          {state.inputMode && (
+            <FormField label="バインド変数">
+              <MyAutoComplete
+                options={variableListFix}
+                value={state.inputVariable}
+                onChange={handleDatasetChange}
+                data-path={`${statePath}.inputVariable`}
+              />
+            </FormField>
+          )}
+
+          <FormField label="ドラッグ可能">
+            <StyledCheckbox
+              checked={state.draggable}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.draggable`}
+              data-type="checkbox"
+            />
+          </FormField>
+
+          {state.draggable && (
+            <>
+              <FormField label="ドラッグ完了イベント ファイル">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+                  <StyledInput
+                    value={state.onDragEnd?.file?.replace(/^\.\/(.*)$/, "$1") || ""}
+                    onChange={handleDatasetChange}
+                    data-path={`${statePath}.onDragEnd.file`}
+                    data-type="path"
+                  />
+                  <IconButton
+                    size="small"
+                    onClick={() => loadEventFile(state.onDragEnd?.file, state.onDragEnd?.label)}
+                    disabled={!state.onDragEnd?.file}
+                    title="シナリオエディタで開く"
+                    sx={{ p: 0.25 }}
+                  >
+                    <Edit sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Box>
+              </FormField>
+
+              <FormField label="ドラッグ完了イベント ラベル">
+                <StyledInput
+                  value={state.onDragEnd?.label || ""}
+                  onChange={handleDatasetChange}
+                  data-path={`${statePath}.onDragEnd.label`}
+                />
+              </FormField>
+            </>
+          )}
+        </MyAccordion>
+
+        <MyAccordion title="イベント" defaultOpen={false}>
+          <FormField label="クリックイベント ファイル">
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+              <StyledInput
+                value={state.onClick.file?.replace(/^\.\/(.*)$/, "$1") || ""}
+                onChange={handleDatasetChange}
+                data-path={`${statePath}.onClick.file`}
+                data-type="path"
+              />
+              <IconButton
+                size="small"
+                onClick={() => loadEventFile(state.onClick.file, state.onClick.label)}
+                disabled={!state.onClick.file}
+                title="シナリオエディタで開く"
+                sx={{ p: 0.25 }}
+              >
+                <Edit sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Box>
+          </FormField>
+
+          <FormField label="クリックイベント ラベル">
+            <StyledInput
+              value={state.onClick.label}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.onClick.label`}
+            />
+          </FormField>
+
+          <UsedItemFormSet
+            usedItems = {state.usedItems}
+            itemList = {itemListFix}
+            handleDatasetChange= {handleDatasetChange}
+            deleteUsedItem = {deleteUsedItem}
+            statePath={statePath}
+            loadEventFile={loadEventFile}
+          />
+
+          <Box sx={{textAlign: "right"}}>
             <IconButton
               size="small"
-              onClick={() => loadEventFile(state.onClick.file, state.onClick.label)}
-              disabled={!state.onClick.file}
-              title="シナリオエディタで開く"
-              sx={{ p: 0.25 }}
+              onClick={addUsedItem}
             >
-              <Edit sx={{ fontSize: 16 }} />
+              <Add />
             </IconButton>
           </Box>
-        </FormField>
-
-        <FormField label="クリックイベント ラベル">
-          <StyledInput
-            value={state.onClick.label}
-            onChange={handleDatasetChange}
-            data-path={`${statePath}.onClick.label`}
-          />
-        </FormField>
-
-        <UsedItemFormSet
-          usedItems = {state.usedItems}
-          itemList = {itemListFix}
-          handleDatasetChange= {handleDatasetChange}
-          deleteUsedItem = {deleteUsedItem}
-          statePath={statePath}
-          loadEventFile={loadEventFile}
-        />
-        
-        <Box sx={{textAlign: "right"}}>
-          <IconButton
-            size="small"
-            onClick={addUsedItem}
-          >
-            <Add />
-          </IconButton>
-        </Box>
+        </MyAccordion>
       </MyAccordion>}
     </>
   )
