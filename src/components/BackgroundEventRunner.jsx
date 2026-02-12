@@ -26,6 +26,8 @@ export default function BackgroundEventRunner({
   openConfig,
   startTimer, stopTimer, restartTimer,
   onConsoleLog,
+  currentSceneName,
+  viewItemName
 }) {
   useEventExecution({//TODO: バックグラウンド実行に不要なデータはnullで渡している バグが起きそう
     lines,
@@ -51,7 +53,9 @@ export default function BackgroundEventRunner({
     openConfig,
     startTimer, stopTimer, restartTimer,
     setVisibleCount: noop,
-    onConsoleLog
+    onConsoleLog,
+    currentSceneName,
+    viewItemName
   });
   return null;
 }

@@ -3,6 +3,7 @@ import {
     parseIfNumber,
     parseOperand,
     evalCondition,
+    checkOverlap,
     calcFlag,
     randomInt,
     random,
@@ -127,6 +128,64 @@ describe('eventExecutionUtils', () => {
 
         it('不正な条件式でエラーをスローする', () => {
             expect(() => evalCondition('invalid', variables)).toThrow('不正な条件式');
+        });
+
+        it('>< 演算子でホットスポットの重なりを判定する', () => {
+            const hotspots = [
+                { name: 'A', state: 's1', states: [{ name: 's1', visibility: true, x: 0, y: 0, width: 100, height: 100 }] },
+                { name: 'B', state: 's1', states: [{ name: 's1', visibility: true, x: 50, y: 50, width: 100, height: 100 }] },
+                { name: 'C', state: 's1', states: [{ name: 's1', visibility: true, x: 200, y: 200, width: 50, height: 50 }] },
+            ];
+            expect(evalCondition('A >< B', [], hotspots)).toBe(true);
+            expect(evalCondition('A >< C', [], hotspots)).toBe(false);
+            expect(evalCondition('B >< C', [], hotspots)).toBe(false);
+        });
+
+        it('>< 演算子で非表示ステートは偽になる', () => {
+            const hotspots = [
+                { name: 'A', state: 's1', states: [{ name: 's1', visibility: true, x: 0, y: 0, width: 100, height: 100 }] },
+                { name: 'B', state: 's1', states: [{ name: 's1', visibility: false, x: 50, y: 50, width: 100, height: 100 }] },
+            ];
+            expect(evalCondition('A >< B', [], hotspots)).toBe(false);
+        });
+
+        it('>< 演算子で存在しないホットスポットは偽になる', () => {
+            const hotspots = [
+                { name: 'A', state: 's1', states: [{ name: 's1', visibility: true, x: 0, y: 0, width: 100, height: 100 }] },
+            ];
+            expect(evalCondition('A >< NotExist', [], hotspots)).toBe(false);
+        });
+    });
+
+    // checkOverlap のテスト
+    describe('checkOverlap', () => {
+        it('重なっている矩形を検出する', () => {
+            const hotspots = [
+                { name: 'A', state: 's1', states: [{ name: 's1', visibility: true, x: 0, y: 0, width: 100, height: 100 }] },
+                { name: 'B', state: 's1', states: [{ name: 's1', visibility: true, x: 50, y: 50, width: 100, height: 100 }] },
+            ];
+            expect(checkOverlap('A', 'B', hotspots)).toBe(true);
+        });
+
+        it('重なっていない矩形を検出する', () => {
+            const hotspots = [
+                { name: 'A', state: 's1', states: [{ name: 's1', visibility: true, x: 0, y: 0, width: 50, height: 50 }] },
+                { name: 'B', state: 's1', states: [{ name: 's1', visibility: true, x: 100, y: 100, width: 50, height: 50 }] },
+            ];
+            expect(checkOverlap('A', 'B', hotspots)).toBe(false);
+        });
+
+        it('辺が接しているだけでは重ならない', () => {
+            const hotspots = [
+                { name: 'A', state: 's1', states: [{ name: 's1', visibility: true, x: 0, y: 0, width: 100, height: 100 }] },
+                { name: 'B', state: 's1', states: [{ name: 's1', visibility: true, x: 100, y: 0, width: 100, height: 100 }] },
+            ];
+            expect(checkOverlap('A', 'B', hotspots)).toBe(false);
+        });
+
+        it('空の hotspots 配列で偽を返す', () => {
+            expect(checkOverlap('A', 'B', [])).toBe(false);
+            expect(checkOverlap('A', 'B', null)).toBe(false);
         });
     });
 

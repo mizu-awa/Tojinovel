@@ -48,20 +48,57 @@ export function parseOperand(str, variables) {
 }
 
 /**
+ * 2つのホットスポットの矩形が重なっているかを判定する
+ * @param {string} leftName - 左辺のホットスポット名
+ * @param {string} rightName - 右辺のホットスポット名
+ * @param {Array} hotspots - ホットスポット配列
+ * @returns {boolean} - 重なっている場合 true
+ */
+export function checkOverlap(leftName, rightName, hotspots) {
+    if (!hotspots || hotspots.length === 0) return false;
+
+    // ホットスポットを名前で検索し、現在のステートの矩形を取得する
+    const getRect = (name) => {
+        const hs = hotspots.find(h => h.name === name);
+        if (!hs) return null;
+        const state = hs.states.find(s => s.name === hs.state);
+        if (!state || !state.visibility) return null;
+        return { x: state.x, y: state.y, width: state.width, height: state.height };
+    };
+
+    const rectA = getRect(leftName);
+    const rectB = getRect(rightName);
+    if (!rectA || !rectB) return false;
+
+    // AABB重なり判定
+    return rectA.x < rectB.x + rectB.width &&
+           rectA.x + rectA.width > rectB.x &&
+           rectA.y < rectB.y + rectB.height &&
+           rectA.y + rectA.height > rectB.y;
+}
+
+/**
  * 条件式をパースして評価する
  * @param {string} cond - 条件式（例: "score > 10"）
  * @param {Array<{name: string, value: *}>} variables - 変数の配列
+ * @param {Array} hotspots - ホットスポット配列（>< 演算子用）
  * @returns {boolean} - 条件式の評価結果
  * @throws {Error} - 不正な条件式の場合
  */
-export function evalCondition(cond, variables) {
-    // 左辺/右辺/演算子に分解
-    const regex = /^(.+?)\s*(==|!=|<=|>=|<|>)\s*(.+)$/;
+export function evalCondition(cond, variables, hotspots = []) {
+    // 左辺/右辺/演算子に分解（>< を >= より前に配置して誤マッチ防止）
+    const regex = /^(.+?)\s*(><|==|!=|<=|>=|<|>)\s*(.+)$/;
 
     const match = cond.match(regex);
     if (!match) throw new Error(`不正な条件式: ${cond}`);
 
     const [, leftRaw, op, rightRaw] = match;
+
+    // >< 演算子の場合はホットスポット名として扱う
+    if (op === "><") {
+        return checkOverlap(leftRaw.trim(), rightRaw.trim(), hotspots);
+    }
+
     const leftVal = parseOperand(leftRaw, variables);
     const rightVal = parseOperand(rightRaw, variables);
 

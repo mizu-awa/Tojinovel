@@ -119,6 +119,45 @@ export default function GameApp({ debug }) {
     });
   };
 
+  // ホットスポットのドラッグ完了時の関数
+  const handleDragEnd = async (hs, hss, hsIndex, hssIndex, newX, newY) => {
+    // ステートの x, y を更新
+    updateGameData(prev => {
+      const next = structuredClone(prev);
+      // シーンのホットスポットから探す
+      for (const scene of next.scenes) {
+        const hi = scene.hotspots.findIndex(h => h.name === hs.name);
+        if (hi !== -1) {
+          const si = scene.hotspots[hi].states.findIndex(s => s.name === hss.name);
+          if (si !== -1) {
+            scene.hotspots[hi].states[si].x = newX;
+            scene.hotspots[hi].states[si].y = newY;
+            return next;
+          }
+        }
+      }
+      // アイテムのホットスポットから探す
+      for (const item of next.items) {
+        const hi = item.hotspots.findIndex(h => h.name === hs.name);
+        if (hi !== -1) {
+          const si = item.hotspots[hi].states.findIndex(s => s.name === hss.name);
+          if (si !== -1) {
+            item.hotspots[hi].states[si].x = newX;
+            item.hotspots[hi].states[si].y = newY;
+            return next;
+          }
+        }
+      }
+      return next;
+    });
+
+    // ドラッグ完了イベントを実行
+    if (hss.onDragEnd && hss.onDragEnd.file) {
+      const parsedLines = await loadEventLines(hss.onDragEnd.file, hss.onDragEnd.label, gameData.characters);
+      executeEvent(parsedLines);
+    }
+  };
+
   // ホットスポットクリック時の関数
   const handleHotspotClick = async (hotspot) => {
     // アイテム使用イベントがある場合はそちらを優先
@@ -577,6 +616,7 @@ export default function GameApp({ debug }) {
           handleHotspotClick={handleHotspotClick}
           variables={gameData.variables}
           onInputChange={handleInputChange}
+          onDragEnd={handleDragEnd}
         />
 
         {/* 方向移動ボタン */}
@@ -594,6 +634,7 @@ export default function GameApp({ debug }) {
           handleItemBackClick={handleItemBackClick}
           variables={gameData.variables}
           onInputChange={handleInputChange}
+          onDragEnd={handleDragEnd}
         />
 
         {/* メニューボタン */}
@@ -655,6 +696,8 @@ export default function GameApp({ debug }) {
         restartTimer={restartTimer}
         onConsoleLog={addConsoleLog.current}
         configVisible={viewConfig}
+        currentSceneName={currentScene.name}
+        viewItemName={viewItemName}
       />
 
       {/* イベント表示(バックグラウンド) */}
@@ -683,6 +726,8 @@ export default function GameApp({ debug }) {
         stopTimer={stopTimer}
         restartTimer={restartTimer}
         onConsoleLog={addConsoleLog.current}
+        currentSceneName={currentScene.name}
+        viewItemName={viewItemName}
       />
 
       {/* セーブロード画面 */}

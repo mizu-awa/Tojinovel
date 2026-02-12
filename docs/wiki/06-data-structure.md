@@ -152,6 +152,11 @@
   "hover": "none",
   "inputMode": false,
   "inputVariable": "",
+  "draggable": false,
+  "onDragEnd": {
+    "file": "",
+    "label": ""
+  },
   "onClick": {
     "file": "./data/event.txt",
     "label": "棚開閉"
@@ -174,6 +179,10 @@
 |hover |string| マウスホバー時に適用するスタイル名
 |inputMode |boolean| 入力モード（有効にするとホットスポットがテキスト入力欄になる）
 |inputVariable |string| 入力値をバインドする変数名（入力モード時に使用）
+|draggable |boolean| ドラッグ可能（有効にするとプレイヤーがドラッグで移動できる）
+|onDragEnd |object| ドラッグ完了時のイベント
+|onDragEnd.file |string| イベントファイルのパス
+|onDragEnd.label |string| イベントファイルのラベル
 |onClick |object |クリック時のイベント
 |onClick.file |string |イベントファイルのパス
 |onClick.label |string |イベントファイルのラベル

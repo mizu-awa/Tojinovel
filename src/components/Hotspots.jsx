@@ -1,5 +1,5 @@
 import { RotateRight } from "@mui/icons-material";
-import { memo, useState, useRef, useEffect } from "react";
+import { memo, useState, useRef, useEffect, useCallback } from "react";
 
 const editBorderStyle = {
   position: "absolute",
@@ -28,6 +28,9 @@ function expandVariables(text, variables) {
   });
 }
 
+// ドラッグ移動量の閾値（これ以下はクリックとして扱う）
+const DRAG_THRESHOLD = 5;
+
 function Hotspots({
   type,
   edit = false,
@@ -41,13 +44,17 @@ function Hotspots({
   handleResizeStart,
   handleRotateStart,
   onTextChange,
-  onInputChange
+  onInputChange,
+  onDragEnd
 }) {
   // インラインテキスト編集用の状態
   const [editingKey, setEditingKey] = useState(null);
   const [editingText, setEditingText] = useState("");
   const inputRef = useRef(null);
   const committedRef = useRef(false); // Enter/Escapeで確定済みフラグ（onBlurの二重呼び出し防止）
+
+  // プレイヤー用ドラッグ状態
+  const dragRef = useRef(null);
 
   // 編集開始時にinputにフォーカス
   useEffect(() => {
@@ -56,6 +63,84 @@ function Hotspots({
       inputRef.current.select();
     }
   }, [editingKey]);
+
+  // プレイヤー用ドラッグ処理
+  const handlePlayerDragStart = useCallback((e, hs, hss, hsIndex, hssIndex) => {
+    if (edit || !hss.draggable) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const el = e.currentTarget;
+
+    // スケール係数を計算（CSS transform対応）
+    const parentRect = el.parentElement.getBoundingClientRect();
+    const parentWidth = el.parentElement.offsetWidth;
+    const scale = parentRect.width / parentWidth;
+
+    dragRef.current = {
+      moved: false,
+      startX: clientX,
+      startY: clientY,
+      origX: hss.x,
+      origY: hss.y,
+      el,
+      scale,
+      hs,
+      hss,
+      hsIndex,
+      hssIndex
+    };
+
+    el.style.cursor = "grabbing";
+
+    const onMove = (ev) => {
+      if (!dragRef.current) return;
+      const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      const dx = (cx - dragRef.current.startX) / dragRef.current.scale;
+      const dy = (cy - dragRef.current.startY) / dragRef.current.scale;
+
+      // 閾値チェック
+      if (!dragRef.current.moved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+      dragRef.current.moved = true;
+
+      // DOM直接操作でスムーズ移動
+      dragRef.current.el.style.left = `${dragRef.current.origX + dx}px`;
+      dragRef.current.el.style.top = `${dragRef.current.origY + dy}px`;
+    };
+
+    const onEnd = (ev) => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onEnd);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onEnd);
+
+      if (!dragRef.current) return;
+      const d = dragRef.current;
+      d.el.style.cursor = "grab";
+
+      if (d.moved) {
+        // ドラッグ完了: 最終位置を計算
+        const cx = ev.changedTouches ? ev.changedTouches[0].clientX : ev.clientX;
+        const cy = ev.changedTouches ? ev.changedTouches[0].clientY : ev.clientY;
+        const newX = d.origX + (cx - d.startX) / d.scale;
+        const newY = d.origY + (cy - d.startY) / d.scale;
+        if (onDragEnd) onDragEnd(d.hs, d.hss, d.hsIndex, d.hssIndex, newX, newY);
+      } else {
+        // クリックとして処理
+        if (!d.hss.inputMode) handleHotspotClick(d.hss);
+      }
+
+      dragRef.current = null;
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onEnd);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onEnd);
+  }, [edit, onDragEnd, handleHotspotClick]);
 
   if (!hotspots) return null;
 
@@ -96,7 +181,7 @@ function Hotspots({
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
-          cursor: edit ? "move" : "pointer",
+          cursor: edit ? "move" : (!edit && hss.draggable) ? "grab" : "pointer",
           transform: `rotate(${hss.style.rotate}deg)`,
           transformOrigin: "center center",
           ...hss.style,
@@ -108,8 +193,8 @@ function Hotspots({
             style={style}
             onClick={(e) => {
               e.stopPropagation();
-              // 入力モードの場合はクリックイベントを実行しない
-              if (!hss.inputMode) handleHotspotClick(hss);
+              // ドラッグ可能 or 入力モードの場合はクリックイベントを実行しない（ドラッグ終了時に処理）
+              if (!hss.inputMode && !hss.draggable) handleHotspotClick(hss);
             }}
             onDoubleClick={edit ? (e) => {
               e.stopPropagation();
@@ -122,7 +207,15 @@ function Hotspots({
             ref={(el) => {
               if (el && hotspotRefs) hotspotRefs.current[`${index}-${hssIndex}`] = el;
             }}
-            onMouseDown={ edit ? (e) => { if (e.detail < 2) onMouseDown(e); } : () => {} }
+            onMouseDown={
+              edit ? (e) => { if (e.detail < 2) onMouseDown(e); }
+              : (!edit && hss.draggable) ? (e) => handlePlayerDragStart(e, hs, hss, index, hssIndex)
+              : () => {}
+            }
+            onTouchStart={
+              (!edit && hss.draggable) ? (e) => handlePlayerDragStart(e, hs, hss, index, hssIndex)
+              : undefined
+            }
             data-hindex={index}
             data-sindex={hssIndex}
           >

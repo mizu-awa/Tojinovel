@@ -8,7 +8,7 @@ import {
     parseLineText
 } from "./eventExecutionUtils.js";
 
-export default function useEventViewer({ 
+export default function useEventViewer({
   lines,
   onComplete,
   gameData,
@@ -32,7 +32,9 @@ export default function useEventViewer({
   openConfig,
   startTimer, stopTimer, restartTimer,
   setVisibleCount,
-  onConsoleLog
+  onConsoleLog,
+  currentSceneName,
+  viewItemName
 }){
     // states------------------------------------------------------------------------------------------
     const [inputValue, setInputValue] = useState("");
@@ -304,8 +306,17 @@ export default function useEventViewer({
             else if(line.type === "if"){// if開始
                 // 実行中のif階層を記憶
                 ifDepth.current = line.depth;
+                // >< 演算子用に現在のコンテキストのホットスポットを取得
+                const currentHotspots = (() => {
+                    if (viewItemName) {
+                        const item = newGameData.items.find(i => i.name === viewItemName);
+                        return item ? item.hotspots : [];
+                    }
+                    const scene = newGameData.scenes.find(s => s.name === currentSceneName);
+                    return scene ? scene.hotspots : [];
+                })();
                 // 命令スキップするかどうかを判定
-                ifSkip.current = !evalCondition(line.condition, newGameData.variables);
+                ifSkip.current = !evalCondition(line.condition, newGameData.variables, currentHotspots);
             }
             else if(line.type === "flag"){// フラグ計算
                 newGameData.variables = calcFlag(newGameData.variables, line.formula);
