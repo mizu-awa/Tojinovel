@@ -41,6 +41,8 @@ export const defaultStateData = {
         "rotate": 0
     },
     "hover":"none",
+    "inputMode": false,
+    "inputVariable": "",
     "onClick": {
         "file": "",
         "label": ""

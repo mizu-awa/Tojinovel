@@ -75,7 +75,7 @@ export default function EditorApp() {
         gameData, setGameData,
         gameDataRef,
         hotspotRefs,
-        sceneList, itemList, characterList, stateList,
+        sceneList, itemList, characterList, variableList, stateList,
         items, subItems, thirdItems,
         nowScene, nowItem, nowHotspot, nowState,
         saveLoadSlotsForEditor,
@@ -391,6 +391,7 @@ export default function EditorApp() {
           selectedThirdItem={selectedThirdItem}
           sceneList={sceneList}
           itemList={itemList}
+          variableList={variableList}
           addUsedItem={addUsedItem}
           deleteUsedItem={deleteUsedItem}
           hotspot={nowHotspot}
@@ -408,6 +409,7 @@ export default function EditorApp() {
           selectedThirdItem={selectedThirdItem}
           sceneList={sceneList}
           itemList={itemList}
+          variableList={variableList}
           addUsedItem={addUsedItemItem}
           deleteUsedItem={deleteUsedItemItem}
           hotspot={nowHotspot}

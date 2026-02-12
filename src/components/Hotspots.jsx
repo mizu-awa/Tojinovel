@@ -40,7 +40,8 @@ function Hotspots({
   hotspotRefs = null,
   handleResizeStart,
   handleRotateStart,
-  onTextChange
+  onTextChange,
+  onInputChange
 }) {
   // インラインテキスト編集用の状態
   const [editingKey, setEditingKey] = useState(null);
@@ -107,7 +108,8 @@ function Hotspots({
             style={style}
             onClick={(e) => {
               e.stopPropagation();
-              handleHotspotClick(hss)
+              // 入力モードの場合はクリックイベントを実行しない
+              if (!hss.inputMode) handleHotspotClick(hss);
             }}
             onDoubleClick={edit ? (e) => {
               e.stopPropagation();
@@ -162,6 +164,40 @@ function Hotspots({
                   boxSizing: "border-box",
                 }}
               />
+            ) : !edit && hss.inputMode && hss.inputVariable ? (
+              // プレイヤーモードの入力フォーム
+              <input
+                type="text"
+                value={(() => {
+                  const v = variables.find(v => v.name === hss.inputVariable);
+                  return v ? String(v.value) : "";
+                })()}
+                onChange={(e) => {
+                  if (onInputChange) onInputChange(hss.inputVariable, e.target.value);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  border: "none",
+                  outline: "none",
+                  background: "transparent",
+                  color: hss.style.color ?? "#000",
+                  fontSize: hss.style.fontSize ?? "0.8rem",
+                  fontFamily: hss.style.fontFamily ?? "inherit",
+                  fontWeight: hss.style.fontWeight ?? 400,
+                  textAlign: hss.style.textAlign ?? "left",
+                  padding: hss.style.textPadding ?? 0,
+                  boxSizing: "border-box",
+                  cursor: "text",
+                }}
+              />
+            ) : edit && hss.inputMode && hss.inputVariable ? (
+              // エディタモードの入力モードプレビュー
+              <span style={{ textAlign: "center", opacity: 0.5 }}>
+                {"[" + hss.inputVariable + "]"}
+              </span>
             ) : (
               hss.text &&
                 <span style={{textAlign: "center" }}>{expandVariables(hss.text, variables)}</span>

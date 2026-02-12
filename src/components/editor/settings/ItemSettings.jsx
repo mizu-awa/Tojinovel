@@ -21,6 +21,7 @@ const ItemSettings = ({
   selectedSubItem,
   selectedThirdItem,
   itemList,
+  variableList,
   addUsedItem,
   deleteUsedItem,
   hotspot,
@@ -32,6 +33,7 @@ const ItemSettings = ({
   // 固定値（フックはearly returnの前に配置）
   const stateListFix = useMemo(() => states || [], [states?.join("") || ""]);
   const itemListFix = useMemo(() => itemList || [], [itemList?.join("") || ""]);
+  const variableListFix = useMemo(() => variableList || [], [variableList?.join("") || ""]);
 
   const isItWarn = useMemo(() => (item && itemListFix.filter(s => s === item.name).length >= 2), [itemListFix, item?.name]);
   const isStWarn = useMemo(() => (stateListFix?.filter(s => s === state?.name).length >= 2), [stateListFix, state?.name]);
@@ -196,6 +198,26 @@ const ItemSettings = ({
         </FormField>
 
         <SectionDivider />
+
+        <FormField label="入力モード">
+          <StyledCheckbox
+            checked={state.inputMode}
+            onChange={handleDatasetChange}
+            data-path={`${statePath}.inputMode`}
+            data-type="checkbox"
+          />
+        </FormField>
+
+        {state.inputMode && (
+          <FormField label="バインド変数">
+            <MyAutoComplete
+              options={variableListFix}
+              value={state.inputVariable}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.inputVariable`}
+            />
+          </FormField>
+        )}
 
         <FormField label="テキスト">
           <StyledInput
