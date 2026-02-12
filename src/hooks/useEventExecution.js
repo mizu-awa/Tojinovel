@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import {
     parseIfNumber,
-    evalCondition,
+    evalCompoundCondition,
     calcFlag,
     random,
     expandVarsShallow,
@@ -24,7 +24,7 @@ export default function useEventViewer({
   currentImage, setCurrentImage,
   hiddenCharacter, hideCharacter,
   currentInput, setCurrentInput,
-  ifDepth, opDepth, opLabel,
+  ifDepth, ifMatched, opDepth, opLabel,
   bgm,
   forEdit,
   openSave, openLoad, saveGame, loadGame,
@@ -232,14 +232,37 @@ export default function useEventViewer({
             const line = expandVarsShallow(lines.lines[i], newGameData.variables); // 処理する行
             
             if((line.type === "endif") && (line.depth === ifDepth.current)){ // if終了時
+                // マッチ状態をクリア
+                ifMatched.current.delete(line.depth);
                 // if階層を1つ上げる
                 ifDepth.current = Math.max(ifDepth.current - 1, 0);
                 // ifによる命令スキップを解除
                 ifSkip.current = false;
             }
+            else if((line.type === "elseif") && (line.depth === ifDepth.current)){ // else if登場時
+                if(ifMatched.current.get(line.depth)){ // 既にマッチ済み → スキップ
+                    ifSkip.current = true;
+                } else {
+                    // >< 演算子用に現在のコンテキストのホットスポットを取得
+                    const currentHotspots = (() => {
+                        if (viewItemName) {
+                            const item = newGameData.items.find(i => i.name === viewItemName);
+                            return item ? item.hotspots : [];
+                        }
+                        const scene = newGameData.scenes.find(s => s.name === currentSceneName);
+                        return scene ? scene.hotspots : [];
+                    })();
+                    const result = evalCompoundCondition(line.condition, newGameData.variables, currentHotspots);
+                    ifSkip.current = !result;
+                    if(result) ifMatched.current.set(line.depth, true);
+                }
+            }
             else if((line.type === "else") && (line.depth === ifDepth.current)){ // else登場時
-                // ifによる命令スキップを反転
-                ifSkip.current = !ifSkip.current;
+                if(ifMatched.current.get(line.depth)){ // 既にマッチ済み → スキップ
+                    ifSkip.current = true;
+                } else {
+                    ifSkip.current = false;
+                }
             }
             else if((line.type === "endOption") && (line.depth === opDepth.current)){// 選択肢終了時
                 // op階層を1つ上げる
@@ -316,7 +339,10 @@ export default function useEventViewer({
                     return scene ? scene.hotspots : [];
                 })();
                 // 命令スキップするかどうかを判定
-                ifSkip.current = !evalCondition(line.condition, newGameData.variables, currentHotspots);
+                const result = evalCompoundCondition(line.condition, newGameData.variables, currentHotspots);
+                ifSkip.current = !result;
+                // マッチ状態を記録（else if チェーン用）
+                ifMatched.current.set(line.depth, result);
             }
             else if(line.type === "flag"){// フラグ計算
                 newGameData.variables = calcFlag(newGameData.variables, line.formula);
@@ -599,6 +625,7 @@ export default function useEventViewer({
 
             ifDepth.current = 0;
             ifSkip.current = false;
+            ifMatched.current.clear();
             opDepth.current = 0;
             opSkip.current = false;
             opLabel.current = null;
@@ -653,15 +680,17 @@ export default function useEventViewer({
                 // 条件式の類はすべて初期化
                 ifDepth.current = 0;
                 ifSkip.current = false;
+                ifMatched.current.clear();
                 opDepth.current = 0;
                 opSkip.current = false;
                 opLabel.current = null;
             }
             else if(!lines.isView && i >= lines.lines.length){ // バックグラウンドイベント実行完了
                 onComplete?.();
-                
+
                 ifDepth.current = 0;
                 ifSkip.current = false;
+                ifMatched.current.clear();
                 opDepth.current = 0;
                 opSkip.current = false;
                 opLabel.current = null;

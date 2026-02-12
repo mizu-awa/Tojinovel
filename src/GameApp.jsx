@@ -52,12 +52,14 @@ export default function GameApp({ debug }) {
   const timers = useRef([]);
   // event
   const ifDepth = useRef(0);
+  const ifMatched = useRef(new Map());
   const opDepth = useRef(0);
   const opLabel = useRef(null);
 
   const bgm = useRef(null);
 
   const ifDepthBack = useRef(0);
+  const ifMatchedBack = useRef(new Map());
   const opDepthBack = useRef(0);
   const opLabelBack = useRef(null);
   
@@ -272,6 +274,7 @@ export default function GameApp({ debug }) {
         hiddenCharacter: hiddenCharacter,
         currentInput: currentInput,
         ifDepth: ifDepth.current,
+        ifMatched: Object.fromEntries(ifMatched.current),
         opDepth: opDepth.current,
         opLabel: opLabel.current,
         bgm: bgm.current
@@ -302,6 +305,7 @@ export default function GameApp({ debug }) {
       hideCharacter(data.eventData.hiddenCharacter)
       setCurrentInput(data.eventData.currentInput);
       ifDepth.current = data.eventData.ifDepth;
+      ifMatched.current = new Map(Object.entries(data.eventData.ifMatched || {}));
       opDepth.current = data.eventData.opDepth;
       opLabel.current = data.eventData.opLabel;
       bgm.current = data.eventData.bgm;
@@ -682,6 +686,7 @@ export default function GameApp({ debug }) {
         currentInput={currentInput}
         setCurrentInput={setCurrentInput}
         ifDepth={ifDepth}
+        ifMatched={ifMatched}
         opDepth={opDepth}
         opLabel={opLabel}
         bgm={bgm}
@@ -713,6 +718,7 @@ export default function GameApp({ debug }) {
         index={0}
         setIndex={null}
         ifDepth={ifDepthBack}
+        ifMatched={ifMatchedBack}
         opDepth={opDepthBack}
         opLabel={opLabelBack}
         bgm={bgm}

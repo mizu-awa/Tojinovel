@@ -9,6 +9,7 @@ const commands = [
 
   // 条件分岐
   { label: "#if: ", type: "keyword", info: "変数名 演算子 値", detail: "条件分岐開始" },
+  { label: "#else if: ", type: "keyword", info: "変数名 演算子 値", detail: "条件分岐（追加条件）" },
   { label: "#else", type: "keyword", info: "条件が偽の場合の処理" },
   { label: "#if終了", type: "keyword", info: "条件分岐終了" },
 
