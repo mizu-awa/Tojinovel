@@ -184,6 +184,7 @@ export default function useEditorData(){
       const sceneList = useMemo(() => gameData.scenes.map((scene) => scene.name),[gameData.scenes]);
       const itemList = useMemo(() => gameData.items.map((item) => item.name),[gameData.items]);
       const characterList = useMemo(() => gameData.characters.map((character) => character.name), [gameData.characters]);
+      const variableList = useMemo(() => gameData.variables.map((v) => v.name), [gameData.variables]);
       const itemsPre = 
           mainTab === "scenes" ? sceneList
         : mainTab === "items" ? itemList
@@ -310,6 +311,7 @@ export default function useEditorData(){
         sceneList,
         itemList,
         characterList,
+        variableList,
         items,
         nowScene,
         nowItem,

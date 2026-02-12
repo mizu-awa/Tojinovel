@@ -22,6 +22,7 @@ const SceneSettings = ({
   selectedThirdItem,
   sceneList,
   itemList,
+  variableList,
   addUsedItem,
   deleteUsedItem,
   hotspot,
@@ -34,6 +35,8 @@ const SceneSettings = ({
   const sceneListFix = useMemo(() => sceneList || [], [sceneList?.join("") || ""]);
   const stateListFix = useMemo(() => states || [], [states?.join("") || ""]);
   const itemListFix = useMemo(() => itemList || [], [itemList?.join("") || ""]);
+
+  const variableListFix = useMemo(() => variableList || [], [variableList?.join("") || ""]);
 
   const isScWarn = useMemo(() => (scene && sceneListFix.filter(s => s === scene.name).length >= 2), [sceneListFix, scene?.name]);
   const isStWarn = useMemo(() => (stateListFix?.filter(s => s === state?.name).length >= 2), [stateListFix, state?.name]);
@@ -256,6 +259,26 @@ const SceneSettings = ({
         </FormField>
 
         <SectionDivider />
+
+        <FormField label="入力モード">
+          <StyledCheckbox
+            checked={state.inputMode}
+            onChange={handleDatasetChange}
+            data-path={`${statePath}.inputMode`}
+            data-type="checkbox"
+          />
+        </FormField>
+
+        {state.inputMode && (
+          <FormField label="バインド変数">
+            <MyAutoComplete
+              options={variableListFix}
+              value={state.inputVariable}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.inputVariable`}
+            />
+          </FormField>
+        )}
 
         <FormField label="テキスト">
           <StyledInput

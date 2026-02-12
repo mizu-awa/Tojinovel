@@ -150,6 +150,8 @@
   "visibility": true,
   "style": { ... },
   "hover": "none",
+  "inputMode": false,
+  "inputVariable": "",
   "onClick": {
     "file": "./data/event.txt",
     "label": "棚開閉"
@@ -170,6 +172,8 @@
 |visibility |boolean |表示/非表示
 |style |object| ホットスポットに適用するスタイル
 |hover |string| マウスホバー時に適用するスタイル名
+|inputMode |boolean| 入力モード（有効にするとホットスポットがテキスト入力欄になる）
+|inputVariable |string| 入力値をバインドする変数名（入力モード時に使用）
 |onClick |object |クリック時のイベント
 |onClick.file |string |イベントファイルのパス
 |onClick.label |string |イベントファイルのラベル

@@ -107,6 +107,18 @@ export default function GameApp({ debug }) {
     }
   };
 
+  // ホットスポット入力モードの変数更新
+  const handleInputChange = (varName, value) => {
+    updateGameData(prev => {
+      const idx = prev.variables.findIndex(v => v.name === varName);
+      if (idx === -1) return prev;
+      const next = { ...prev };
+      next.variables = [...next.variables];
+      next.variables[idx] = { ...next.variables[idx], value };
+      return next;
+    });
+  };
+
   // ホットスポットクリック時の関数
   const handleHotspotClick = async (hotspot) => {
     // アイテム使用イベントがある場合はそちらを優先
@@ -564,6 +576,7 @@ export default function GameApp({ debug }) {
           currentSceneName={currentScene.name}
           handleHotspotClick={handleHotspotClick}
           variables={gameData.variables}
+          onInputChange={handleInputChange}
         />
 
         {/* 方向移動ボタン */}
@@ -580,6 +593,7 @@ export default function GameApp({ debug }) {
           handleHotspotClick={handleHotspotClick}
           handleItemBackClick={handleItemBackClick}
           variables={gameData.variables}
+          onInputChange={handleInputChange}
         />
 
         {/* メニューボタン */}
