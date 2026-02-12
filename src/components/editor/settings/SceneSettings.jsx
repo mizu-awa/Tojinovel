@@ -280,6 +280,47 @@ const SceneSettings = ({
           </FormField>
         )}
 
+        <FormField label="ドラッグ可能">
+          <StyledCheckbox
+            checked={state.draggable}
+            onChange={handleDatasetChange}
+            data-path={`${statePath}.draggable`}
+            data-type="checkbox"
+          />
+        </FormField>
+
+        {state.draggable && (
+          <>
+            <FormField label="ドラッグ完了イベント ファイル">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+                <StyledInput
+                  value={state.onDragEnd?.file?.replace(/^\.\/(.*)$/, "$1") || ""}
+                  onChange={handleDatasetChange}
+                  data-path={`${statePath}.onDragEnd.file`}
+                  data-type="path"
+                />
+                <IconButton
+                  size="small"
+                  onClick={() => loadEventFile(state.onDragEnd?.file, state.onDragEnd?.label)}
+                  disabled={!state.onDragEnd?.file}
+                  title="シナリオエディタで開く"
+                  sx={{ p: 0.25 }}
+                >
+                  <Edit sx={{ fontSize: 16 }} />
+                </IconButton>
+              </Box>
+            </FormField>
+
+            <FormField label="ドラッグ完了イベント ラベル">
+              <StyledInput
+                value={state.onDragEnd?.label || ""}
+                onChange={handleDatasetChange}
+                data-path={`${statePath}.onDragEnd.label`}
+              />
+            </FormField>
+          </>
+        )}
+
         <FormField label="テキスト">
           <StyledInput
             value={state.text}

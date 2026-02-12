@@ -16,7 +16,8 @@ function ItemDrawer({
     variables,
     setSelectedSubItem,
     setSelectedThirdItem,
-    onInputChange
+    onInputChange,
+    onDragEnd
 }){
     if(!item) return null;
 
@@ -116,6 +117,7 @@ function ItemDrawer({
             handleRotateStart={handleRotateStart}
             variables={variables}
             onInputChange={onInputChange}
+            onDragEnd={onDragEnd}
           />
         </div>
       </div>

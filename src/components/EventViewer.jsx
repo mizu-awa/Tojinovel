@@ -25,7 +25,9 @@ function EventViewer({
   openConfig,
   startTimer, stopTimer, restartTimer,
   onConsoleLog,
-  configVisible
+  configVisible,
+  currentSceneName,
+  viewItemName
 }) {
 
   // states-----------------------------------------------------------------------------------------------------------------------
@@ -63,7 +65,9 @@ function EventViewer({
         openConfig,
         startTimer, stopTimer, restartTimer,
         setVisibleCount,
-        onConsoleLog
+        onConsoleLog,
+        currentSceneName,
+        viewItemName
     });
   
   // effects--------------------------------------------------------------------------------------------------------------------

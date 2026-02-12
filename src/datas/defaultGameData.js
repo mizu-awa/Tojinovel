@@ -43,6 +43,11 @@ export const defaultStateData = {
     "hover":"none",
     "inputMode": false,
     "inputVariable": "",
+    "draggable": false,
+    "onDragEnd": {
+        "file": "",
+        "label": ""
+    },
     "onClick": {
         "file": "",
         "label": ""
