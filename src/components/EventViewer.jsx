@@ -283,7 +283,7 @@ function EventViewer({
             overflowY: "auto",
             whiteSpace: "pre-line",
             boxSizing: "border-box",
-            borderTopLeftRadius: currentLine.char ? 0 : gameData.game.textBox.style.borderTopRightRadius,
+            borderTopLeftRadius: (currentLine.char && gameData.game.textBox.nameStyle.distance === 0) ? 0 : gameData.game.textBox.style.borderTopRightRadius,
             borderBottomLeftRadius: gameData.game.textBox.style.borderTopRightRadius,
             borderBottomRightRadius: gameData.game.textBox.style.borderTopRightRadius,
             borderLeft: `${gameData.game.textBox.style.borderTopWidth} ${gameData.game.textBox.style.borderTopStyle} ${gameData.game.textBox.style.borderTopColor}`,
