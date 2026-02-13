@@ -38,7 +38,8 @@ export const defaultStateData = {
         "borderRadius": 0,
         "textVAlign": "center",
         "textPadding": "0px",
-        "rotate": 0
+        "rotate": 0,
+        "fontFamily": ""
     },
     "hover":"none",
     "inputMode": false,
@@ -106,10 +107,22 @@ export const defaultGameData = {
       "noDataText": "No Data",
       "autoText": "Auto",
       "hover": "none",
+      "gap": 10,
       "backStyle": {
         "backgroundColor": "rgba(222,222,222,1)",
         "backgroundImage": "",
         "padding": "10px 30px"
+      },
+      "titleStyle": {
+        "fontSize": "24px",
+        "color": "rgba(0,0,0,1)",
+        "backgroundColor": "transparent",
+        "padding": "0px"
+      },
+      "closeBtnStyle": {
+        "size": 24,
+        "color": "rgba(0,0,0,1)",
+        "hover": "hoverOp"
       },
       "buttonStyle":{
         "padding":10,
@@ -132,7 +145,8 @@ export const defaultGameData = {
       "borderWidth": 1,
       "borderStyle": "none",
       "shadowColor": "rgba(0, 0, 0, 0.3)",
-      "color": "rgba(0,0,0,1)"
+      "color": "rgba(0,0,0,1)",
+      "fontFamily": "system-ui"
     },
     "itemBox": {
       "size": 160,
@@ -190,7 +204,16 @@ export const defaultGameData = {
       },
       "nameStyle":{
         "backgroundColor": "rgba(0,0,0,0.6)",
-        "backgroundImage": ""
+        "backgroundImage": "",
+        "color": "rgba(255,255,255,1)",
+        "fontSize": "16px",
+        "padding": 12,
+        "minWidth": 120,
+        "distance": 0,
+        "borderWidth": "0px",
+        "borderStyle": "solid",
+        "borderColor": "rgba(0,0,0,0)",
+        "borderRadius": "0px"
       },
       "indicator": {
         "text": "▼"
@@ -203,6 +226,12 @@ export const defaultGameData = {
       "style": {
         "backgroundColor": "rgba(0,0,0,0)",
         "color": "rgba(125,125,125,1)"
+      },
+      "images": {
+        "top": "",
+        "right": "",
+        "bottom": "",
+        "left": ""
       }
     },
     "option": {

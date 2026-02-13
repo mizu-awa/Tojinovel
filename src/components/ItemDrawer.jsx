@@ -14,6 +14,7 @@ function ItemDrawer({
     handleResizeStart,
     handleRotateStart,
     variables,
+    gameData,
     setSelectedSubItem,
     setSelectedThirdItem,
     onInputChange,
@@ -116,6 +117,7 @@ function ItemDrawer({
             handleResizeStart={handleResizeStart}
             handleRotateStart={handleRotateStart}
             variables={variables}
+            gameData={gameData}
             onInputChange={onInputChange}
             onDragEnd={onDragEnd}
           />

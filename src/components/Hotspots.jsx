@@ -38,6 +38,7 @@ function Hotspots({
   stateIndex,
   hotspots,
   variables,
+  gameData,
   handleHotspotClick,
   onMouseDown,
   hotspotRefs = null,
@@ -173,7 +174,7 @@ function Hotspots({
           boxSizing: "border-box",
           color: hss.style.color ?? "#000",
           fontSize: hss.style.fontSize ?? "0.8rem",
-          fontFamily: hss.style.fontFamily ?? "inherit",
+          fontFamily: hss.style.fontFamily || gameData?.game?.gameStyle?.fontFamily || "inherit",
           boxShadow: hss.style.shadowColor
             ? `0 4px 12px ${hss.style.shadowColor}`
             : undefined,

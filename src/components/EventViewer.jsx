@@ -242,22 +242,27 @@ function EventViewer({
           style={{
             ...gameData.game.textBox.nameStyle,
             position: "absolute",
-            color: gameData.game.textBox.style.color,
+            color: gameData.game.textBox.nameStyle.color,
+            fontSize: gameData.game.textBox.nameStyle.fontSize,
+            padding: `${gameData.game.textBox.nameStyle.padding}px`,
+            minWidth: `${gameData.game.textBox.nameStyle.minWidth}px`,
             left: gameData.game.textBox.position[0],
-            bottom: `calc(100% - ${gameData.game.textBox.position[1]}px)`,
-            borderTop: `${gameData.game.textBox.style.borderTopWidth} ${gameData.game.textBox.style.borderTopStyle} ${gameData.game.textBox.style.borderTopColor}`,
-            borderLeft: `${gameData.game.textBox.style.borderTopWidth} ${gameData.game.textBox.style.borderTopStyle} ${gameData.game.textBox.style.borderTopColor}`,
-            borderRight: `${gameData.game.textBox.style.borderTopWidth} ${gameData.game.textBox.style.borderTopStyle} ${gameData.game.textBox.style.borderTopColor}`,
-            borderBottom: "none",
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
-            borderTopLeftRadius: gameData.game.textBox.style.borderTopRightRadius,
-            borderTopRightRadius: gameData.game.textBox.style.borderTopRightRadius,
-            minWidth: "15%",
+            bottom: `calc(100% - ${gameData.game.textBox.position[1]}px + ${gameData.game.textBox.nameStyle.distance}px)`,
+            ...(gameData.game.textBox.nameStyle.distance === 0 ? {
+              borderTop: `${gameData.game.textBox.nameStyle.borderWidth} ${gameData.game.textBox.nameStyle.borderStyle} ${gameData.game.textBox.nameStyle.borderColor}`,
+              borderLeft: `${gameData.game.textBox.nameStyle.borderWidth} ${gameData.game.textBox.nameStyle.borderStyle} ${gameData.game.textBox.nameStyle.borderColor}`,
+              borderRight: `${gameData.game.textBox.nameStyle.borderWidth} ${gameData.game.textBox.nameStyle.borderStyle} ${gameData.game.textBox.nameStyle.borderColor}`,
+              borderBottom: "none",
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              borderTopLeftRadius: gameData.game.textBox.nameStyle.borderRadius,
+              borderTopRightRadius: gameData.game.textBox.nameStyle.borderRadius
+            } : {
+              border: `${gameData.game.textBox.nameStyle.borderWidth} ${gameData.game.textBox.nameStyle.borderStyle} ${gameData.game.textBox.nameStyle.borderColor}`,
+              borderRadius: gameData.game.textBox.nameStyle.borderRadius
+            }),
             zIndex: 2002,
-            boxSizing: "border-box",
-            fontSize: gameData.game.textBox.style.fontSize,
-            padding: `1.5%`
+            boxSizing: "border-box"
           }}
         >
           <span>{currentLine.char}</span>
@@ -278,7 +283,7 @@ function EventViewer({
             overflowY: "auto",
             whiteSpace: "pre-line",
             boxSizing: "border-box",
-            borderTopLeftRadius: currentLine.char ? 0 : gameData.game.textBox.style.borderTopRightRadius,
+            borderTopLeftRadius: (currentLine.char && gameData.game.textBox.nameStyle.distance === 0) ? 0 : gameData.game.textBox.style.borderTopRightRadius,
             borderBottomLeftRadius: gameData.game.textBox.style.borderTopRightRadius,
             borderBottomRightRadius: gameData.game.textBox.style.borderTopRightRadius,
             borderLeft: `${gameData.game.textBox.style.borderTopWidth} ${gameData.game.textBox.style.borderTopStyle} ${gameData.game.textBox.style.borderTopColor}`,

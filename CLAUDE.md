@@ -393,6 +393,90 @@ describe('parseIfNumber', () => {
 新しいバージョンのツールで古いデータを開く際に自動変換される。
 逆方向（新→旧）のマイグレーションはサポートしない。
 
+## UI拡張パラメータ（2026-02）
+
+### 名前表示部の独立化（game.textBox.nameStyle）
+
+キャラクター名表示部が完全に独立したパラメータセットを持つようになりました：
+
+- `color`: 文字色
+- `fontSize`: 文字サイズ
+- `padding`: パディング（数値px）
+- `minWidth`: 最小幅（数値px）
+- `distance`: テキストボックスとの距離（px）
+  - `0`: テキストボックスに接続（下部ボーダー・角丸なし）
+  - `> 0`: 独立表示（全ボーダー・角丸適用）
+- `borderWidth`, `borderStyle`, `borderColor`: ボーダー設定
+- `borderRadius`: 角丸（distance > 0 の時のみ全ての角に適用）
+
+### SaveLoad画面の拡張（game.save）
+
+タイトルと×ボタンのスタイルが独立したオブジェクトになりました：
+
+```javascript
+"save": {
+  "gap": 10,                    // スロット間隔
+  "titleStyle": {
+    "fontSize": "24px",         // タイトルフォントサイズ
+    "color": "rgba(0,0,0,1)",
+    "backgroundColor": "transparent",
+    "padding": "0px"
+  },
+  "closeBtnStyle": {
+    "size": 24,                 // ×ボタンサイズ
+    "color": "rgba(0,0,0,1)",
+    "hover": "hoverOp"          // ホバー効果
+  }
+}
+```
+
+### 方向移動ボタンの画像対応（game.direction.images）
+
+4方向それぞれに自作画像を設定可能：
+
+```javascript
+"direction": {
+  "images": {
+    "top": "",      // 上方向の画像パス
+    "right": "",    // 右方向の画像パス
+    "bottom": "",   // 下方向の画像パス
+    "left": ""      // 左方向の画像パス
+  }
+}
+```
+
+表示優先順位: 画像 > デフォルトアイコン（`useDefaultArrow: true`） > なし
+
+### フォント設定機能
+
+#### 全体フォント（game.gameStyle.fontFamily）
+
+ゲーム全体のデフォルトフォントを設定：
+
+```javascript
+"gameStyle": {
+  "fontFamily": "system-ui"  // デフォルトフォント
+}
+```
+
+**Google Fonts 自動ロード:**
+- エディタの「ゲーム全体」→「ゲームスタイル」→「デフォルトフォント」で選択
+- プリセット: Noto Sans JP, Noto Serif JP, M PLUS Rounded 1c 等
+- Google Fonts を選択すると自動的にCDNから読み込まれる
+- ユーザーは「プリロード」を意識する必要なし
+
+#### ホットスポットごとのフォント（state.style.fontFamily）
+
+各ホットスポットのステートで個別にフォントを上書き可能：
+
+```javascript
+"style": {
+  "fontFamily": ""  // 空文字列 = game.gameStyle.fontFamily を継承
+}
+```
+
+エディタの「シーン」→「ホットスポット」→「ステート」→「テキスト」→「フォント」で設定。
+
 ### コーディングルール
 
 - **ブランチ運用**: 新機能や機能変更を行うときは、必ず `feature/機能名` のブランチを切ってから実装すること

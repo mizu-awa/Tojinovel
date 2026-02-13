@@ -6,8 +6,7 @@ function SaveLoad({
   save,
   saveClick,
   loadClick,
-  closeSaveLoad,
-  screenSize
+  closeSaveLoad
 }){
     // 2桁ゼロ埋め関数
     const pad = (n) => n.toString().padStart(2, '0');
@@ -26,7 +25,9 @@ function SaveLoad({
 
     if(!saveLoadSlots) return null;
 
-    const titleFontSize = screenSize ? Math.max(12, Math.round(screenSize[1] * 0.04)) : (parseInt(save?.buttonStyle?.fontSize) || 16);
+    const titleFontSize = parseInt(save.titleStyle?.fontSize) || 24;
+    const closeBtnSize = save.closeBtnStyle?.size || 24;
+    const titlePadding = save.titleStyle?.padding || `${titleFontSize / 2}px`;
 
     return(
         <div
@@ -43,14 +44,20 @@ function SaveLoad({
             boxSizing: "border-box"
           }}
         >
-          <h2 style={{ padding: `${titleFontSize / 2}px`, fontSize: `${titleFontSize}px` }}>
+          <h2 style={{
+            padding: titlePadding,
+            fontSize: `${titleFontSize}px`,
+            color: save.titleStyle?.color,
+            backgroundColor: save.titleStyle?.backgroundColor,
+            margin: 0
+          }}>
             {saveLoadSlots.type === "save" ? save.saveText : save.loadText}
           </h2>
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 10,
+              gap: save.gap || 10,
               flex: 1,
               minHeight: 0,
               overflowY: "auto",
@@ -92,16 +99,18 @@ function SaveLoad({
             })}
           </div>
           <div
+            className={save.closeBtnStyle?.hover}
             style={{
               position: "absolute",
               top: 10,
               right: 10,
-              padding: `${titleFontSize / 2}px`,
-              cursor: "pointer"
+              padding: `${closeBtnSize / 2}px`,
+              cursor: "pointer",
+              color: save.closeBtnStyle?.color
             }}
             onClick={closeSaveLoad}
           >
-            <X size={titleFontSize} />
+            <X size={closeBtnSize} />
           </div>
         </div>
     )
