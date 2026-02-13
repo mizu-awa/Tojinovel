@@ -258,6 +258,7 @@
   "title": "Game title",
   "screenSize": [800, 480],
   "startScene": "New Scene",
+  "commonSceneName": "",
   "character": {
     "slots": 3
   },
@@ -281,6 +282,7 @@
 |title	|string	|ゲームタイトル
 |screenSize	|number[]	|画面最大サイズ（x,y）
 |startScene	|string	|開始シーン名
+|commonSceneName	|string	|共通部品として使用するシーン名
 |character.slots	|number	|立ち絵の同時表示数
 |backStyle	|object	|ゲーム画面の背景スタイル
 |gameStyle	|object	|ゲーム画面のスタイル
