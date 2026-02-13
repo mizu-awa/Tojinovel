@@ -56,6 +56,78 @@ function normalizeRelativeUrl(path) {
 
 
 
+// 英語エイリアス → 日本語コマンドの変換マップ
+// 完全一致（引数なしコマンド）
+const exactAliases = {
+  "click": "クリック待ち",
+  "endif": "if終了",
+  "option": "選択肢",
+  "option:": "選択肢:",
+  "endOption": "選択肢終了",
+  "clearBg": "背景クリア",
+  "clearImage": "画像クリア",
+  "hideChar": "キャラ非表示",
+  "showChar": "キャラ非表示解除",
+  "clearChar": "キャラクリア",
+  "clearText": "テキストクリア",
+  "closeItem": "アイテム画面閉じる",
+  "stopBGM": "BGM停止",
+  "openSave": "セーブ画面",
+  "openLoad": "ロード画面",
+  "openConfig": "コンフィグ画面",
+};
+
+// プレフィックス一致（コロン付きコマンド）
+const prefixAliases = {
+  "flag:": "フラグ:",
+  "getItem:": "アイテム入手:",
+  "discardItem:": "アイテム破棄:",
+  "changeState:": "ステート変更:",
+  "changeStateAll:": "ステート一括変更:",
+  "changeItemState:": "アイテムステート変更:",
+  "changeItemStateAll:": "アイテムステート一括変更:",
+  "fileJump:": "ファイルジャンプ:",
+  "bg:": "背景:",
+  "image:": "画像:",
+  "input:": "入力:",
+  "moveScene:": "シーン移動:",
+  "sceneBg:": "シーン背景変更:",
+  "itemBg:": "アイテム背景変更:",
+  "openItem:": "アイテム画面:",
+  "random:": "乱数:",
+  "hyperlink:": "ハイパーリンク:",
+  "save:": "セーブ:",
+  "load:": "ロード:",
+  "bgmVolume:": "BGM音量:",
+  "seVolume:": "SE音量:",
+  "voiceVolume:": "ボイス音量:",
+  "textSpeed:": "文字送り速度:",
+  "timer:": "タイマー:",
+  "pauseTimer:": "タイマー一時停止:",
+  "resumeTimer:": "タイマー再開:",
+  "console:": "コンソール:",
+};
+
+// 英語コマンドを日本語に正規化
+function normalizeCommand(command) {
+  // 完全一致チェック
+  if (exactAliases[command]) return exactAliases[command];
+
+  // プレフィックス一致チェック（長い順にソート済みなので最長マッチ）
+  for (const [en, ja] of Object.entries(prefixAliases)) {
+    if (command.startsWith(en)) {
+      return ja + command.slice(en.length);
+    }
+  }
+
+  // clearBg: の特殊ケース（clearBg:アニメーション名）
+  if (command.startsWith("clearBg:")) {
+    return "背景クリア:" + command.slice("clearBg:".length);
+  }
+
+  return command;
+}
+
 /**
  * txt を EventViewer 用の配列に変換
  */
@@ -94,8 +166,8 @@ function parseEventText(text, label, characters) {
 
     // コマンドの場合
     if (line.startsWith("#")) {
-      // #を除去
-      const command = line.slice(1);
+      // #を除去し、英語エイリアスを日本語に正規化
+      const command = normalizeCommand(line.slice(1));
       switch (true) {
         case command === "クリック待ち":// クリック待ち
           blocks.push({ type: "click" });
