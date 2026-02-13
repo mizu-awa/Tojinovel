@@ -7,6 +7,7 @@ import TextAlignSelector from "../TextAlignSelector";
 import TextVerticalAlignSelector from "../TextVerticalAlignSelector";
 import BorderStyleSelect from "../BorderStyleSelect";
 import HoverSelector from "../HoverSelector";
+import FontSelector from "../FontSelector";
 import MyAutoComplete from "../MyAutoComplete";
 import StyledCheckbox from "../StyledCheckBox";
 import MyAccordion from "../MyAccordion";
@@ -314,6 +315,14 @@ const ItemSettings = ({
               data-path={`${statePath}.style.textPadding`}
               data-type="px"
               inputProps={inputPropsDefaultNum}
+            />
+          </FormField>
+
+          <FormField label="フォント（空欄で全体設定を継承）">
+            <FontSelector
+              value={state.style.fontFamily || ""}
+              onChange={handleDatasetChange}
+              data-path={`${statePath}.style.fontFamily`}
             />
           </FormField>
         </MyAccordion>

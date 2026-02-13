@@ -191,6 +191,65 @@ export default function EditorApp() {
     saveFile();
   }, [saveAllDirtyFiles, saveFile]);
 
+  // Google Fontsの自動ロード
+  useEffect(() => {
+    if (!gameData) return;
+
+    // 使用されているフォントを収集
+    const fonts = new Set();
+
+    // 全体フォント
+    const defaultFont = gameData.game?.gameStyle?.fontFamily;
+    if (defaultFont && defaultFont !== "system-ui" && !defaultFont.includes(",")) {
+      fonts.add(defaultFont);
+    }
+
+    // 全ホットスポットのフォント
+    gameData.scenes?.forEach(scene => {
+      scene.hotspots?.forEach(hotspot => {
+        hotspot.states?.forEach(state => {
+          if (state.style?.fontFamily && state.style.fontFamily !== "system-ui" && !state.style.fontFamily.includes(",")) {
+            fonts.add(state.style.fontFamily);
+          }
+        });
+      });
+    });
+
+    gameData.items?.forEach(item => {
+      item.hotspots?.forEach(hotspot => {
+        hotspot.states?.forEach(state => {
+          if (state.style?.fontFamily && state.style.fontFamily !== "system-ui" && !state.style.fontFamily.includes(",")) {
+            fonts.add(state.style.fontFamily);
+          }
+        });
+      });
+    });
+
+    // Google Fonts をロード
+    if (fonts.size > 0) {
+      const fontFamilies = Array.from(fonts).map(f => f.replace(/ /g, "+")).join("&family=");
+      const link = document.createElement("link");
+      link.href = `https://fonts.googleapis.com/css2?family=${fontFamilies}&display=swap`;
+      link.rel = "stylesheet";
+      link.id = "google-fonts-dynamic-editor";
+
+      // 既存のリンクを削除
+      const existingLink = document.getElementById("google-fonts-dynamic-editor");
+      if (existingLink) {
+        document.head.removeChild(existingLink);
+      }
+
+      document.head.appendChild(link);
+
+      return () => {
+        const linkToRemove = document.getElementById("google-fonts-dynamic-editor");
+        if (linkToRemove) {
+          document.head.removeChild(linkToRemove);
+        }
+      };
+    }
+  }, [gameData]);
+
   // keydown-------------------------
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -590,6 +649,7 @@ export default function EditorApp() {
                             handleResizeStart={handleResizeStart}
                             handleRotateStart={handleRotateStart}
                             variables={gameData.variables}
+                            gameData={gameData}
                             setSelectedSubItem={setSelectedSubItem}
                             setSelectedThirdItem={setSelectedThirdItem}
                           />}

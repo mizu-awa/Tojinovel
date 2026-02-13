@@ -25,7 +25,24 @@ function SceneDirections({
                   className={config.hover}
                   onClick={() => handleDirectionClick(directions.top)}
                 >
-                  {config.useDefaultArrow && <ChevronUp size={config.size} />}
+                  {config.images?.top ? (
+                    <img
+                      src={config.images.top}
+                      alt="上へ"
+                      draggable={false}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain"
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "./system/transparent.png";
+                      }}
+                    />
+                  ) : config.useDefaultArrow ? (
+                    <ChevronUp size={config.size} />
+                  ) : null}
                 </div>
               }
         
@@ -46,7 +63,24 @@ function SceneDirections({
                   className={config.hover}
                   onClick={() => handleDirectionClick(directions.right)}
                 >
-                  {config.useDefaultArrow && <ChevronRight size={config.size} />}
+                  {config.images?.right ? (
+                    <img
+                      src={config.images.right}
+                      alt="右へ"
+                      draggable={false}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain"
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "./system/transparent.png";
+                      }}
+                    />
+                  ) : config.useDefaultArrow ? (
+                    <ChevronRight size={config.size} />
+                  ) : null}
                 </div>
               }
         
@@ -67,7 +101,24 @@ function SceneDirections({
                   className={config.hover}
                   onClick={() => handleDirectionClick(directions.bottom)}
                 >
-                  {config.useDefaultArrow && <ChevronDown size={config.size} />}
+                  {config.images?.bottom ? (
+                    <img
+                      src={config.images.bottom}
+                      alt="下へ"
+                      draggable={false}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain"
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "./system/transparent.png";
+                      }}
+                    />
+                  ) : config.useDefaultArrow ? (
+                    <ChevronDown size={config.size} />
+                  ) : null}
                 </div>
               }
         
@@ -88,7 +139,24 @@ function SceneDirections({
                   className={config.hover}
                   onClick={() => handleDirectionClick(directions.left)}
                 >
-                  {config.useDefaultArrow && <ChevronLeft size={config.size} />}
+                  {config.images?.left ? (
+                    <img
+                      src={config.images.left}
+                      alt="左へ"
+                      draggable={false}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain"
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "./system/transparent.png";
+                      }}
+                    />
+                  ) : config.useDefaultArrow ? (
+                    <ChevronLeft size={config.size} />
+                  ) : null}
                 </div>
               }
         </>

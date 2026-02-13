@@ -461,6 +461,65 @@ export default function GameApp({ debug }) {
     }
   }, [gameData]);
 
+  // Google Fontsの自動ロード
+  useEffect(() => {
+    if (!gameData) return;
+
+    // 使用されているフォントを収集
+    const fonts = new Set();
+
+    // 全体フォント
+    const defaultFont = gameData.game?.gameStyle?.fontFamily;
+    if (defaultFont && defaultFont !== "system-ui" && !defaultFont.includes(",")) {
+      fonts.add(defaultFont);
+    }
+
+    // 全ホットスポットのフォント
+    gameData.scenes?.forEach(scene => {
+      scene.hotspots?.forEach(hotspot => {
+        hotspot.states?.forEach(state => {
+          if (state.style?.fontFamily && state.style.fontFamily !== "system-ui" && !state.style.fontFamily.includes(",")) {
+            fonts.add(state.style.fontFamily);
+          }
+        });
+      });
+    });
+
+    gameData.items?.forEach(item => {
+      item.hotspots?.forEach(hotspot => {
+        hotspot.states?.forEach(state => {
+          if (state.style?.fontFamily && state.style.fontFamily !== "system-ui" && !state.style.fontFamily.includes(",")) {
+            fonts.add(state.style.fontFamily);
+          }
+        });
+      });
+    });
+
+    // Google Fonts をロード
+    if (fonts.size > 0) {
+      const fontFamilies = Array.from(fonts).map(f => f.replace(/ /g, "+")).join("&family=");
+      const link = document.createElement("link");
+      link.href = `https://fonts.googleapis.com/css2?family=${fontFamilies}&display=swap`;
+      link.rel = "stylesheet";
+      link.id = "google-fonts-dynamic";
+
+      // 既存のリンクを削除
+      const existingLink = document.getElementById("google-fonts-dynamic");
+      if (existingLink) {
+        document.head.removeChild(existingLink);
+      }
+
+      document.head.appendChild(link);
+
+      return () => {
+        const linkToRemove = document.getElementById("google-fonts-dynamic");
+        if (linkToRemove) {
+          document.head.removeChild(linkToRemove);
+        }
+      };
+    }
+  }, [gameData]);
+
   // リサイズ時の挙動を指定してスケール対応(絶対座標で指定するためにこの方式をとっている)
   useEffect(() => {
     if(gameData){
@@ -590,6 +649,7 @@ export default function GameApp({ debug }) {
   const gameContainerStyle = {
     ...gameData.game.gameStyle,
     boxShadow: `0 4px 12px ${gameData.game.gameStyle.shadowColor}`,
+    fontFamily: gameData.game.gameStyle.fontFamily || "system-ui",
     display: "flex",
     width: gameData.game.screenSize[0],
     height: gameData.game.screenSize[1],
@@ -619,6 +679,7 @@ export default function GameApp({ debug }) {
           currentSceneName={currentScene.name}
           handleHotspotClick={handleHotspotClick}
           variables={gameData.variables}
+          gameData={gameData}
           onInputChange={handleInputChange}
           onDragEnd={handleDragEnd}
         />
@@ -637,6 +698,7 @@ export default function GameApp({ debug }) {
           handleHotspotClick={handleHotspotClick}
           handleItemBackClick={handleItemBackClick}
           variables={gameData.variables}
+          gameData={gameData}
           onInputChange={handleInputChange}
           onDragEnd={handleDragEnd}
         />

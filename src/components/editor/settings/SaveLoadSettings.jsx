@@ -33,6 +33,82 @@ const SaveLoadSettings = ({
             data-path="game.save.auto"
           />
         </FormField>
+
+        <FormField label="スロット間隔">
+          <StyledInput
+            type="number"
+            value={gameSave.gap}
+            onChange={handleDatasetChange}
+            inputProps={inputPropsDefaultNum}
+            data-path="game.save.gap"
+          />
+        </FormField>
+      </MyAccordion>
+
+      <MyAccordion title="タイトルスタイル">
+        <FormField label="文字サイズ">
+          <StyledInput
+            type="number"
+            value={parseInt(gameSave.titleStyle?.fontSize) || 0}
+            onChange={handleDatasetChange}
+            inputProps={inputPropsDefaultNum}
+            data-path="game.save.titleStyle.fontSize"
+            data-type="px"
+          />
+        </FormField>
+
+        <FormField label="文字色">
+          <RgbaColorInput
+            value={gameSave.titleStyle?.color}
+            onChange={handleDatasetChange}
+            data-path="game.save.titleStyle.color"
+          />
+        </FormField>
+
+        <FormField label="背景色">
+          <RgbaColorInput
+            value={gameSave.titleStyle?.backgroundColor}
+            onChange={handleDatasetChange}
+            data-path="game.save.titleStyle.backgroundColor"
+          />
+        </FormField>
+
+        <FormField label="パディング">
+          <StyledInput
+            type="text"
+            value={gameSave.titleStyle?.padding}
+            onChange={handleDatasetChange}
+            data-path="game.save.titleStyle.padding"
+          />
+        </FormField>
+      </MyAccordion>
+
+      <MyAccordion title="閉じるボタン">
+        <FormField label="ボタンサイズ">
+          <StyledInput
+            type="number"
+            value={gameSave.closeBtnStyle?.size}
+            onChange={handleDatasetChange}
+            inputProps={inputPropsDefaultNum}
+            data-path="game.save.closeBtnStyle.size"
+          />
+        </FormField>
+
+        <FormField label="ボタン色">
+          <RgbaColorInput
+            value={gameSave.closeBtnStyle?.color}
+            onChange={handleDatasetChange}
+            data-path="game.save.closeBtnStyle.color"
+          />
+        </FormField>
+
+        <FormField label="ホバー効果">
+          <HoverSelector
+            value={gameSave.closeBtnStyle?.hover}
+            onChange={handleDatasetChange}
+            data-path="game.save.closeBtnStyle.hover"
+          />
+        </FormField>
       </MyAccordion>
 
       <MyAccordion title="テキスト設定">

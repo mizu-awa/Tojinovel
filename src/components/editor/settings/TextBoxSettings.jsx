@@ -173,24 +173,123 @@ const TextBoxSettings = ({
         </FormField>
       </MyAccordion>
 
-      <MyAccordion title="名前背景">
-        <FormField label="背景色">
-          <RgbaColorInput
-            value={gameTextBox.nameStyle.backgroundColor}
-            onChange={handleDatasetChange}
-            data-path="game.textBox.nameStyle.backgroundColor"
-          />
-        </FormField>
+      <MyAccordion title="名前表示">
+        <MyAccordion title="基本">
+          <FormField label="テキストボックスとの距離">
+            <StyledInput
+              type="number"
+              value={gameTextBox.nameStyle.distance}
+              onChange={handleDatasetChange}
+              inputProps={inputPropsDefaultNum}
+              data-path="game.textBox.nameStyle.distance"
+            />
+          </FormField>
 
-        <FormField label="背景画像">
-          <StyledInput
-            type="text"
-            value={gameTextBox.nameStyle.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
+          <FormField label="パディング">
+            <StyledInput
+              type="number"
+              value={gameTextBox.nameStyle.padding}
+              onChange={handleDatasetChange}
+              inputProps={inputPropsDefaultNum}
+              data-path="game.textBox.nameStyle.padding"
+            />
+          </FormField>
+
+          <FormField label="最小幅">
+            <StyledInput
+              type="number"
+              value={gameTextBox.nameStyle.minWidth}
+              onChange={handleDatasetChange}
+              inputProps={inputPropsDefaultNum}
+              data-path="game.textBox.nameStyle.minWidth"
+            />
+          </FormField>
+        </MyAccordion>
+
+        <MyAccordion title="背景">
+          <FormField label="背景色">
+            <RgbaColorInput
+              value={gameTextBox.nameStyle.backgroundColor}
+              onChange={handleDatasetChange}
+              data-path="game.textBox.nameStyle.backgroundColor"
+            />
+          </FormField>
+
+          <FormField label="背景画像">
+            <StyledInput
+              type="text"
+              value={gameTextBox.nameStyle.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
+              onChange={handleDatasetChange}
+              data-path="game.textBox.nameStyle.backgroundImage"
+              data-type="url"
+            />
+          </FormField>
+        </MyAccordion>
+
+        <MyAccordion title="文字">
+          <FormField label="文字色">
+            <RgbaColorInput
+              value={gameTextBox.nameStyle.color}
+              onChange={handleDatasetChange}
+              data-path="game.textBox.nameStyle.color"
+            />
+          </FormField>
+
+          <FormField label="文字サイズ">
+            <StyledInput
+              type="number"
+              value={parseInt(gameTextBox.nameStyle.fontSize) || 0}
+              onChange={handleDatasetChange}
+              inputProps={inputPropsDefaultNum}
+              data-path="game.textBox.nameStyle.fontSize"
+              data-type="px"
+            />
+          </FormField>
+        </MyAccordion>
+
+        <MyAccordion title="枠線">
+          <FormField label="ボーダー太さ">
+            <StyledInput
+              type="number"
+              value={parseInt(gameTextBox.nameStyle.borderWidth) || 0}
+              onChange={handleDatasetChange}
+              inputProps={inputPropsDefaultNum}
+              data-path="game.textBox.nameStyle.borderWidth"
+              data-type="px"
+            />
+          </FormField>
+
+          <BorderStyleSelect
+            label="ボーダースタイル"
+            value={gameTextBox.nameStyle.borderStyle}
             onChange={handleDatasetChange}
-            data-path="game.textBox.nameStyle.backgroundImage"
-            data-type="url"
+            data-path="game.textBox.nameStyle.borderStyle"
           />
-        </FormField>
+
+          <FormField label="ボーダー色">
+            <RgbaColorInput
+              value={gameTextBox.nameStyle.borderColor}
+              onChange={handleDatasetChange}
+              data-path="game.textBox.nameStyle.borderColor"
+            />
+          </FormField>
+        </MyAccordion>
+
+        <MyAccordion title="角丸">
+          <FormField label="角丸">
+            <StyledInput
+              type="number"
+              value={parseInt(gameTextBox.nameStyle.borderRadius) || 0}
+              onChange={handleDatasetChange}
+              inputProps={inputPropsDefaultNum}
+              data-path="game.textBox.nameStyle.borderRadius"
+              data-type="px"
+            />
+          </FormField>
+          <p style={{ fontSize: "0.75rem", color: "#666", marginTop: "8px" }}>
+            距離が0の場合は下部の角丸が無効になります
+          </p>
+        </MyAccordion>
       </MyAccordion>
 
       <MyAccordion title="ハイライト・インジケーター">

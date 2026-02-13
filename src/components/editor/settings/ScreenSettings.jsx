@@ -4,6 +4,7 @@ import BorderStyleSelect from "../BorderStyleSelect"
 import RgbaColorInput from "../RgbaColorInput"
 import { StyledInput } from "../StyledInput"
 import StyledCheckbox from "../StyledCheckBox";
+import FontSelector from "../FontSelector";
 import { inputPropsDefaultNum } from "./inputProps";
 import { MenuItem, Select } from "@mui/material"
 import MyAccordion from "../MyAccordion";
@@ -85,6 +86,17 @@ const ScreenSettings = ({
       </MyAccordion>
 
       <MyAccordion title="ゲームスタイル">
+        <FormField label="デフォルトフォント">
+          <FontSelector
+            value={game.gameStyle.fontFamily}
+            onChange={handleDatasetChange}
+            data-path="game.gameStyle.fontFamily"
+          />
+        </FormField>
+        <p style={{ fontSize: "0.75rem", color: "#666", marginTop: "8px" }}>
+          Google Fontsを選択した場合、自動的に読み込まれます
+        </p>
+
         <FormField label="文字色">
           <RgbaColorInput
             value={game.gameStyle.color}
