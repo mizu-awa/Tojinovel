@@ -8,6 +8,13 @@ const editBorderStyle = {
   boxSizing: "border-box",
 }
 
+const commonBorderStyle = {
+  position: "absolute",
+  inset: 0,
+  border: "1px dotted gray",
+  boxSizing: "border-box",
+}
+
 const scaleHandleBase = {
   border: "gray 1px solid",
   backgroundColor: "white",
@@ -298,7 +305,7 @@ function Hotspots({
             )}
             {edit && (
               <div
-                style={editBorderStyle}
+                style={type === "common" ? commonBorderStyle : editBorderStyle}
               />
             )}
             {edit && (hotspotIndex === index) && (
