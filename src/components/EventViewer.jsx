@@ -257,7 +257,7 @@ function EventViewer({
             zIndex: 2002,
             boxSizing: "border-box",
             fontSize: gameData.game.textBox.style.fontSize,
-            padding: `${gameData.game.textBox.style.padding * 0.75}px`
+            padding: `1.5%`
           }}
         >
           <span>{currentLine.char}</span>
