@@ -409,6 +409,11 @@ export default function EditorApp() {
   // render null-------------------------------------------------------
   if(!gameData) return null;
 
+  // 共通シーンを取得
+  const commonScene = gameData?.game?.commonSceneName
+    ? gameData.scenes.find(s => s.name === gameData.game.commonSceneName)
+    : null;
+
   // render const -------------------------------------------------------------------------------------
   // 施策1: 選択中のSettingsコンポーネントだけを生成
   const renderGameSetting = () => {
@@ -610,21 +615,43 @@ export default function EditorApp() {
                           <SnapOverlay guideLines={guideLines} screenSize={sceneSize} />}
 
                         {/* シーンホットスポット */}
-                        {mainTab === "scenes" &&
-                          <Hotspots
-                            type="scene"
-                            edit
-                            hotspotIndex={selectedSubItem}
-                            stateIndex={selectedThirdItem}
-                            hotspots={nowScene?.hotspots}
-                            handleHotspotClick={noop}
-                            onMouseDown={onDragStart}
-                            hotspotRefs={hotspotRefs}
-                            handleResizeStart={handleResizeStart}
-                            handleRotateStart={handleRotateStart}
-                            variables={gameData.variables}
-                            onTextChange={handleHotspotTextChange}
-                          />}
+                        {mainTab === "scenes" && (
+                          <>
+                            {/* 通常シーンのホットスポット */}
+                            <Hotspots
+                              type="scene"
+                              edit
+                              hotspotIndex={selectedSubItem}
+                              stateIndex={selectedThirdItem}
+                              hotspots={nowScene?.hotspots}
+                              handleHotspotClick={noop}
+                              onMouseDown={onDragStart}
+                              hotspotRefs={hotspotRefs}
+                              handleResizeStart={handleResizeStart}
+                              handleRotateStart={handleRotateStart}
+                              variables={gameData.variables}
+                              onTextChange={handleHotspotTextChange}
+                            />
+
+                            {/* 共通シーンのホットスポット */}
+                            {commonScene && commonScene.name !== nowScene?.name && (
+                              <Hotspots
+                                type="common"
+                                edit
+                                hotspotIndex={-1}
+                                stateIndex={null}
+                                hotspots={commonScene.hotspots}
+                                handleHotspotClick={noop}
+                                onMouseDown={noop}
+                                hotspotRefs={null}
+                                handleResizeStart={noop}
+                                handleRotateStart={noop}
+                                variables={gameData.variables}
+                                onTextChange={noop}
+                              />
+                            )}
+                          </>
+                        )}
 
                         {/* 方向移動ボタン */}
                         {(selectedItem === "方向移動" || mainTab === "scenes") &&

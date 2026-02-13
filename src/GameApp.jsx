@@ -634,6 +634,11 @@ export default function GameApp({ debug }) {
   // calc----------------------------------------------------------------------------------------------
   const viewItem = gameData ? gameData.items.find((r) => r.name === viewItemName) : null;
 
+  // 共通シーンを取得
+  const commonScene = gameData?.game?.commonSceneName
+    ? gameData.scenes.find(s => s.name === gameData.game.commonSceneName)
+    : null;
+
   // render---------------------------------------------------------------------------------------------
   if (loading) return <Loading />;
   if (error) return <Error message={error.message} />;
@@ -683,6 +688,20 @@ export default function GameApp({ debug }) {
           onInputChange={handleInputChange}
           onDragEnd={handleDragEnd}
         />
+
+        {/* 共通シーンのホットスポット */}
+        {commonScene && (
+          <Hotspots
+            type="common"
+            hotspots={commonScene.hotspots}
+            currentSceneName={commonScene.name}
+            handleHotspotClick={handleHotspotClick}
+            variables={gameData.variables}
+            gameData={gameData}
+            onInputChange={handleInputChange}
+            onDragEnd={handleDragEnd}
+          />
+        )}
 
         {/* 方向移動ボタン */}
         <SceneDirections

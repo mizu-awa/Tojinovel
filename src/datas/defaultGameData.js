@@ -95,6 +95,7 @@ export const defaultGameData = {
     "title": "Game title",
     "screenSize": [800, 480],
     "startScene": "New Scene",
+    "commonSceneName": "",
     "character": {
       "slots": 3
     },
