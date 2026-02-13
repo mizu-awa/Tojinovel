@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
 import {
     parseIfNumber,
     parseOperand,
     evalCondition,
+    evalCompoundCondition,
     checkOverlap,
     calcFlag,
     randomInt,
@@ -154,6 +154,68 @@ describe('eventExecutionUtils', () => {
                 { name: 'A', state: 's1', states: [{ name: 's1', visibility: true, x: 0, y: 0, width: 100, height: 100 }] },
             ];
             expect(evalCondition('A >< NotExist', [], hotspots)).toBe(false);
+        });
+    });
+
+    // evalCompoundCondition のテスト
+    describe('evalCompoundCondition', () => {
+        const variables = [
+            { name: 'score', value: '100' },
+            { name: 'level', value: '5' },
+            { name: 'flag', value: '1' },
+            { name: 'key', value: '1' },
+            { name: 'door', value: '0' }
+        ];
+
+        it('単一条件はevalConditionと同じ結果を返す', () => {
+            expect(evalCompoundCondition('score == 100', variables)).toBe(true);
+            expect(evalCompoundCondition('score == 50', variables)).toBe(false);
+        });
+
+        it('「かつ」でAND条件を評価する', () => {
+            expect(evalCompoundCondition('score == 100 かつ level == 5', variables)).toBe(true);
+            expect(evalCompoundCondition('score == 100 かつ level == 10', variables)).toBe(false);
+            expect(evalCompoundCondition('score == 50 かつ level == 5', variables)).toBe(false);
+        });
+
+        it('&&でAND条件を評価する', () => {
+            expect(evalCompoundCondition('score == 100 && level == 5', variables)).toBe(true);
+            expect(evalCompoundCondition('score == 100 && level == 10', variables)).toBe(false);
+        });
+
+        it('「または」でOR条件を評価する', () => {
+            expect(evalCompoundCondition('score == 100 または level == 10', variables)).toBe(true);
+            expect(evalCompoundCondition('score == 50 または level == 5', variables)).toBe(true);
+            expect(evalCompoundCondition('score == 50 または level == 10', variables)).toBe(false);
+        });
+
+        it('||でOR条件を評価する', () => {
+            expect(evalCompoundCondition('score == 100 || level == 10', variables)).toBe(true);
+            expect(evalCompoundCondition('score == 50 || level == 10', variables)).toBe(false);
+        });
+
+        it('ANDはORより優先される', () => {
+            // key==1 かつ door==0 → true, score==50は偽だが OR で true
+            expect(evalCompoundCondition('score == 50 または key == 1 かつ door == 0', variables)).toBe(true);
+            // score==50 かつ level==5 → false, key==1は真なので OR で true
+            expect(evalCompoundCondition('score == 50 かつ level == 5 または key == 1', variables)).toBe(true);
+            // 両方のOR部分が偽
+            expect(evalCompoundCondition('score == 50 かつ level == 5 または key == 0 かつ door == 0', variables)).toBe(false);
+        });
+
+        it('3つ以上のAND条件を評価する', () => {
+            expect(evalCompoundCondition('score == 100 かつ level == 5 かつ flag == 1', variables)).toBe(true);
+            expect(evalCompoundCondition('score == 100 かつ level == 5 かつ flag == 0', variables)).toBe(false);
+        });
+
+        it('3つ以上のOR条件を評価する', () => {
+            expect(evalCompoundCondition('score == 50 または level == 10 または flag == 1', variables)).toBe(true);
+            expect(evalCompoundCondition('score == 50 または level == 10 または flag == 0', variables)).toBe(false);
+        });
+
+        it('かつと&&、またはと||を混在できる', () => {
+            expect(evalCompoundCondition('score == 100 && level == 5', variables)).toBe(true);
+            expect(evalCompoundCondition('score == 50 || level == 5', variables)).toBe(true);
         });
     });
 

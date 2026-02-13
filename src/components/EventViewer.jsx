@@ -17,7 +17,7 @@ function EventViewer({
   currentImage, setCurrentImage,
   hiddenCharacter, hideCharacter,
   currentInput, setCurrentInput,
-  ifDepth, opDepth, opLabel,
+  ifDepth, ifMatched, opDepth, opLabel,
   bgm,
   forEdit,
   openSave, openLoad, saveGame, loadGame,
@@ -57,7 +57,7 @@ function EventViewer({
         currentImage, setCurrentImage,
         hiddenCharacter, hideCharacter,
         currentInput, setCurrentInput,
-        ifDepth, opDepth, opLabel,
+        ifDepth, ifMatched, opDepth, opLabel,
         bgm,
         forEdit,
         openSave, openLoad, saveGame, loadGame,
@@ -159,6 +159,8 @@ function EventViewer({
   );
 
   const itemBoxSize = gameData.game.itemBox.foldable ? 0 : gameData.game.itemBox.size;
+  const strokeWidth = 0.05; // 文字サイズに対して5%の太さ（微調整してください）
+  const strokeColor = gameData.game.textBox.highlightStyle.strokeColor;
 
   return (
     <>
@@ -255,7 +257,7 @@ function EventViewer({
             zIndex: 2002,
             boxSizing: "border-box",
             fontSize: gameData.game.textBox.style.fontSize,
-            padding: `${gameData.game.textBox.style.padding * 0.75}px`
+            padding: `1.5%`
           }}
         >
           <span>{currentLine.char}</span>
@@ -298,14 +300,25 @@ function EventViewer({
                   style={{
                     fontWeight: "bolder",
                     color: gameData.game.textBox.highlightStyle.color,
-                    textShadow:`1px 1px 0 ${gameData.game.textBox.highlightStyle.strokeColor},
-                      -1px -1px 0 ${gameData.game.textBox.highlightStyle.strokeColor},
-                      -1px 1px 0 ${gameData.game.textBox.highlightStyle.strokeColor},
-                      1px -1px 0 ${gameData.game.textBox.highlightStyle.strokeColor},
-                      0px 1px 0 ${gameData.game.textBox.highlightStyle.strokeColor}, 
-                      0-1px 0 ${gameData.game.textBox.highlightStyle.strokeColor},
-                      -1px 0 0 ${gameData.game.textBox.highlightStyle.strokeColor},
-                      1px 0 0 ${gameData.game.textBox.highlightStyle.strokeColor}`
+                    textShadow:`
+                      ${strokeWidth}em ${strokeWidth}em 0 ${strokeColor},
+                      -${strokeWidth}em -${strokeWidth}em 0 ${strokeColor},
+                      -${strokeWidth}em ${strokeWidth}em 0 ${strokeColor},
+                      ${strokeWidth}em -${strokeWidth}em 0 ${strokeColor},
+                      0 ${strokeWidth}em 0 ${strokeColor},
+                      0 -${strokeWidth}em 0 ${strokeColor},
+                      -${strokeWidth}em 0 0 ${strokeColor},
+                      ${strokeWidth}em 0 0 ${strokeColor},
+                      /* 中間の角度を補填 */
+                      ${strokeWidth * 0.5}em ${strokeWidth}em 0 ${strokeColor},
+                      ${strokeWidth * 0.5}em -${strokeWidth}em 0 ${strokeColor},
+                      -${strokeWidth * 0.5}em ${strokeWidth}em 0 ${strokeColor},
+                      -${strokeWidth * 0.5}em -${strokeWidth}em 0 ${strokeColor},
+                      ${strokeWidth}em ${strokeWidth * 0.5}em 0 ${strokeColor},
+                      ${strokeWidth}em -${strokeWidth * 0.5}em 0 ${strokeColor},
+                      -${strokeWidth}em ${strokeWidth * 0.5}em 0 ${strokeColor},
+                      -${strokeWidth}em -${strokeWidth * 0.5}em 0 ${strokeColor}
+                    `
                   }}
                 >
                   {part.char} 

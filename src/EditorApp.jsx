@@ -61,6 +61,7 @@ import SnapOverlay from "./components/editor/SnapOverlay";
 const noop = () => {};
 const defaultRef0 = { current: 0 };
 const defaultRefNull = { current: null };
+const defaultRefMap = { current: new Map() };
 const deselectOverlayStyle = { position: "absolute", width: "100%", height: "100%", top: 0, left: 0 };
 
 const itemsDataforEditor = Array.from({ length: 16 }, (_, i) => ({ ...defaultItemData, name: defaultItemData.name + i }));
@@ -639,6 +640,7 @@ export default function EditorApp() {
                         currentInput={currentInputForEditor}
                         setCurrentInput={noop}
                         ifDepth={defaultRef0}
+                        ifMatched={defaultRefMap}
                         opDepth={defaultRef0}
                         opLabel={defaultRefNull}
                         bgm={null}

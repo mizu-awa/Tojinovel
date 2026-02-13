@@ -47,8 +47,8 @@ const eventLanguage = StreamLanguage.define({
       return "labelName";
     }
 
-    // 制御構文: #if, #else, #if終了, #選択肢, #選択肢終了
-    if (stream.match(/#if終了|#if:|#else|#選択肢終了|#選択肢/)) {
+    // 制御構文: #if, #else if, #else, #if終了, #選択肢, #選択肢終了
+    if (stream.match(/#if終了|#if:|#else if:|#else|#選択肢終了|#選択肢/)) {
       return "controlKeyword";
     }
 

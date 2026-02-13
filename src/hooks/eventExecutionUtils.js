@@ -114,6 +114,26 @@ export function evalCondition(cond, variables, hotspots = []) {
 }
 
 /**
+ * 複合条件式を評価する（かつ/&&、または/|| に対応）
+ * かつ/&& は または/|| より優先される
+ * @param {string} cond - 条件式（例: "score > 10 かつ health > 0"）
+ * @param {Array<{name: string, value: *}>} variables - 変数の配列
+ * @param {Array} hotspots - ホットスポット配列（>< 演算子用）
+ * @returns {boolean} - 条件式の評価結果
+ */
+export function evalCompoundCondition(cond, variables, hotspots = []) {
+    // 「または」「||」で分割（OR）
+    const orParts = cond.split(/\s+(?:または|\|\|)\s+/);
+    return orParts.some(orPart => {
+        // 「かつ」「&&」で分割（AND）
+        const andParts = orPart.split(/\s+(?:かつ|&&)\s+/);
+        return andParts.every(part =>
+            evalCondition(part.trim(), variables, hotspots)
+        );
+    });
+}
+
+/**
  * フラグ式をパースして実行する
  * @param {Array<{name: string, value: *}>} variables - 変数の配列（破壊的に更新される）
  * @param {string} formula - 式（例: "score + 10"）

@@ -109,7 +109,12 @@ function parseEventText(text, label, characters) {
           blocks.push({ type: "if", condition: command.replace("if:", "").trim(), depth: depth });
           break;
 
-        case command.startsWith("else"):// else
+        case command.startsWith("else if:"):// else if
+          // 条件式と階層を登録
+          blocks.push({ type: "elseif", condition: command.replace("else if:", "").trim(), depth: depth });
+          break;
+
+        case command === "else":// else
           // 階層を登録
           blocks.push({ type: "else", depth: depth });
           break;
