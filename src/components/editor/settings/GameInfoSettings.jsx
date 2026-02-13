@@ -22,6 +22,15 @@ const GameInfoSettings = ({
           data-path="game.startScene"
         />
       </FormField>
+
+      <FormField label="共通シーン">
+        <MyAutoComplete
+          options={["", ...scenes.map(s => s.name)]}
+          value={game.commonSceneName ?? ""}
+          onChange={handleDatasetChange}
+          data-path="game.commonSceneName"
+        />
+      </FormField>
     </>
   )
 }
