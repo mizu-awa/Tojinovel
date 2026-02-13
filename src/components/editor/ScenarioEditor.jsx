@@ -6,7 +6,7 @@ import { Description, FolderOpen, Close, NoteAdd, Fullscreen, FullscreenExit } f
 // CodeMirror
 import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { LanguageSupport } from "@codemirror/language";
 import eventLanguage from "./codemirror/eventLanguage";
 import { eventCompletionExtension } from "./codemirror/eventCompletion";
@@ -117,7 +117,7 @@ function ScenarioEditor({
         highlightActiveLine(),
         highlightActiveLineGutter(),
         history(),
-        keymap.of([...defaultKeymap, ...historyKeymap]),
+        keymap.of([indentWithTab, ...defaultKeymap, ...historyKeymap]),
         language,
         eventCompletionExtension,
         closeBracketsExtension,
