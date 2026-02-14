@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-export default function useHsndleChange({
+export default function useHandleChange({
     setGameData,
     setMainTab,
     setIsSaved,

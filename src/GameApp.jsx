@@ -24,6 +24,8 @@ import { useIndexedDBSaves } from "./hooks/useIndexedDBStorage.js";
 import Config from "./components/Config.jsx";
 import BackgroundEventRunner from "./components/BackgroundEventRunner.jsx";
 
+const noop = () => {};
+
 export default function GameApp({ debug }) {
   // state-----------------------------------------------------------------------------------------
   const [selectedItem, selectItem] = useState(null);
@@ -821,7 +823,7 @@ export default function GameApp({ debug }) {
         moveScene={moveScene}
         save={getEventSaveData}
         index={0}
-        setIndex={null}
+        setIndex={noop}
         ifDepth={ifDepthBack}
         ifMatched={ifMatchedBack}
         opDepth={opDepthBack}

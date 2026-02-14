@@ -60,6 +60,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
   const currentFilePathRef = useRef(null);
   const currentLabelRef = useRef("");
   const idbTimeoutRef = useRef(null);
+  const scrollTimerRef = useRef(null);
   // エディタがマウントされた時に適用する pending content
   const pendingContentRef = useRef(null);
 
@@ -128,7 +129,8 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
 
       // ラベル位置にスクロール
       if (currentLabelRef.current) {
-        setTimeout(() => scrollToLabel(editorViewRef.current, currentLabelRef.current), 50);
+        clearTimeout(scrollTimerRef.current);
+        scrollTimerRef.current = setTimeout(() => scrollToLabel(editorViewRef.current, currentLabelRef.current), 50);
       }
     }
   }, []);
@@ -191,7 +193,8 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
         pendingContentRef.current = null;
         // ラベル位置にスクロール
         if (label) {
-          setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
+          clearTimeout(scrollTimerRef.current);
+          scrollTimerRef.current = setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
         }
       }
       setStatus(existing.dirty ? "未保存" : null);
@@ -229,7 +232,8 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
             pendingContentRef.current = null;
             // ラベル位置にスクロール
             if (label) {
-              setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
+              clearTimeout(scrollTimerRef.current);
+          scrollTimerRef.current = setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
             }
           }
           setStatus(null);

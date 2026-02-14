@@ -198,6 +198,8 @@ export function random(variables, varName, min, max) {
     const index = variables.findIndex(v => v.name === varName);
     if (index !== -1) {
         variables[index].value = randomInt(safeMin, safeMax);
+    } else {
+        variables.push({ name: varName, value: randomInt(safeMin, safeMax) });
     }
     return variables;
 }
