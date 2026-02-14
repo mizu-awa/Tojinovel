@@ -379,7 +379,7 @@ export default function useEventViewer({
                     // ホットスポットが存在している場合のみ処理
                     if(hotspotIndex!== - 1){
                         // 対象ステートが存在するか確認
-                        const stateIndex = newGameData.scenes[sceneIndex].hotspots[hotspotIndex].states.find(s => s.name === line.state);
+                        const stateIndex = newGameData.scenes[sceneIndex].hotspots[hotspotIndex].states.findIndex(s => s.name === line.state);
                         // ステートが存在している場合のみ処理
                         if(stateIndex !== -1){
                         // ステートを変更
@@ -418,7 +418,7 @@ export default function useEventViewer({
                     // ホットスポットが存在している場合のみ処理
                     if(hotspotIndex!== - 1){
                         // 対象ステートが存在するか確認
-                        const stateIndex = newGameData.items[itemIndex].hotspots[hotspotIndex].states.find(s => s.name === line.state);
+                        const stateIndex = newGameData.items[itemIndex].hotspots[hotspotIndex].states.findIndex(s => s.name === line.state);
                         // ステートが存在している場合のみ処理
                         if(stateIndex !== -1){
                             // ステートを変更
