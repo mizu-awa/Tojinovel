@@ -11,8 +11,8 @@ New-Item -ItemType Directory -Path ./release
 $envText = Get-Content ".env.local"
 $commit = ($envText | Where-Object { $_ -match "^VITE_COMMIT_HASH=" }) `
             -replace "VITE_COMMIT_HASH=", ""
-$release = ($envText | Where-Object { $_ -match "^RELEASE_VERSION=" }) `
-            -replace "RELEASE_VERSION=", ""
+$release = ($envText | Where-Object { $_ -match "^VITE_RELEASE_VERSION=" }) `
+            -replace "VITE_RELEASE_VERSION=", ""
 
 if ($release -and $release.Trim() -ne "") {
     $version = $release

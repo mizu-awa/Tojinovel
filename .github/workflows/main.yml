@@ -54,7 +54,7 @@ jobs:
         run: |
           $version = "v0.1.${{ github.run_number }}.${{ github.run_attempt }}"
           @"
-          RELEASE_VERSION=$version
+          VITE_RELEASE_VERSION=$version
           "@ | Out-File .env.local -Encoding utf8
           echo "version=$version" >> $env:GITHUB_OUTPUT
 

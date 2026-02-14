@@ -37,7 +37,7 @@ export default function useEditorData(){
       // function-------------------------------------------------
       const downloadJSON = useCallback(() => {
         // JSON文字列に変換
-        const json = JSON.stringify({...gameDataRef.current, toolVersion: import.meta.env.RELEASE_VERSION , commit: import.meta.env.VITE_COMMIT_HASH ?? "dev" }, null, 2); // 第2引数のnull,2で整形出力
+        const json = JSON.stringify({...gameDataRef.current, toolVersion: import.meta.env.VITE_RELEASE_VERSION , commit: import.meta.env.VITE_COMMIT_HASH ?? "dev" }, null, 2); // 第2引数のnull,2で整形出力
     
         // Blobオブジェクトを作成（ブラウザで扱えるファイルデータ）
         const blob = new Blob([json], { type: "application/json" });
@@ -115,7 +115,7 @@ export default function useEditorData(){
           const res = await fetch(`${API_BASE}/save`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...gameDataRef.current, toolVersion: import.meta.env.RELEASE_VERSION , commit: import.meta.env.VITE_COMMIT_HASH ?? "dev" }),
+            body: JSON.stringify({ ...gameDataRef.current, toolVersion: import.meta.env.VITE_RELEASE_VERSION , commit: import.meta.env.VITE_COMMIT_HASH ?? "dev" }),
           });
 
           if (!res.ok) {
