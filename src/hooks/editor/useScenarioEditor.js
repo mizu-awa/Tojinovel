@@ -319,7 +319,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
       })
         .then((res) => {
           if (res.ok) {
-            entry.dirty = false;
+            eventBufferRef.current.set(path, { ...entry, dirty: false });
           } else {
             errors.push(`${path}: HTTP ${res.status}`);
           }

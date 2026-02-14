@@ -19,14 +19,16 @@ export default function useEditorData(){
       });
 
       const [selectedSubItem, setSelectedSubItem] = useState(() => {
-        return sessionStorage.getItem("selectedSubItem") ?? 0;
+        const v = sessionStorage.getItem("selectedSubItem");
+        return v === null ? 0 : Number(v) || 0;
       });
 
       const [selectedThirdItem, setSelectedThirdItem] = useState(() => {
-        return sessionStorage.getItem("selectedThirdItem") ?? 0;
+        const v = sessionStorage.getItem("selectedThirdItem");
+        return v === null ? 0 : Number(v) || 0;
       });
     
-      const [gameData, setGameData] = useState(defaultGameData);
+      const [gameData, setGameData] = useState(() => structuredClone(defaultGameData));
 
       const [isSaved, setIsSaved] = useState(true);
     
@@ -83,7 +85,7 @@ export default function useEditorData(){
       }, [setGameData])
 
       const newGame = useCallback(() => {
-        setGameData(defaultGameData);
+        setGameData(structuredClone(defaultGameData));
       }, [setGameData])
 
       const loadFirst = useCallback(async () => {

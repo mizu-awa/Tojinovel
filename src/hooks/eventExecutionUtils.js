@@ -156,8 +156,8 @@ export function calcFlag(variables, formula){
             case "+":  variables[leftIndex].value = leftVal + rightVal; break;
             case "-": variables[leftIndex].value = leftVal - rightVal; break;
             case "*": variables[leftIndex].value = leftVal * rightVal; break;
-            case "/": variables[leftIndex].value = Math.floor(leftVal / rightVal); break;
-            case "%": variables[leftIndex].value = leftVal % rightVal; break;
+            case "/": variables[leftIndex].value = rightVal === 0 ? (console.warn("[Tojinovel] ゼロ除算が発生しました"), 0) : Math.floor(leftVal / rightVal); break;
+            case "%": variables[leftIndex].value = rightVal === 0 ? (console.warn("[Tojinovel] ゼロ除算が発生しました"), 0) : leftVal % rightVal; break;
             case "=": variables[leftIndex].value = rightVal; break;
         }
     }

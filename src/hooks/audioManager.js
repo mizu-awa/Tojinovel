@@ -1,12 +1,13 @@
 import { Howl, Howler } from "howler";
 
+const SE_CACHE_MAX = 50; // SEキャッシュ上限
+
 class AudioManager {
   constructor() {
     this.bgm = null;        // 1つだけ
     this.voice = null;      // 1つだけ
-    this.seList = [];       // 同時再生OK
 
-    // 🚀 修正①: ユーザー操作後にAudioContextを解放
+    // ユーザー操作後にAudioContextを解放
     document.addEventListener(
       "click",
       () => {
@@ -17,7 +18,7 @@ class AudioManager {
       { once: true }
     );
 
-    // 🚀 修正②: 効果音キャッシュ用
+    // 効果音キャッシュ用
     this.seCache = new Map();
   }
 
@@ -50,14 +51,23 @@ class AudioManager {
       bgmToStop.fade(bgmToStop.volume(), 0, fadeOutMs);
       setTimeout(() => {
         bgmToStop.stop();
+        bgmToStop.unload();
       }, fadeOutMs);
     }
   }
   /** 効果音をワンショット再生（キャッシュ付き） */
   playSE(src, volume = 1.0) {
-    // 🚀 修正③: 同じ音源は再利用
     let se = this.seCache.get(src);
     if (!se) {
+      // キャッシュ上限チェック
+      if (this.seCache.size >= SE_CACHE_MAX) {
+        // 最も古いエントリを削除（Mapは挿入順を保持）
+        const oldest = this.seCache.keys().next().value;
+        const oldSe = this.seCache.get(oldest);
+        oldSe.stop();
+        oldSe.unload();
+        this.seCache.delete(oldest);
+      }
       se = new Howl({ src: [src], volume });
       this.seCache.set(src, se);
     }
@@ -86,8 +96,12 @@ class AudioManager {
 
   stopAll() {
     this.stopBGM(0);
-    this.seList.forEach((s) => s.stop());
-    this.seList = [];
+    // キャッシュされた全SEを停止・解放
+    for (const se of this.seCache.values()) {
+      se.stop();
+      se.unload();
+    }
+    this.seCache.clear();
     this.stopVoice();
   }
 }

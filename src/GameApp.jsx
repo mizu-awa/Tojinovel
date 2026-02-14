@@ -278,7 +278,17 @@ export default function GameApp({ debug }) {
         opDepth: opDepth.current,
         opLabel: opLabel.current,
         bgm: bgm.current
-      }
+      },
+      backEventData: {
+        backLines: backLines,
+        backLinesQueue: backLinesQueue.current,
+        isBackEventRunning: isBackEventRunning.current,
+        ifDepthBack: ifDepthBack.current,
+        ifMatchedBack: Object.fromEntries(ifMatchedBack.current),
+        opDepthBack: opDepthBack.current,
+        opLabelBack: opLabelBack.current,
+      },
+      timerData: timers.current.map(t => ({...t}))
     }
     await saveGameDB(slot, saveData);
     setSaveLoadSlots(null);
@@ -305,7 +315,7 @@ export default function GameApp({ debug }) {
       hideCharacter(data.eventData.hiddenCharacter)
       setCurrentInput(data.eventData.currentInput);
       ifDepth.current = data.eventData.ifDepth;
-      ifMatched.current = new Map(Object.entries(data.eventData.ifMatched || {}));
+      ifMatched.current = new Map(Object.entries(data.eventData.ifMatched || {}).map(([k, v]) => [Number(k), v]));
       opDepth.current = data.eventData.opDepth;
       opLabel.current = data.eventData.opLabel;
       bgm.current = data.eventData.bgm;
@@ -315,6 +325,20 @@ export default function GameApp({ debug }) {
       else{
         audioManager.stopBGM();
       }
+      // バックグラウンドイベント復元
+      if (data.backEventData) {
+        setBackLines(data.backEventData.backLines);
+        backLinesQueue.current = data.backEventData.backLinesQueue || [];
+        isBackEventRunning.current = data.backEventData.isBackEventRunning || false;
+        ifDepthBack.current = data.backEventData.ifDepthBack || 0;
+        ifMatchedBack.current = new Map(
+          Object.entries(data.backEventData.ifMatchedBack || {}).map(([k, v]) => [Number(k), v])
+        );
+        opDepthBack.current = data.backEventData.opDepthBack || 0;
+        opLabelBack.current = data.backEventData.opLabelBack || null;
+      }
+      // タイマー復元
+      timers.current = data.timerData || [];
     }
 
     setSaveLoadSlots(null);
