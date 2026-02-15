@@ -219,20 +219,6 @@ function ItemBox({
                         {expand ? <ChevronUp /> : <ChevronDown />}
                     </div>
 
-                :itemBox.position === "right" ?
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            transform: "translateX(-100%)",
-                            backgroundColor: itemBox.boxStyle.backgroundColor
-                        }}
-                        onClick={toggleExpand}
-                    >
-                        {expand ? <ChevronRight /> : <ChevronLeft />}
-                    </div>
-
                 :itemBox.position === "bottom" ?
                     <div
                         style={{

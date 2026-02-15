@@ -379,7 +379,7 @@ export default function useEventViewer({
                     // ホットスポットが存在している場合のみ処理
                     if(hotspotIndex!== - 1){
                         // 対象ステートが存在するか確認
-                        const stateIndex = newGameData.scenes[sceneIndex].hotspots[hotspotIndex].states.find(s => s.name === line.state);
+                        const stateIndex = newGameData.scenes[sceneIndex].hotspots[hotspotIndex].states.findIndex(s => s.name === line.state);
                         // ステートが存在している場合のみ処理
                         if(stateIndex !== -1){
                         // ステートを変更
@@ -418,7 +418,7 @@ export default function useEventViewer({
                     // ホットスポットが存在している場合のみ処理
                     if(hotspotIndex!== - 1){
                         // 対象ステートが存在するか確認
-                        const stateIndex = newGameData.items[itemIndex].hotspots[hotspotIndex].states.find(s => s.name === line.state);
+                        const stateIndex = newGameData.items[itemIndex].hotspots[hotspotIndex].states.findIndex(s => s.name === line.state);
                         // ステートが存在している場合のみ処理
                         if(stateIndex !== -1){
                             // ステートを変更
@@ -610,6 +610,10 @@ export default function useEventViewer({
 
         // Stateの更新
         if( lines.isView && i >= lines.lines.length ){// isView イベント実行完了
+            // #if終了 欠落チェック
+            if(ifDepth.current !== 0) console.warn(`[Tojinovel] #if終了 が ${ifDepth.current} 個不足しています`);
+            // ゲームデータを更新（念のため）
+            updateGameData(() => newGameData);
             // イベント終了時にすべての変数を初期化(BGM除く)
             onComplete?.();
             setIndex(0);
@@ -686,6 +690,8 @@ export default function useEventViewer({
                 opLabel.current = null;
             }
             else if(!lines.isView && i >= lines.lines.length){ // バックグラウンドイベント実行完了
+                // #if終了 欠落チェック
+                if(ifDepth.current !== 0) console.warn(`[Tojinovel] #if終了 が ${ifDepth.current} 個不足しています`);
                 onComplete?.();
 
                 ifDepth.current = 0;

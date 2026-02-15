@@ -10,7 +10,7 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo}) => {
           Tojinovel Editor {!isSaved && "*"}
         </Typography>
         <Typography sx={{ color: "primary.contrastText", flexGrow: 1 }} pl={1}>
-          ver :{ import.meta.env.RELEASE_VERSION ?? ( import.meta.env.VITE_COMMIT_HASH ?? "dev" ) }
+          ver :{ import.meta.env.VITE_RELEASE_VERSION ?? ( import.meta.env.VITE_COMMIT_HASH ?? "dev" ) }
         </Typography>
 
         <Box sx={{display: "flex"}}>

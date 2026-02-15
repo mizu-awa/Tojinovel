@@ -26,13 +26,23 @@ export default function useUndoRedo({
         const { mainTab: tab, selectedItem: item, selectedSubItem: sub, selectedThirdItem: third,
                 setSelectedItem: setItem, setSelectedSubItem: setSub, setSelectedThirdItem: setThird } = latestRef.current;
         if(tab === "characters" ){
-          setItem(Math.min(newData.characters.length - 1, item));
-          setSub(Math.min((newData.characters[item]?.expressions.length || 1) - 1, sub));
+          const newItem = Math.min(newData.characters.length - 1, item);
+          setItem(newItem);
+          setSub(Math.min((newData.characters[newItem]?.expressions.length || 1) - 1, sub));
         }
         else if(tab === "scenes"){
-          setItem(Math.min(newData.scenes.length - 1, item));
-          setSub(Math.min((newData.scenes[item]?.hotspots.length || 1) - 1, sub));
-          setThird(Math.min((newData.scenes[item]?.hotspots[sub]?.states.length || 1) - 1, third));
+          const newItem = Math.min(newData.scenes.length - 1, item);
+          setItem(newItem);
+          const newSub = Math.min((newData.scenes[newItem]?.hotspots.length || 1) - 1, sub);
+          setSub(newSub);
+          setThird(Math.min((newData.scenes[newItem]?.hotspots[newSub]?.states.length || 1) - 1, third));
+        }
+        else if(tab === "items"){
+          const newItem = Math.min(newData.items.length - 1, item);
+          setItem(newItem);
+          const newSub = Math.min((newData.items[newItem]?.hotspots.length || 1) - 1, sub);
+          setSub(newSub);
+          setThird(Math.min((newData.items[newItem]?.hotspots[newSub]?.states.length || 1) - 1, third));
         }
       }, []);
 

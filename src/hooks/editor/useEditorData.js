@@ -19,14 +19,16 @@ export default function useEditorData(){
       });
 
       const [selectedSubItem, setSelectedSubItem] = useState(() => {
-        return sessionStorage.getItem("selectedSubItem") ?? 0;
+        const v = sessionStorage.getItem("selectedSubItem");
+        return v === null ? 0 : Number(v) || 0;
       });
 
       const [selectedThirdItem, setSelectedThirdItem] = useState(() => {
-        return sessionStorage.getItem("selectedThirdItem") ?? 0;
+        const v = sessionStorage.getItem("selectedThirdItem");
+        return v === null ? 0 : Number(v) || 0;
       });
     
-      const [gameData, setGameData] = useState(defaultGameData);
+      const [gameData, setGameData] = useState(() => structuredClone(defaultGameData));
 
       const [isSaved, setIsSaved] = useState(true);
     
@@ -37,7 +39,7 @@ export default function useEditorData(){
       // function-------------------------------------------------
       const downloadJSON = useCallback(() => {
         // JSON文字列に変換
-        const json = JSON.stringify({...gameDataRef.current, toolVersion: import.meta.env.RELEASE_VERSION , commit: import.meta.env.VITE_COMMIT_HASH ?? "dev" }, null, 2); // 第2引数のnull,2で整形出力
+        const json = JSON.stringify({...gameDataRef.current, toolVersion: import.meta.env.VITE_RELEASE_VERSION , commit: import.meta.env.VITE_COMMIT_HASH ?? "dev" }, null, 2); // 第2引数のnull,2で整形出力
     
         // Blobオブジェクトを作成（ブラウザで扱えるファイルデータ）
         const blob = new Blob([json], { type: "application/json" });
@@ -83,7 +85,7 @@ export default function useEditorData(){
       }, [setGameData])
 
       const newGame = useCallback(() => {
-        setGameData(defaultGameData);
+        setGameData(structuredClone(defaultGameData));
       }, [setGameData])
 
       const loadFirst = useCallback(async () => {
@@ -115,7 +117,7 @@ export default function useEditorData(){
           const res = await fetch(`${API_BASE}/save`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...gameDataRef.current, toolVersion: import.meta.env.RELEASE_VERSION , commit: import.meta.env.VITE_COMMIT_HASH ?? "dev" }),
+            body: JSON.stringify({ ...gameDataRef.current, toolVersion: import.meta.env.VITE_RELEASE_VERSION , commit: import.meta.env.VITE_COMMIT_HASH ?? "dev" }),
           });
 
           if (!res.ok) {

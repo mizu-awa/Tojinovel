@@ -265,7 +265,7 @@ function parseEventText(text, label, characters) {
           if(isView){
             blocks.push({ type: "click" });// クリック待ち実行後にファイルジャンプ
           }
-          blocks.push({type: "fileJump", file: file.trim(), label: fjLabel.trim()});
+          blocks.push({type: "fileJump", file: file.trim(), label: fjLabel?.trim() || null});
           //start = false;
           break;
         }
@@ -325,13 +325,17 @@ function parseEventText(text, label, characters) {
 
         case command.startsWith("シーン背景変更:"): {//シーン背景変更
           const match3 = command.match(/^シーン背景変更:(.*?),(.*?)$/);
-          blocks.push({type: "sceneBack", scene: match3[1].trim(), back: normalizeRelativeUrl(match3[2].trim())});
+          if(match3){
+            blocks.push({type: "sceneBack", scene: match3[1].trim(), back: normalizeRelativeUrl(match3[2].trim())});
+          }
           break;
         }
 
         case command.startsWith("アイテム背景変更:"): {//アイテム背景変更
           const match4 = command.match(/^アイテム背景変更:(.*?),(.*?)$/);
-          blocks.push({type: "itemBack", item: match4[1].trim(), back: normalizeRelativeUrl(match4[2].trim())});
+          if(match4){
+            blocks.push({type: "itemBack", item: match4[1].trim(), back: normalizeRelativeUrl(match4[2].trim())});
+          }
           break;
         }
 
@@ -359,7 +363,9 @@ function parseEventText(text, label, characters) {
 
         case command.startsWith("乱数:"): {
           const match5 = command.match(/^乱数:(.*?),(.*?),(.*?)$/);
-          blocks.push({type: "random", varName: match5[1].trim(), min: match5[2].trim(), max: match5[3].trim()});
+          if(match5){
+            blocks.push({type: "random", varName: match5[1].trim(), min: match5[2].trim(), max: match5[3].trim()});
+          }
           break;
         }
 
