@@ -11,10 +11,12 @@ import FontSelector from "../FontSelector";
 import MyAutoComplete from "../MyAutoComplete";
 import MyAccordion from "../MyAccordion";
 import StyledCheckbox from "../StyledCheckBox";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, Button } from "@mui/material";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import { inputPropsFontWeight, inputPropsDefaultNum, inputPropsZIndex } from "./inputProps";
 import NameWarn from "../NameWarn";
+import { getImageSize } from "../../../hooks/getImageSize"; // utility for loading image dimensions
+
 
 const SceneSettings = ({
   scene,
@@ -219,6 +221,34 @@ const SceneSettings = ({
               data-path={`${statePath}.height`}
             />
           </FormField>
+
+          {/* ボタン: 画像の実サイズに合わせる */}
+          <Box sx={{ textAlign: "right", mt: 1 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={async () => {
+                const imgUrl = state.background;
+                if (!imgUrl) return;
+                try {
+                  const { width, height } = await getImageSize(imgUrl);
+                  // dispatch two updates through handleDatasetChange
+                  handleDatasetChange({
+                    target: { value: width, dataset: { path: `${statePath}.width` }, type: "number" }
+                  });
+                  handleDatasetChange({
+                    target: { value: height, dataset: { path: `${statePath}.height` }, type: "number" }
+                  });
+                } catch (e) {
+                  // 失敗しても無視（画像がロードできない場合など）
+                  console.warn(e);
+                }
+              }}
+              disabled={!state.background}
+            >
+              画像に合わせる
+            </Button>
+          </Box>
 
           <FormField label="回転">
             <StyledInput

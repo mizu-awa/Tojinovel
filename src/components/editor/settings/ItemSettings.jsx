@@ -11,10 +11,12 @@ import FontSelector from "../FontSelector";
 import MyAutoComplete from "../MyAutoComplete";
 import StyledCheckbox from "../StyledCheckBox";
 import MyAccordion from "../MyAccordion";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, Button } from "@mui/material";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import { inputPropsFontWeight, inputPropsDefaultNum, inputPropsZIndex } from "./inputProps";
 import NameWarn from "../NameWarn";
+import { getImageSize } from "../../../hooks/getImageSize"; // 同じユーティリティを利用しています
+
 
 const ItemSettings = ({
   item,
@@ -157,6 +159,32 @@ const ItemSettings = ({
               data-path={`${statePath}.height`}
             />
           </FormField>
+
+          {/* - 画像に合わせるボタン: state.background がなければアイテム画像を使う */}
+          <Box sx={{ textAlign: "right", mt: 1 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={async () => {
+                const imgUrl = state.background || item?.image;
+                if (!imgUrl) return;
+                try {
+                  const { width, height } = await getImageSize(imgUrl);
+                  handleDatasetChange({
+                    target: { value: width, dataset: { path: `${statePath}.width` }, type: "number" }
+                  });
+                  handleDatasetChange({
+                    target: { value: height, dataset: { path: `${statePath}.height` }, type: "number" }
+                  });
+                } catch (e) {
+                  console.warn(e);
+                }
+              }}
+              disabled={!(state.background || item?.image)}
+            >
+              画像に合わせる
+            </Button>
+          </Box>
 
           <FormField label="回転">
             <StyledInput
