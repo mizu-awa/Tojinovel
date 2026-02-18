@@ -16,6 +16,10 @@ server/build
 release
 build
 
+# Wails自動生成
+frontend/
+wailsjs/
+
 .env.local
 
 .claude
