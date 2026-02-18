@@ -57,6 +57,15 @@ import ScenarioEditor from "./components/editor/ScenarioEditor";
 import useScenarioEditor from "./hooks/editor/useScenarioEditor";
 import SnapOverlay from "./components/editor/SnapOverlay";
 import FileExplorer from "./components/editor/panels/FileExplorer";
+import ImagePreview from "./components/editor/ImagePreview";
+
+// 画像拡張子判定
+const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp"]);
+const isImageFile = (path) => {
+  const ext = path.split(".").pop()?.toLowerCase();
+  return IMAGE_EXTENSIONS.has(ext);
+};
+const isTextFile = (path) => path.split(".").pop()?.toLowerCase() === "txt";
 
 // 空の定義
 const noop = () => {};
@@ -127,6 +136,26 @@ export default function EditorApp() {
   const toggleScenarioEditorMaximize = useCallback(() => {
     setIsScenarioEditorMaximized(prev => !prev);
   }, []);
+
+  // エクスプローラーで選択中のファイル（画像プレビュー用）
+  const [explorerSelectedImage, setExplorerSelectedImage] = useState(null);
+
+  // タブ切替時にエクスプローラー状態をリセット
+  useEffect(() => {
+    if (mainTab !== "explorer") {
+      setExplorerSelectedImage(null);
+    }
+  }, [mainTab]);
+
+  // エクスプローラーでファイルクリック時のハンドラ
+  const handleExplorerFileSelect = useCallback((filePath) => {
+    if (isTextFile(filePath)) {
+      setExplorerSelectedImage(null);
+      loadEventFile(filePath);
+    } else if (isImageFile(filePath)) {
+      setExplorerSelectedImage(filePath);
+    }
+  }, [loadEventFile]);
 
   // undo redo--------------------------------------------------------
   const { debouncedDoAction, undo, redo, canUndo, canRedo }
@@ -546,7 +575,7 @@ export default function EditorApp() {
           paste={paste}
         />
       );
-      case "explorer": return <FileExplorer />;
+      case "explorer": return <FileExplorer onFileSelect={handleExplorerFileSelect} />;
       default: return null;
     }
   };
@@ -588,7 +617,19 @@ export default function EditorApp() {
           <Panel defaultSize={65}>
             <PanelGroup direction="vertical">
               <Panel defaultSize={100}>
-                {selectedItem !== "変数" ? 
+                {mainTab === "explorer" ?
+                  // エクスプローラー: 画像プレビュー or プレースホルダー
+                  (explorerSelectedImage ? (
+                    <ImagePreview filePath={explorerSelectedImage} />
+                  ) : !currentFilePath ? (
+                    <Box sx={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Typography variant="body2" color="text.disabled">
+                        ファイルを選択してください
+                      </Typography>
+                    </Box>
+                  ) : null)
+
+                : selectedItem !== "変数" ?
                   // ゲーム画面表示
                   <div
                     ref={boxRef}
@@ -779,8 +820,8 @@ export default function EditorApp() {
                 }
               </Panel>
 
-              {/* シナリオエディタ: シーン/アイテムタブでのみ表示 */}
-              {(mainTab === "scenes" || mainTab === "items") && <>
+              {/* シナリオエディタ: シーン/アイテム/エクスプローラータブで表示 */}
+              {(mainTab === "scenes" || mainTab === "items" || (mainTab === "explorer" && !explorerSelectedImage && currentFilePath)) && <>
                 <PanelResizeHandle style={handleStyleVertical} />
                 <Panel defaultSize={35} minSize={0}>
                   <ScenarioEditor

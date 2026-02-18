@@ -22,7 +22,7 @@ function getFileIcon(name, isDir) {
 }
 
 // ファイルツリーノード
-function TreeNode({ name, isDir, parentPath, depth }) {
+function TreeNode({ name, isDir, parentPath, depth, onFileSelect }) {
   const [open, setOpen] = useState(false);
   const [children, setChildren] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -70,14 +70,15 @@ function TreeNode({ name, isDir, parentPath, depth }) {
     setContextMenu(null);
   }, [relativePath]);
 
-  // ファイルクリック（パスコピー）
+  // ファイルクリック（パスコピー＋ファイル選択通知）
   const handleClick = useCallback(() => {
     if (isDir) {
       handleToggle();
     } else {
       handleCopyPath();
+      if (onFileSelect) onFileSelect("./" + relativePath);
     }
-  }, [isDir, handleToggle, handleCopyPath]);
+  }, [isDir, handleToggle, handleCopyPath, onFileSelect, relativePath]);
 
   // 右クリック
   const handleContextMenu = useCallback((e) => {
@@ -170,6 +171,7 @@ function TreeNode({ name, isDir, parentPath, depth }) {
                   isDir={child.isDir}
                   parentPath={relativePath}
                   depth={depth + 1}
+                  onFileSelect={onFileSelect}
                 />
               ))}
             </List>
@@ -208,7 +210,7 @@ function TreeNode({ name, isDir, parentPath, depth }) {
 }
 
 // メインのファイルエクスプローラーコンポーネント
-export default function FileExplorer() {
+export default function FileExplorer({ onFileSelect }) {
   const [rootEntries, setRootEntries] = useState(null);
   const [loading, setLoading] = useState(true);
   // リフレッシュ用のキー
@@ -267,6 +269,7 @@ export default function FileExplorer() {
                 isDir={entry.isDir}
                 parentPath="data"
                 depth={0}
+                onFileSelect={onFileSelect}
               />
             ))}
           </List>
