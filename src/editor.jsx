@@ -4,9 +4,11 @@ import './index.css'
 import App from './EditorApp.jsx'
 import { setAdapter } from './services/storageService'
 import { httpAdapter } from './services/httpAdapter'
+import { wailsAdapter } from './services/wailsAdapter'
 
-// Adapter初期化（Wails環境判定は将来wailsAdapter導入時に追加）
-setAdapter(httpAdapter);
+// Wails環境かどうかを判定（Wails v2はwindow.goにバインディングを公開する）
+const isWails = !!window.go;
+setAdapter(isWails ? wailsAdapter : httpAdapter);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
