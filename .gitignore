@@ -19,6 +19,7 @@ build
 # Wails自動生成
 frontend/
 wailsjs/
+*.md5
 
 .env.local
 

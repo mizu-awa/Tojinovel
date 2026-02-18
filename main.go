@@ -14,19 +14,20 @@ import (
 var assets embed.FS
 
 func main() {
-	app := NewApp()
 	fileService := services.NewFileService()
+	app := NewApp(fileService)
 	assetHandler := services.NewAssetHandler(fileService)
 
 	err := wails.Run(&options.App{
-		Title:  "Tojinovel",
-		Width:  1280,
-		Height: 800,
+		Title:      "Tojinovel",
+		Width:      1280,
+		Height:     800,
 		AssetServer: &assetserver.Options{
 			Assets:  assets,
 			Handler: assetHandler,
 		},
-		OnStartup: app.startup,
+		OnStartup:  app.startup,
+		OnDomReady: app.domReady,
 		Bind: []interface{}{
 			app,
 			fileService,

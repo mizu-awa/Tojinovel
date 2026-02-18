@@ -10,7 +10,7 @@
 #### 実施内容
 
 1. **仕様書のWails v2対応**
-   - `docs/wails-migration-spec.md` - Wails v2のバインディング形式 (`window.go.main.*`) に修正、`AssetsHandler` の記述を追加
+   - `docs/wails-migration-spec.md` - Wails v2のバインディング形式 (`window.go.services.*`) に修正、`AssetsHandler` の記述を追加
    - `docs/wails-implementation-guide.md` - CLIインストールコマンド、wailsAdapter.jsのバインディング形式、AssetHandler設定をv2向けに修正
    - Wails v3参照をすべてv2に統一
 
@@ -93,7 +93,7 @@ storage (storageService.js)
 
 5. **フロントエンドAdapter統合**（実装計画のステップ3を前倒し）
    - `src/services/wailsAdapter.js` - Wails v2 Goバインディング呼び出しAdapter
-     - `window.go.main.FileService.*` 経由でGoの関数を呼び出し
+     - `window.go.services.FileService.*` 経由でGoの関数を呼び出し
      - loadGameData / saveGameData / loadEventFile / saveEventFile / resolveAssetUrl
      - readDir / deleteFile / renameFile（ファイルツリー用）
    - `src/editor.jsx` - 環境判定ロジック追加
@@ -128,7 +128,7 @@ tojinovel/
 [Wails v2 WebView]
   ├── React App (dist/ に埋め込み)
   │     └── editor.jsx
-  │           ├─ isWails=true  → wailsAdapter  → window.go.main.FileService.*
+  │           ├─ isWails=true  → wailsAdapter  → window.go.services.FileService.*
   │           └─ isWails=false → httpAdapter    → fetch() + Go HTTPサーバー
   │
   └── Go Backend
@@ -146,20 +146,96 @@ tojinovel/
 
 ---
 
+### ステップ3: `wails dev` 動作確認 + バグ修正 ✅ 完了
+
+**実施日**: 2026-02-18
+**ブランチ**: feature/toWails
+
+#### 実施内容
+
+1. **バグ修正: wailsAdapter.js のバインディングパス**
+   - `window.go.main.FileService.*` → `window.go.services.FileService.*` に修正
+   - `FileService` は `package services` に定義されているため、Wails v2 のバインディングパスは `window.go.services.FileService` が正しい
+   - 自動生成されたバインディング（`wailsjs/go/services/FileService.js`）で正しいパスを確認
+
+2. **app.go の拡張**
+   - `App` struct に `fileService` フィールドを追加し、`NewApp(fileService)` で受け取る形に変更
+   - `startup` コールバック: プロジェクトパスが未設定の場合、開発用デフォルト（`./public/`）を自動設定
+   - `domReady` コールバック: Wailsアプリ起動時に `index.html` から `editor.html` へリダイレクト
+     - Wailsはデフォルトで `index.html`（プレイヤー）を読み込むため、エディタへのリダイレクトが必要
+
+3. **main.go の修正**
+   - `NewApp(fileService)` で `FileService` を渡すように変更
+   - `OnDomReady: app.domReady` コールバックを追加
+
+#### `wails dev` 起動確認結果
+
+```
+✓ Wails CLI v2.11.0 で起動
+✓ Go バインディング自動生成（wailsjs/go/services/FileService.js）
+✓ Vite 開発サーバー起動（localhost:5173）
+✓ Wails DevServer 起動（localhost:34115）
+✓ WebView2 環境作成成功
+✓ 開発用プロジェクトパス自動設定（C:\dev\Tojinovel\public）
+```
+
+#### 検証結果
+- **wails dev**: 正常起動 ✅
+- **Go vet**: エラーなし ✅
+- **Vitest**: 64テスト全パス ✅
+- **Vite Build**: プロダクションビルド成功 ✅
+- **バインディング生成**: `window.go.services.FileService.*` で正しく生成 ✅
+
+#### 注意点
+- `.gitignore` の `frontend/` エントリは無害（`frontend:dir` が `.` のため Wails は `frontend/` ディレクトリを作成しない）
+- `.gitignore` の `wailsjs/` は自動生成バインディングなのでそのまま維持
+- `wails dev` 中、ブラウザから直接 `http://localhost:34115/editor.html` や `http://localhost:34115/debug.html` にアクセス可能
+
+---
+
 ## 次のステップ
 
-### ステップ3: `wails dev` で動作確認
-- `wails dev` コマンドでアプリケーション起動確認
-- エディタ画面がWails WebView内で表示されることを確認
-- Goバインディング経由でのファイル読み書き動作確認
-- AssetHandlerによるアセット（画像・音声）配信の動作確認
+### ステップ3.5: エディタ/デバッグ切り替えUI（ステップ4と同時実施予定）
+- Wailsアプリ内でエディタ画面とデバッグプレイ画面を切り替える機能
+- 方式案:
+  1. エディタ画面のメニュー/ツールバーに「デバッグプレイ」ボタン → `window.location.href = '/debug.html'` でナビゲーション
+  2. または、EditorApp内にデバッグモード切り替えステートを持ち、同一ページ内で切り替え
+- プロジェクト選択画面の設計と合わせて実装するのが効率的
 
 ### ステップ4: プロジェクト管理 + エクスプローラー
 - `ProjectManager` Go実装（`services/project_manager.go`）
 - `ProjectSelector.jsx` UI作成（プロジェクト選択画面）
 - `FileExplorer.jsx` UI作成（仮想エクスプローラー）
+- エディタ/デバッグ切り替えUI（ステップ3.5）
 
 ### ステップ5: 仕上げ
 - エクスポート機能
 - エラーハンドリング改善
 - クロスプラットフォームテスト
+
+---
+
+## 人間による確認が必要な項目
+
+### `wails dev` の手動動作確認
+以下の項目は、実際にアプリケーションを操作して確認が必要です：
+
+1. **`wails dev` を実行してWailsウィンドウが開くこと**
+   - `cd c:\dev\Tojinovel && wails dev`
+   - WebView ウィンドウが表示されること
+
+2. **editor.html へのリダイレクト**
+   - 起動後、index.html ではなくエディタ画面が表示されること
+
+3. **Goバインディング経由のファイル読み書き**
+   - エディタ上でゲームデータが正しく読み込まれること（`FileService.LoadGameData`）
+   - シナリオファイルが読み込めること（`FileService.LoadEventFile`）
+   - 保存操作が動作すること（`FileService.SaveGameData` / `FileService.SaveEventFile`）
+
+4. **AssetHandler によるアセット配信**
+   - 画像ファイルがエディタ上で正しく表示されること
+   - 音声ファイルが再生できること
+
+5. **ブラウザからのアクセス（HTTPモード互換）**
+   - `http://localhost:34115/editor.html` でエディタが動作すること
+   - `http://localhost:34115/debug.html` でデバッグモードが動作すること
