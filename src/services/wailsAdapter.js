@@ -27,6 +27,14 @@ export const wailsAdapter = {
   // アセットURL解決（AssetHandlerが処理するため、相対パスそのまま）
   resolveAssetUrl: (path) => path,
 
+  // プロジェクト管理
+  listProjects: () => window.go.services.ProjectManager.ListRecentProjects(),
+  openProject: (path) => window.go.services.ProjectManager.OpenProject(path),
+  createProject: (name, parentDir) => window.go.services.ProjectManager.CreateProject(name, parentDir),
+  selectProjectDialog: () => window.go.services.ProjectManager.SelectProjectDialog(),
+  selectNewProjectParentDialog: () => window.go.services.ProjectManager.SelectNewProjectParentDialog(),
+  getCurrentProjectName: () => window.go.services.ProjectManager.GetCurrentProjectName(),
+
   // ファイルツリー（仮想エクスプローラー用）
   readDir: (path) => window.go.services.FileService.ReadDir(path),
   deleteFile: (path) => window.go.services.FileService.DeleteFile(path),

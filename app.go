@@ -11,20 +11,23 @@ import (
 
 // App struct - Wailsアプリケーションのライフサイクル管理
 type App struct {
-	ctx         context.Context
-	fileService *services.FileService
+	ctx            context.Context
+	fileService    *services.FileService
+	projectManager *services.ProjectManager
 }
 
 // NewApp - App構造体を作成
-func NewApp(fileService *services.FileService) *App {
+func NewApp(fileService *services.FileService, projectManager *services.ProjectManager) *App {
 	return &App{
-		fileService: fileService,
+		fileService:    fileService,
+		projectManager: projectManager,
 	}
 }
 
 // startup - Wails起動時に呼ばれるコールバック
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.projectManager.SetContext(ctx)
 
 	// プロジェクトパスが未設定の場合、開発用デフォルトを設定
 	if a.fileService.GetProjectPath() == "" {
@@ -50,7 +53,7 @@ func (a *App) setDevDefaultProjectPath() {
 	defaultPath := filepath.Join(cwd, "public")
 	dataPath := filepath.Join(defaultPath, "data")
 	if info, err := os.Stat(dataPath); err == nil && info.IsDir() {
-		a.fileService.SetProjectPath(defaultPath)
+		a.projectManager.OpenProject(defaultPath)
 		fmt.Println("開発用プロジェクトパス:", defaultPath)
 	}
 }

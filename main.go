@@ -15,7 +15,8 @@ var assets embed.FS
 
 func main() {
 	fileService := services.NewFileService()
-	app := NewApp(fileService)
+	projectManager := services.NewProjectManager(fileService)
+	app := NewApp(fileService, projectManager)
 	assetHandler := services.NewAssetHandler(fileService)
 
 	err := wails.Run(&options.App{
@@ -31,6 +32,7 @@ func main() {
 		Bind: []interface{}{
 			app,
 			fileService,
+			projectManager,
 		},
 	})
 	if err != nil {

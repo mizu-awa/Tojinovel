@@ -18,4 +18,17 @@ export const storage = {
   loadEventFile: (...args) => adapter.loadEventFile(...args),
   saveEventFile: (...args) => adapter.saveEventFile(...args),
   resolveAssetUrl: (...args) => adapter.resolveAssetUrl(...args),
+
+  // プロジェクト管理
+  listProjects: (...args) => adapter.listProjects?.(...args) ?? Promise.resolve(null),
+  openProject: (...args) => adapter.openProject?.(...args) ?? Promise.resolve(null),
+  createProject: (...args) => adapter.createProject?.(...args) ?? Promise.resolve(null),
+  selectProjectDialog: (...args) => adapter.selectProjectDialog?.(...args) ?? Promise.resolve(null),
+  selectNewProjectParentDialog: (...args) => adapter.selectNewProjectParentDialog?.(...args) ?? Promise.resolve(null),
+  getCurrentProjectName: (...args) => adapter.getCurrentProjectName?.(...args) ?? Promise.resolve(""),
+
+  // ファイルツリー
+  readDir: (...args) => adapter.readDir?.(...args) ?? Promise.resolve(null),
+  deleteFile: (...args) => adapter.deleteFile?.(...args) ?? Promise.resolve(null),
+  renameFile: (...args) => adapter.renameFile?.(...args) ?? Promise.resolve(null),
 };

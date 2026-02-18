@@ -56,6 +56,7 @@ import Config from "./components/Config";
 import ScenarioEditor from "./components/editor/ScenarioEditor";
 import useScenarioEditor from "./hooks/editor/useScenarioEditor";
 import SnapOverlay from "./components/editor/SnapOverlay";
+import FileExplorer from "./components/editor/panels/FileExplorer";
 
 // 空の定義
 const noop = () => {};
@@ -545,6 +546,7 @@ export default function EditorApp() {
           paste={paste}
         />
       );
+      case "explorer": return <FileExplorer />;
       default: return null;
     }
   };

@@ -2,6 +2,9 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { memo } from 'react';
 
+// Wails環境判定
+const isWails = !!window.go;
+
 function MainTabs({ value, onChange }) {
   return (
     <Tabs
@@ -15,6 +18,7 @@ function MainTabs({ value, onChange }) {
         <Tab label="キャラクター" value="characters" />
         <Tab label="シーン" value="scenes" />
         <Tab label="アイテム" value="items" />
+        {isWails && <Tab label="エクスプローラー" value="explorer" />}
     </Tabs>
   );
 }

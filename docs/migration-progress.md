@@ -193,23 +193,115 @@ tojinovel/
 
 ---
 
+### ステップ4: プロジェクト管理 + エクスプローラー + デバッグ切り替え ✅ 完了
+
+**実施日**: 2026-02-18
+**ブランチ**: feature/toWails
+
+#### 実施内容
+
+1. **ProjectManager Go実装** (`services/project_manager.go`)
+   - `ProjectManager` struct: プロジェクトの一覧・選択・作成を管理
+   - `ListRecentProjects()` - 設定ファイルから最近のプロジェクト一覧（最大20件）
+   - `OpenProject(path)` - FileService.SetProjectPath + 最近リストに追加
+   - `CreateProject(name, parentDir)` - フォルダ構造作成 + デフォルトgamedata.json配置
+   - `SelectProjectDialog()` / `SelectNewProjectParentDialog()` - Wails runtime.OpenDirectoryDialog
+   - `GetCurrentProjectName()` - 現在のプロジェクト名
+   - 設定ファイル: `os.UserConfigDir()/Tojinovel/config.json`
+
+2. **main.go / app.go の更新**
+   - `main.go`: `ProjectManager` を `Bind` 配列に追加
+   - `app.go`: `NewApp(fileService, projectManager)` でProjectManager受け取り、startup時にSetContext(ctx)呼び出し
+   - 開発モードのデフォルトプロジェクトパスは `OpenProject()` 経由で設定（最近リストにも追加される）
+
+3. **ProjectSelector UI** (`src/components/editor/ProjectSelector.jsx`)
+   - 最近のプロジェクト一覧（カード型レイアウト）
+   - 「フォルダを選択」ボタン（OSダイアログ経由）
+   - 「新規作成」ボタン + ダイアログ（プロジェクト名 + 作成場所選択）
+   - エラーハンドリング付き
+
+4. **main.jsx の拡張**
+   - `RootApp` コンポーネント追加: Wails環境時にProjectSelector → EditorApp 切り替えフロー
+   - HTTP環境では従来通り直接EditorApp表示
+   - デバッグモード時に「エディタに戻る」フローティングボタン追加
+
+5. **デバッグプレイボタン** (`src/components/editor/MyAppBar.jsx`)
+   - PlayArrowアイコンボタンをツールバーに追加（Save右隣、Dividerで区切り）
+   - クリック → 未保存なら保存 → `window.location.search = "?debug"` でデバッグモードに遷移
+   - デバッグモードからの戻り: `window.location.search = ""` で遷移
+
+6. **仮想エクスプローラー** (`src/components/editor/panels/FileExplorer.jsx`)
+   - `data/` フォルダをルートとしたファイルツリー表示
+   - MUI List + Collapse による遅延ロード型ツリー
+   - ファイルクリック → 相対パス（`./data/...`）をクリップボードにコピー
+   - 右クリックメニュー: パスコピー / リネーム / 削除
+   - ファイル種類別アイコン（画像/音声/テキスト/JSON）
+   - リフレッシュボタン付き
+
+7. **MainTabs.jsx の更新**
+   - 「エクスプローラー」タブ追加（Wails環境のみ表示）
+
+8. **EditorApp.jsx の更新**
+   - `FileExplorer` import追加
+   - `mainTab === "explorer"` 時に左パネルにFileExplorer表示
+
+9. **Adapter層の拡張**
+   - `storageService.js`: プロジェクト管理 + ファイルツリーメソッド追加（optional chaining + fallback）
+   - `wailsAdapter.js`: ProjectManagerバインディング追加
+   - `httpAdapter.js`: 変更なし（optional chaining のfallbackで自動的にnull返却）
+
+#### プロジェクト構造（新規追加分）
+
+```
+tojinovel/
+├── services/
+│   └── project_manager.go              ← プロジェクト管理（新規）
+├── src/
+│   ├── main.jsx                         ← RootApp + ProjectSelector統合（修正）
+│   ├── components/editor/
+│   │   ├── ProjectSelector.jsx          ← プロジェクト選択画面（新規）
+│   │   ├── MyAppBar.jsx                 ← デバッグプレイボタン追加（修正）
+│   │   ├── MainTabs.jsx                 ← エクスプローラータブ追加（修正）
+│   │   └── panels/
+│   │       └── FileExplorer.jsx         ← 仮想エクスプローラー（新規）
+│   └── services/
+│       ├── storageService.js            ← プロジェクト管理メソッド追加（修正）
+│       └── wailsAdapter.js             ← ProjectManagerバインディング追加（修正）
+```
+
+#### アーキテクチャ（ステップ4完了時点）
+
+```
+[Wails v2 WebView]
+  ├── React App
+  │     └── main.jsx (RootApp)
+  │           ├─ ProjectSelector  → storage.listProjects / openProject / createProject
+  │           ├─ EditorApp        → storage.loadGameData / saveGameData / ...
+  │           │   ├─ MyAppBar     → デバッグプレイボタン（?debug遷移）
+  │           │   ├─ MainTabs     → エクスプローラータブ（Wails環境のみ）
+  │           │   └─ FileExplorer → storage.readDir / deleteFile / renameFile
+  │           └─ GameApp (debug)  → 「エディタに戻る」ボタン
+  │
+  └── Go Backend
+        ├── App              … ライフサイクル管理
+        ├── FileService      … ファイル読み書き（Bind登録）
+        ├── ProjectManager   … プロジェクト管理（Bind登録）
+        └── AssetHandler     … 相対パス → 実ファイル配信
+```
+
+#### 検証結果
+- **Go vet**: エラーなし ✅
+- **Go build**: コンパイル成功 ✅
+- **Vitest**: 64テスト全パス ✅
+- **ESLint**: 今回の変更による新規エラーなし ✅
+- **Vite Build**: プロダクションビルド成功 ✅
+
+---
+
 ## 次のステップ
 
-### ステップ3.5: エディタ/デバッグ切り替えUI（ステップ4と同時実施予定）
-- Wailsアプリ内でエディタ画面とデバッグプレイ画面を切り替える機能
-- 方式案:
-  1. エディタ画面のメニュー/ツールバーに「デバッグプレイ」ボタン → `window.location.href = '/debug.html'` でナビゲーション
-  2. または、EditorApp内にデバッグモード切り替えステートを持ち、同一ページ内で切り替え
-- プロジェクト選択画面の設計と合わせて実装するのが効率的
-
-### ステップ4: プロジェクト管理 + エクスプローラー
-- `ProjectManager` Go実装（`services/project_manager.go`）
-- `ProjectSelector.jsx` UI作成（プロジェクト選択画面）
-- `FileExplorer.jsx` UI作成（仮想エクスプローラー）
-- エディタ/デバッグ切り替えUI（ステップ3.5）
-
 ### ステップ5: 仕上げ
-- エクスポート機能
+- エクスポート機能（プロジェクトZIP出力）
 - エラーハンドリング改善
 - クロスプラットフォームテスト
 
@@ -217,25 +309,34 @@ tojinovel/
 
 ## 人間による確認が必要な項目
 
-### `wails dev` の手動動作確認
-以下の項目は、実際にアプリケーションを操作して確認が必要です：
+### ステップ4の手動動作確認
 
-1. **`wails dev` を実行してWailsウィンドウが開くこと**
-   - `cd c:\dev\Tojinovel && wails dev`
-   - WebView ウィンドウが表示されること
+`wails dev` を実行して以下を確認してください:
 
-2. **editor.html へのリダイレクト**
-   - 起動後、index.html ではなくエディタ画面が表示されること
+1. **プロジェクト選択画面**
+   - 起動時にプロジェクト選択画面が表示されること
+   - ※開発モードでは `public/` が自動的に開かれるため、直接エディタに遷移する場合あり
+   - 確認方法: `%APPDATA%/Tojinovel/config.json` を削除してから起動
 
-3. **Goバインディング経由のファイル読み書き**
-   - エディタ上でゲームデータが正しく読み込まれること（`FileService.LoadGameData`）
-   - シナリオファイルが読み込めること（`FileService.LoadEventFile`）
-   - 保存操作が動作すること（`FileService.SaveGameData` / `FileService.SaveEventFile`）
+2. **フォルダ選択ダイアログ**
+   - 「フォルダを選択」ボタンでOSのフォルダ選択ダイアログが開くこと
+   - フォルダ選択後、エディタ画面に遷移すること
 
-4. **AssetHandler によるアセット配信**
-   - 画像ファイルがエディタ上で正しく表示されること
-   - 音声ファイルが再生できること
+3. **新規プロジェクト作成**
+   - 「新規作成」→ プロジェクト名入力 + 作成場所選択 → 作成
+   - 指定場所にプロジェクトフォルダ（data/, data/events/ 等）が作成されること
+   - デフォルトの gamedata.json が配置されること
 
-5. **ブラウザからのアクセス（HTTPモード互換）**
-   - `http://localhost:34115/editor.html` でエディタが動作すること
-   - `http://localhost:34115/debug.html` でデバッグモードが動作すること
+4. **デバッグプレイボタン**
+   - ツールバー右端の ▶ ボタンでデバッグプレイ画面に遷移すること
+   - 「エディタに戻る」ボタンでエディタに戻れること
+
+5. **エクスプローラータブ**
+   - 「エクスプローラー」タブが表示されること（Wails環境のみ）
+   - data/ フォルダのファイルツリーが表示されること
+   - ファイルクリックでパスがクリップボードにコピーされること
+   - 右クリックメニュー（パスコピー/リネーム/削除）が動作すること
+
+6. **既存機能の動作確認**
+   - ゲームデータの読み込み・保存が正常に動作すること
+   - シナリオエディタでイベントファイルの読み書きが正常なこと

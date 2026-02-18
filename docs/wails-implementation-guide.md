@@ -25,6 +25,7 @@ go install github.com/wailsapp/wails/v2/cmd/wails@latest
 ※ Wails v2（安定版）を使用。
 
 ### 0-2. プロジェクト構造の決定
+※構成の変更は不要と判断(Step3時点)
 
 ```
 tojinovel/
