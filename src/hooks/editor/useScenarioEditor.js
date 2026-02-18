@@ -122,8 +122,16 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
   const applyPendingContent = useCallback(() => {
     if (!editorViewRef.current) return;
 
-    if (pendingContentRef.current !== null) {
-      setEditorContent(editorViewRef.current, pendingContentRef.current);
+    // pendingContentがなくても、現在のファイルのバッファ内容をフォールバックとして使う
+    // （タブ切替でアンマウント→再マウントされた場合の復元）
+    let content = pendingContentRef.current;
+    if (content === null && currentFilePathRef.current) {
+      const entry = eventBufferRef.current.get(currentFilePathRef.current);
+      if (entry) content = entry.content;
+    }
+
+    if (content !== null) {
+      setEditorContent(editorViewRef.current, content);
       pendingContentRef.current = null;
 
       // ラベル位置にスクロール
