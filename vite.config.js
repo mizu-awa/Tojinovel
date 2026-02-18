@@ -10,8 +10,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        sub: resolve(__dirname, 'editor.html'),
-        debug: resolve(__dirname, 'debug.html'),
+        player: resolve(__dirname, 'player.html'),
       },
     },
   },

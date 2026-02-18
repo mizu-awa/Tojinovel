@@ -5,6 +5,6 @@ import App from './GameApp.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App debug />
+    <App />
   </StrictMode>,
 )

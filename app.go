@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"tojinovel/services"
 )
 
@@ -34,13 +33,8 @@ func (a *App) startup(ctx context.Context) {
 }
 
 // domReady - DOM構築完了時に呼ばれるコールバック
+// index.htmlが直接エディタSPAなのでリダイレクト不要
 func (a *App) domReady(ctx context.Context) {
-	// Wailsアプリではエディタを表示（index.htmlからリダイレクト）
-	wailsRuntime.WindowExecJS(ctx, `
-		if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-			window.location.replace('/editor.html');
-		}
-	`)
 }
 
 // setDevDefaultProjectPath - 開発時のデフォルトプロジェクトパスを設定
