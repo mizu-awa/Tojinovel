@@ -19,8 +19,8 @@ const isDebug = params.has('debug');
 // ルートアプリ: Wails環境ではプロジェクト選択フローを挟む
 // eslint-disable-next-line react-refresh/only-export-components
 function RootApp() {
-  // HTTP環境ではプロジェクト選択不要（従来通り直接エディタ表示）
-  const [projectReady, setProjectReady] = useState(!isWails);
+  // HTTP環境またはセッション継続中（デバッグから戻った場合など）はプロジェクト選択不要
+  const [projectReady, setProjectReady] = useState(!isWails || !!sessionStorage.getItem("sessionRunning"));
 
   const handleProjectReady = useCallback(() => {
     setProjectReady(true);
