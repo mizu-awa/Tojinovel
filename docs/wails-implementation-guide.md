@@ -19,17 +19,17 @@
 ### 0-1. Wails CLI インストール・プロジェクト作成
 
 ```bash
-go install github.com/AudienseCo/wails/v3/cmd/wails3@latest
+go install github.com/wailsapp/wails/v2/cmd/wails@latest
 ```
 
-※ Wails v3 を想定。v2 の場合はコマンドが異なる。
+※ Wails v2（安定版）を使用。
 
 ### 0-2. プロジェクト構造の決定
 
 ```
 tojinovel/
-├── main.go                  ← Wails エントリポイント
-├── app.go                   ← Application struct（バインディング登録）
+├── main.go                  ← Wails v2 エントリポイント
+├── app.go                   ← App struct（バインディング登録）
 ├── services/
 │   ├── project_manager.go   ← プロジェクト管理
 │   ├── file_service.go      ← ファイル読み書き
@@ -138,32 +138,34 @@ export const httpAdapter = {
 
 **ファイル:** `src/services/wailsAdapter.js`
 
+Wails v2 では Go バインディングが `window.go.main.StructName.MethodName()` の形式で公開される。
+
 ```javascript
 export const wailsAdapter = {
   loadGameData: async () => {
-    const json = await window.go.services.FileService.LoadGameData();
+    const json = await window.go.main.FileService.LoadGameData();
     return JSON.parse(json);
   },
   saveGameData: async (data) => {
-    await window.go.services.FileService.SaveGameData(JSON.stringify(data, null, 2));
+    await window.go.main.FileService.SaveGameData(JSON.stringify(data, null, 2));
   },
   loadEventFile: async (path) => {
-    return window.go.services.FileService.LoadEventFile(path);
+    return window.go.main.FileService.LoadEventFile(path);
   },
   saveEventFile: async (path, content) => {
-    await window.go.services.FileService.SaveEventFile(path, content);
+    await window.go.main.FileService.SaveEventFile(path, content);
   },
   resolveAssetUrl: (path) => path, // AssetHandlerが処理
   // プロジェクト管理
-  listProjects: () => window.go.services.ProjectManager.ListRecentProjects(),
-  openProject: (path) => window.go.services.ProjectManager.OpenProject(path),
-  createProject: (name) => window.go.services.ProjectManager.CreateProject(name),
-  selectProjectDialog: () => window.go.services.ProjectManager.SelectProjectDialog(),
+  listProjects: () => window.go.main.ProjectManager.ListRecentProjects(),
+  openProject: (path) => window.go.main.ProjectManager.OpenProject(path),
+  createProject: (name) => window.go.main.ProjectManager.CreateProject(name),
+  selectProjectDialog: () => window.go.main.ProjectManager.SelectProjectDialog(),
   // ファイルツリー
-  readDir: (path) => window.go.services.FileService.ReadDir(path),
-  deleteFile: (path) => window.go.services.FileService.DeleteFile(path),
-  renameFile: (old, nw) => window.go.services.FileService.RenameFile(old, nw),
-  importFile: (dest) => window.go.services.FileService.ImportFile(dest),
+  readDir: (path) => window.go.main.FileService.ReadDir(path),
+  deleteFile: (path) => window.go.main.FileService.DeleteFile(path),
+  renameFile: (old, nw) => window.go.main.FileService.RenameFile(old, nw),
+  importFile: (dest) => window.go.main.FileService.ImportFile(dest),
 };
 ```
 
@@ -333,14 +335,25 @@ func NewAssetHandler(fileService *FileService) http.Handler {
 }
 ```
 
-Wails の `options.App` で `AssetHandler` を設定:
+Wails v2 の `options.App` で `AssetsHandler` を設定:
 
 ```go
-app := wails.NewApp(wails.AppOptions{
+import "github.com/wailsapp/wails/v2/pkg/options"
+
+err := wails.Run(&options.App{
     // ...
-    AssetHandler: NewAssetHandler(fileService),
+    AssetsHandler: NewAssetHandler(fileService),
+    Bind: []interface{}{
+        app,
+        fileService,
+        projectManager,
+    },
 })
 ```
+
+**Wails v2 の注意点:**
+- バインディングは `Bind` フィールドに登録したstructのエクスポートされたメソッドが自動的に `window.go.main.StructName.MethodName()` で呼び出し可能になる
+- `AssetsHandler` は `http.Handler` を受け取り、フロントエンドの静的アセットで解決できないリクエストを処理する
 
 ---
 
@@ -445,6 +458,8 @@ wails build -platform darwin/universal
 wails build -platform linux/amd64
 ```
 
+※ Wails v2 のクロスコンパイルはホストOS上でのビルドが基本。他OS向けはCI/CD環境を推奨。
+
 ---
 
 ## 実装順序の詳細（推奨）
@@ -488,7 +503,7 @@ wails build -platform linux/amd64
 
 ## リスク・注意点
 
-1. **Wails バージョン**: v2 と v3 で API が大きく異なる。v3 は2025年時点でプレリリース状態の可能性。安定版の v2 を推奨。
+1. **Wails バージョン**: Wails v2（安定版）を使用。v3 はプレリリース状態のため採用しない。
 2. **WebView 互換性**: Windows では WebView2 (Chromium)。macOS では WKWebView (Safari)。CSS/JS の互換性に注意。
 3. **ファイルパス**: Windows の `\` と Unix の `/` の差異。Go側で `filepath.ToSlash()` で統一。
 4. **大容量ファイル**: 画像・音声の大量読み込み時のメモリ。AssetHandler でストリーム配信。

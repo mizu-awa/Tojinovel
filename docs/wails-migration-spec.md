@@ -32,22 +32,22 @@
 
 ## 2. 新アーキテクチャ
 
-### 2.1 全体構成
+### 2.1 全体構成（Wails v2）
 
 ```
-[Wails WebView]
+[Wails v2 WebView]
   ├── React App (Vite ビルド済み)
   │     └── StorageService (Adapter)
-  │           ├── WailsAdapter  → Go バインディング呼び出し
+  │           ├── WailsAdapter  → Go バインディング呼び出し (window.go.main.*)
   │           └── BrowserAdapter → IndexedDB + fetch（将来）
   │
-  └── Go Backend (Wails Runtime)
+  └── Go Backend (Wails v2 Runtime)
         ├── ProjectManager   … プロジェクト一覧・選択
         ├── FileService      … ファイル読み書き（プロジェクト内）
-        └── AssetHandler     … 相対パスでアセット配信
+        └── AssetHandler     … 相対パスでアセット配信（AssetsHandler）
 ```
 
-### 2.2 Adapter Pattern 詳細
+### 2.2 Adapter Pattern 詳細（Wails v2）
 
 ```javascript
 // src/services/storageService.js
@@ -82,12 +82,13 @@ const StorageInterface = {
 
 ```javascript
 // src/services/wailsAdapter.js
+// Wails v2 のバインディングは window.go.main.StructName.MethodName() 形式
 export const wailsAdapter = {
   loadGameData: () => window.go.main.FileService.LoadGameData(),
   saveGameData: (data) => window.go.main.FileService.SaveGameData(JSON.stringify(data)),
   loadEventFile: (path) => window.go.main.FileService.LoadEventFile(path),
   saveEventFile: (path, content) => window.go.main.FileService.SaveEventFile(path, content),
-  resolveAssetUrl: (relativePath) => relativePath, // AssetHandlerが処理
+  resolveAssetUrl: (relativePath) => relativePath, // AssetsHandlerが処理
   // ...
 };
 ```
@@ -168,10 +169,10 @@ func (f *FileService) ImportFile(destDir string) error // ダイアログ経由
 - `..` を含むパスは拒否（現サーバーと同等）
 - `filepath.Clean` + プロジェクトパスプレフィックス検証
 
-### 3.3 アセット配信（AssetHandler）
+### 3.3 アセット配信（AssetsHandler）
 
-Wails の `AssetHandler` を使い、`./data/images/bg.png` のような相対パスリクエストを
-プロジェクトフォルダ内の実ファイルにマッピングする。
+Wails v2 の `AssetsHandler`（`options.App.AssetsHandler`）を使い、
+`./data/images/bg.png` のような相対パスリクエストをプロジェクトフォルダ内の実ファイルにマッピングする。
 
 ```go
 func assetHandler(projectPath string) http.Handler {
@@ -185,6 +186,7 @@ func assetHandler(projectPath string) http.Handler {
 ```
 
 **ポイント:**
+- Wails v2 では `AssetsHandler` はフロントエンドの埋め込みアセットで解決できなかったリクエストを処理するフォールバックハンドラ
 - React側のコード変更不要（`<img src="./data/images/bg.png">` がそのまま動作）
 - Content-Type自動判定（画像/音声/テキスト）
 
@@ -226,6 +228,6 @@ func assetHandler(projectPath string) http.Handler {
 
 ### 4.4 ビルド・配布
 
-- Wailsアプリとしてクロスコンパイル（Windows / macOS / Linux）
+- Wails v2 アプリとしてクロスコンパイル（Windows / macOS / Linux）
 - プレイヤー用の静的ファイル一式は「エクスポート」機能で出力
   - index.html + ビルド済みJS/CSS + data/ フォルダをZIPまたはフォルダコピー

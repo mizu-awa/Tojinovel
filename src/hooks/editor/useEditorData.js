@@ -2,8 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { defaultCharacterData, defaultExpressionData, defaultGameData } from "../../datas/defaultGameData";
 import { useIndexedDBSaves } from "../useIndexedDBStorage";
 import { mergeDefault } from "../useMerge";
-
-const API_BASE = import.meta.env.VITE_API_BASE;
+import { storage } from "../../services/storageService";
 
 export default function useEditorData(){
     // state--------------------------------------------------------------------------------------
@@ -61,9 +60,7 @@ export default function useEditorData(){
       
       const loadFile = useCallback(async () => {
         try {
-          const res = await fetch("./data/gamedata.json");
-          if (!res.ok) throw new Error("HTTPエラー: " + res.status);
-          const json = await res.json();
+          const json = await storage.loadGameData();
           setGameData(mergeDefault(json));
         } catch (err) {
           console.error("JSON読み込み失敗:", err);
@@ -98,9 +95,7 @@ export default function useEditorData(){
         }
         else{
           try {
-            const res = await fetch("./data/gamedata.json");
-            if (!res.ok) throw new Error("HTTPエラー: " + res.status);
-            const json = await res.json();
+            const json = await storage.loadGameData();
             setGameData(mergeDefault(json));
             console.log("JSONファイルを読み込み");
           } catch {
@@ -114,23 +109,15 @@ export default function useEditorData(){
 
       const saveFile = useCallback(async () => {
         try{
-          const res = await fetch(`${API_BASE}/save`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...gameDataRef.current, toolVersion: import.meta.env.VITE_RELEASE_VERSION , commit: import.meta.env.VITE_COMMIT_HASH ?? "dev" }),
+          await storage.saveGameData({
+            ...gameDataRef.current,
+            toolVersion: import.meta.env.VITE_RELEASE_VERSION,
+            commit: import.meta.env.VITE_COMMIT_HASH ?? "dev",
           });
-
-          if (!res.ok) {
-            console.error(`HTTP Error: ${res.status} ${res.statusText}`);
-            console.log("保存に失敗したため、ゲームデータをダウンロードします。");
-            downloadJSON();
-          }
-          else{
-            setIsSaved(true);
-          }
+          setIsSaved(true);
         }
         catch (error){
-          console.error("Network Error:", error);
+          console.error("保存エラー:", error);
           console.log("保存に失敗したため、ゲームデータをダウンロードします。");
           downloadJSON();
         }

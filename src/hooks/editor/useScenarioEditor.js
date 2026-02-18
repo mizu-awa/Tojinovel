@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { openDB } from "idb";
-
-const API_BASE = import.meta.env.VITE_API_BASE;
+import { storage } from "../../services/storageService";
 
 // IndexedDB設定（useIndexedDBStorage.js と同じDB/ストアを共用）
 const DB_NAME = "TojinovelDB";
@@ -201,58 +200,39 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
       return;
     }
 
-    // サーバーからfetch
+    // Adapter経由でファイル読み込み
     setStatus("読み込み中...");
     try {
-      const response = await fetch(normalizedPath);
+      const text = await storage.loadEventFile(normalizedPath);
 
-      // fetchの後、パスが変わっていたら結果を破棄（高速切替対策）
+      // 読み込み後、パスが変わっていたら結果を破棄（高速切替対策）
       if (currentFilePathRef.current !== normalizedPath) return;
 
-      if (response.ok) {
-        const contentType = response.headers.get("Content-Type");
-        // text/html が返ってきた場合はファイルが存在しない（サーバーがHTMLを返している）
-        if (contentType && contentType.startsWith("text/html")) {
-          setFileNotFound(true);
-          setStatus("ファイルが存在しません");
-          pendingContentRef.current = "";
-          if (editorViewRef.current) setEditorContent(editorViewRef.current, "");
-          return;
-        }
-        if (contentType && contentType.startsWith("text/")) {
-          const text = await response.text();
-          if (currentFilePathRef.current !== normalizedPath) return;
-          eventBufferRef.current.set(normalizedPath, { content: text, dirty: false });
+      if (text !== null) {
+        eventBufferRef.current.set(normalizedPath, { content: text, dirty: false });
 
-          // pending contentに保存
-          pendingContentRef.current = text;
+        // pending contentに保存
+        pendingContentRef.current = text;
 
-          if (editorViewRef.current) {
-            setEditorContent(editorViewRef.current, text);
-            pendingContentRef.current = null;
-            // ラベル位置にスクロール
-            if (label) {
-              clearTimeout(scrollTimerRef.current);
-          scrollTimerRef.current = setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
-            }
+        if (editorViewRef.current) {
+          setEditorContent(editorViewRef.current, text);
+          pendingContentRef.current = null;
+          // ラベル位置にスクロール
+          if (label) {
+            clearTimeout(scrollTimerRef.current);
+            scrollTimerRef.current = setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
           }
-          setStatus(null);
-        } else {
-          // テキストではない → ファイルが存在しない扱い
-          setFileNotFound(true);
-          setStatus("ファイルが存在しません");
-          pendingContentRef.current = "";
-          if (editorViewRef.current) setEditorContent(editorViewRef.current, "");
         }
+        setStatus(null);
       } else {
-        // 404等 → ファイルが存在しない
+        // nullが返った → ファイルが存在しない
         setFileNotFound(true);
         setStatus("ファイルが存在しません");
         pendingContentRef.current = "";
         if (editorViewRef.current) setEditorContent(editorViewRef.current, "");
       }
     } catch {
-      // ネットワークエラー → ファイルが存在しない扱い
+      // エラー → ファイルが存在しない扱い
       if (currentFilePathRef.current !== normalizedPath) return;
       setFileNotFound(true);
       setStatus("ファイルが存在しません");
@@ -313,20 +293,9 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     for (const [path, entry] of eventBufferRef.current) {
       if (!entry.dirty) continue;
 
-      // サーバーに送るパスは ./ を除去
-      const serverPath = path.replace(/^\.\//, "");
-
-      const promise = fetch(`${API_BASE}/save-event`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: serverPath, content: entry.content }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            eventBufferRef.current.set(path, { ...entry, dirty: false });
-          } else {
-            errors.push(`${path}: HTTP ${res.status}`);
-          }
+      const promise = storage.saveEventFile(path, entry.content)
+        .then(() => {
+          eventBufferRef.current.set(path, { ...entry, dirty: false });
         })
         .catch((e) => {
           errors.push(`${path}: ${e.message}`);
