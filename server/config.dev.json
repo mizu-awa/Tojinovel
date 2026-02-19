@@ -1,5 +1,0 @@
-{
-  "port": "42736",
-  "distDir": "../public",
-  "saveFile": "../public/data/gamedata.json"
-}

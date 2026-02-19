@@ -4,25 +4,23 @@
 
 ブラウザベースの脱出ゲーム・ノベルゲーム制作ツール。React + Go構成。dist/がゲーム制作者に配布される。
 
-- **プレイヤー**: `index.html` → `src/main.jsx` → `src/GameApp.jsx`
-- **エディタ**: `editor.html` → `src/editor.jsx` → `src/EditorApp.jsx`
-- **デバッグ**: `debug.html` → `src/debug.jsx` → `src/GameApp.jsx`（debug prop付き）
-- **サーバー**: `server/server.go`（ポート42736）
-- **データ**: `public/data/gamedata.json`、セーブは IndexedDB
+- **エディタ**: `index.html` → `src/main.jsx` → `src/EditorApp.jsx`（Wails WebView上で動作）
+- **デバッグプレイ**: `?debug` パラメータ → `src/GameApp.jsx`（debug prop付き）
+- **プレイヤー書き出し**: `player.html` + `assets/` → プロジェクトフォルダにコピー
+- **データ**: プロジェクトフォルダ内 `data/gamedata.json`、セーブは IndexedDB
 
 ## コマンド
 
 ```bash
-npm run dev          # Vite開発サーバー
-npm run build        # プロダクションビルド
+npm run build        # プロダクションビルド（Wailsビルド前に必要）
 npm run lint         # ESLint
 npm run test:run     # Vitest一回実行
 ```
 ```powershell
-./server/dev.ps1              # Go開発サーバー
-./server/build-all.ps1        # クロスコンパイル
-./scripts/dev-test.ps1 event_test  # サンプルデータでテスト起動
-./scripts/use-sample.ps1 event_test  # サンプルデータコピーのみ
+wails dev                              # Wails開発サーバー（推奨）
+wails build                            # Wailsアプリビルド
+./scripts/dev-test.ps1 event_test      # サンプルデータでテスト起動
+./scripts/use-sample.ps1 event_test    # サンプルデータコピーのみ
 ```
 
 ## 主要ディレクトリ

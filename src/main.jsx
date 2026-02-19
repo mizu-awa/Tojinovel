@@ -5,22 +5,19 @@ import EditorApp from './EditorApp.jsx'
 import GameApp from './GameApp.jsx'
 import ProjectSelector from './components/editor/ProjectSelector.jsx'
 import { setAdapter } from './services/storageService'
-import { httpAdapter } from './services/httpAdapter'
 import { wailsAdapter } from './services/wailsAdapter'
 
-// Wails環境かどうかを判定（Wails v2はwindow.goにバインディングを公開する）
-const isWails = !!window.go;
-setAdapter(isWails ? wailsAdapter : httpAdapter);
+setAdapter(wailsAdapter);
 
 // URLパラメータでデバッグモード判定（?debug）
 const params = new URLSearchParams(window.location.search);
 const isDebug = params.has('debug');
 
-// ルートアプリ: Wails環境ではプロジェクト選択フローを挟む
+// ルートアプリ: プロジェクト選択フローを挟む
 // eslint-disable-next-line react-refresh/only-export-components
 function RootApp() {
-  // HTTP環境またはセッション継続中（デバッグから戻った場合など）はプロジェクト選択不要
-  const [projectReady, setProjectReady] = useState(!isWails || !!sessionStorage.getItem("sessionRunning"));
+  // セッション継続中（デバッグから戻った場合など）はプロジェクト選択不要
+  const [projectReady, setProjectReady] = useState(!!sessionStorage.getItem("sessionRunning"));
 
   const handleProjectReady = useCallback(() => {
     setProjectReady(true);
@@ -49,7 +46,7 @@ function RootApp() {
     );
   }
 
-  // Wails環境: プロジェクト未選択ならProjectSelector表示
+  // プロジェクト未選択ならProjectSelector表示
   if (!projectReady) {
     return <ProjectSelector onProjectReady={handleProjectReady} />;
   }
