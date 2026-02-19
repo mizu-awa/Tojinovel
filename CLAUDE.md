@@ -19,8 +19,8 @@ npm run test:run     # Vitest一回実行
 ```powershell
 wails dev                              # Wails開発サーバー（推奨）
 wails build                            # Wailsアプリビルド
-./scripts/dev-test.ps1 event_test      # サンプルデータでテスト起動
-./scripts/use-sample.ps1 event_test    # サンプルデータコピーのみ
+./scripts/use-sample.ps1 event_test    # サンプルデータをpublic/にコピー（wails dev前に実行）
+./scripts/build-all.ps1                # リリースビルド＋ZIPパッケージング
 ```
 
 ## 主要ディレクトリ
