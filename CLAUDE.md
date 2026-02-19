@@ -2,12 +2,13 @@
 
 ## 概要
 
-ブラウザベースの脱出ゲーム・ノベルゲーム制作ツール。React + Go構成。dist/がゲーム制作者に配布される。
+デスクトップアプリ（Wails v2）ベースの脱出ゲーム・ノベルゲーム制作ツール。React + Go構成。Wailsビルドしたバイナリがゲーム制作者に配布される。
 
-- **エディタ**: `index.html` → `src/main.jsx` → `src/EditorApp.jsx`（Wails WebView上で動作）
+- **エディタ**: `editor.html` → `src/editor.jsx` → `src/EditorApp.jsx`（Wails WebView上で動作）
 - **デバッグプレイ**: `?debug` パラメータ → `src/GameApp.jsx`（debug prop付き）
-- **プレイヤー書き出し**: `player.html` + `assets/` → プロジェクトフォルダにコピー
+- **プレイヤー書き出し**: 埋め込み `dist/player.html`（→ `index.html`）+ `dist/assets/` → プロジェクトフォルダにコピー
 - **データ**: プロジェクトフォルダ内 `data/gamedata.json`、セーブは IndexedDB
+- **プロジェクト管理**: 起動時にプロジェクト選択画面を表示。複数プロジェクト対応。設定は `%APPDATA%/Tojinovel/config.json`
 
 ## コマンド
 
@@ -29,12 +30,24 @@ wails build                            # Wailsアプリビルド
 src/
 ├── GameApp.jsx / EditorApp.jsx    # ルートコンポーネント
 ├── components/                     # UI（SceneWrap, Hotspots, EventViewer, ItemBox, ItemDrawer, Menu, SaveLoad）
-│   └── editor/                     # エディタUI（panels/, settings/, codemirror/）
+│   └── editor/                     # エディタUI（panels/, settings/, codemirror/, ProjectSelector, FileExplorer）
 ├── hooks/                          # useGameData, useEventExecution, useEventLines, useMerge, useIndexedDBStorage, audioManager
 │   ├── eventExecutionUtils.js      # イベント実行ユーティリティ（テスト対象）
 │   └── editor/                     # useEditorData, useUndoRedo, useHandleChange, useSnap, useScenarioEditor
+├── services/                       # ストレージ抽象化層（Adapter Pattern）
+│   ├── storageService.js           # Adapter管理（setAdapter/getAdapter/storage）
+│   ├── wailsAdapter.js             # Wails Goバインディング呼び出し（window.go.services.*）
+│   └── httpAdapter.js              # フォールバック用fetchベースAdapter
 ├── datas/defaultGameData.js        # デフォルトスキーマ
 └── theme/Theme.jsx                 # MUIテーマ
+
+# Goバックエンド
+main.go                             # Wails v2エントリポイント（embed.FSでdist/を内包）
+app.go                              # Wailsアプリライフサイクル管理（startup/domReady）
+services/
+├── file_service.go                 # ファイルI/O（gamedata.json / イベントファイル / ReadDir等）
+├── project_manager.go              # プロジェクト管理・プレイヤー書き出し・設定保存
+└── asset_handler.go                # プロジェクトフォルダの画像・音声を相対パスで配信
 ```
 
 ## コーディング規約
