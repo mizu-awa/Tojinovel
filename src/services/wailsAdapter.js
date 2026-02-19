@@ -15,9 +15,13 @@ export const wailsAdapter = {
 
   // イベントファイル
   loadEventFile: async (path) => {
-    const content = await window.go.services.FileService.LoadEventFile(path);
-    // Go側で存在しないファイルは空文字を返す
-    return content || null;
+    try {
+      // Go側でファイル不在の場合はエラーを返す → catch で null を返す
+      const content = await window.go.services.FileService.LoadEventFile(path);
+      return content;  // "" (空ファイル) も有効なコンテンツとして返す
+    } catch {
+      return null;
+    }
   },
 
   saveEventFile: async (path, content) => {

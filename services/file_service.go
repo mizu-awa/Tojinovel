@@ -110,7 +110,7 @@ func (f *FileService) LoadEventFile(relativePath string) (string, error) {
 	data, err := os.ReadFile(fullPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return "", nil // ファイルが存在しない場合は空文字を返す
+			return "", fmt.Errorf("ファイルが存在しません: %s", relativePath)
 		}
 		return "", fmt.Errorf("ファイル読み込みに失敗: %w", err)
 	}
