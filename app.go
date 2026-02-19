@@ -53,7 +53,10 @@ func (a *App) setDevDefaultProjectPath() {
 	defaultPath := filepath.Join(cwd, "public")
 	dataPath := filepath.Join(defaultPath, "data")
 	if info, err := os.Stat(dataPath); err == nil && info.IsDir() {
-		a.projectManager.OpenProject(defaultPath)
-		fmt.Println("開発用プロジェクトパス:", defaultPath)
+		if err := a.projectManager.OpenProject(defaultPath); err != nil {
+			fmt.Println("開発用プロジェクトパスの設定に失敗:", err)
+		} else {
+			fmt.Println("開発用プロジェクトパス:", defaultPath)
+		}
 	}
 }

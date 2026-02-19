@@ -38,7 +38,7 @@ export default function ProjectSelector({ onProjectReady }) {
     try {
       setError(null);
       await storage.openProject(path);
-      onProjectReady();
+      onProjectReady(path);
     } catch (e) {
       setError("プロジェクトを開けませんでした: " + e.message);
     }
@@ -51,7 +51,7 @@ export default function ProjectSelector({ onProjectReady }) {
       const dir = await storage.selectProjectDialog();
       if (dir) {
         await storage.openProject(dir);
-        onProjectReady();
+        onProjectReady(dir);
       }
     } catch (e) {
       setError("プロジェクトを開けませんでした: " + e.message);
@@ -60,9 +60,13 @@ export default function ProjectSelector({ onProjectReady }) {
 
   // 新規作成ダイアログ: 親フォルダ選択
   const handleSelectParent = useCallback(async () => {
-    const dir = await storage.selectNewProjectParentDialog();
-    if (dir) {
-      setNewProjectParent(dir);
+    try {
+      const dir = await storage.selectNewProjectParentDialog();
+      if (dir) {
+        setNewProjectParent(dir);
+      }
+    } catch (e) {
+      console.error("フォルダ選択に失敗:", e);
     }
   }, []);
 
@@ -71,9 +75,9 @@ export default function ProjectSelector({ onProjectReady }) {
     if (!newProjectName.trim() || !newProjectParent) return;
     try {
       setError(null);
-      await storage.createProject(newProjectName.trim(), newProjectParent);
+      const createdPath = await storage.createProject(newProjectName.trim(), newProjectParent);
       setNewDialogOpen(false);
-      onProjectReady();
+      onProjectReady(createdPath);
     } catch (e) {
       setError("プロジェクト作成に失敗: " + e.message);
     }

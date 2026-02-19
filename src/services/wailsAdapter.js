@@ -10,7 +10,7 @@ export const wailsAdapter = {
   },
 
   saveGameData: async (data) => {
-    await window.go.services.FileService.SaveGameData(JSON.stringify(data, null, 2));
+    await window.go.services.FileService.SaveGameData(JSON.stringify(data));
   },
 
   // イベントファイル

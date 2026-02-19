@@ -44,6 +44,9 @@ function TreeNode({
   // スナックバー（コピー通知）
   const [snackOpen, setSnackOpen] = useState(false);
 
+  // 削除確認ダイアログ
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   const relativePath = parentPath ? `${parentPath}/${name}` : name;
   const isSelectedFolder = isDir && selectedFolder === relativePath;
 
@@ -97,17 +100,21 @@ function TreeNode({
     setContextMenu({ mouseX: e.clientX, mouseY: e.clientY });
   }, []);
 
-  // 削除
-  const handleDelete = useCallback(async () => {
+  // 削除（confirm() はWails WebView2でブロックされる可能性があるためMUI Dialogを使用）
+  const handleDelete = useCallback(() => {
     setContextMenu(null);
-    if (!confirm(`「${name}」を削除しますか？`)) return;
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    setDeleteDialogOpen(false);
     try {
       await storage.deleteFile(relativePath);
       onRefresh();
     } catch (e) {
       console.error("削除失敗:", e);
     }
-  }, [name, relativePath, onRefresh]);
+  }, [relativePath, onRefresh]);
 
   // リネーム開始
   const handleRenameStart = useCallback(() => {
@@ -271,6 +278,18 @@ function TreeNode({
           )}
         </Collapse>
       )}
+
+      {/* 削除確認ダイアログ */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>削除の確認</DialogTitle>
+        <DialogContent>
+          <Typography>「{name}」を削除しますか？この操作は取り消せません。</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>キャンセル</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">削除</Button>
+        </DialogActions>
+      </Dialog>
 
       {/* 右クリックメニュー */}
       <Menu

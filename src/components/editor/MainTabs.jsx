@@ -2,10 +2,10 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { memo } from 'react';
 
-// Wails環境判定
-const isWails = !!window.go;
-
 function MainTabs({ value, onChange }) {
+  // Wails環境判定（コンポーネント内で評価してモジュールロード時のタイミング問題を回避）
+  const isWails = !!window?.go;
+
   return (
     <Tabs
       value={value}

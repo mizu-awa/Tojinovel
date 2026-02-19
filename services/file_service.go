@@ -6,10 +6,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 // FileService - プロジェクト内ファイルの読み書きサービス
 type FileService struct {
+	mu          sync.RWMutex
 	projectPath string
 }
 
@@ -27,17 +29,25 @@ func NewFileService() *FileService {
 
 // SetProjectPath - プロジェクトパスを設定
 func (f *FileService) SetProjectPath(path string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	f.projectPath = path
 }
 
 // GetProjectPath - 現在のプロジェクトパスを取得
 func (f *FileService) GetProjectPath() string {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
 	return f.projectPath
 }
 
 // validatePath - パスのバリデーション（ディレクトリトラバーサル防止）
 func (f *FileService) validatePath(relativePath string) (string, error) {
-	if f.projectPath == "" {
+	f.mu.RLock()
+	projectPath := f.projectPath
+	f.mu.RUnlock()
+
+	if projectPath == "" {
 		return "", fmt.Errorf("プロジェクトが選択されていません")
 	}
 
@@ -47,8 +57,8 @@ func (f *FileService) validatePath(relativePath string) (string, error) {
 		return "", fmt.Errorf("不正なパス: %s", relativePath)
 	}
 
-	full := filepath.Join(f.projectPath, clean)
-	absProject, err := filepath.Abs(f.projectPath)
+	full := filepath.Join(projectPath, clean)
+	absProject, err := filepath.Abs(projectPath)
 	if err != nil {
 		return "", fmt.Errorf("プロジェクトパスの解決に失敗: %w", err)
 	}
@@ -58,7 +68,8 @@ func (f *FileService) validatePath(relativePath string) (string, error) {
 	}
 
 	// プロジェクトフォルダ外へのアクセスを防止
-	if !strings.HasPrefix(absFull, absProject) {
+	// absProject+Separator でプレフィックス境界を確実にチェック（MyProject と MyProjectEvil の誤判定を防ぐ）
+	if absFull != absProject && !strings.HasPrefix(absFull, absProject+string(filepath.Separator)) {
 		return "", fmt.Errorf("プロジェクト外へのアクセス: %s", relativePath)
 	}
 	return full, nil
@@ -169,6 +180,10 @@ func (f *FileService) ReadDir(relativePath string) ([]FileInfo, error) {
 // DeleteFile - ファイルを削除
 func (f *FileService) DeleteFile(relativePath string) error {
 	cleanPath := strings.TrimPrefix(relativePath, "./")
+	// 空パス（プロジェクトルート）への削除を防止
+	if cleanPath == "" || cleanPath == "." {
+		return fmt.Errorf("プロジェクトルートは削除できません")
+	}
 	fullPath, err := f.validatePath(cleanPath)
 	if err != nil {
 		return err

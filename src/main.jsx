@@ -22,9 +22,13 @@ function RootApp() {
   // セッション継続中（デバッグから戻った場合など）はプロジェクト選択不要
   const [projectReady, setProjectReady] = useState(!!sessionStorage.getItem("sessionRunning"));
 
-  const handleProjectReady = useCallback(() => {
+  const handleProjectReady = useCallback((projectPath) => {
     // プロジェクト切り替え時はセッションをリセット（前プロジェクトの状態混入防止）
     sessionStorage.clear();
+    // IndexedDBキーのプロジェクト別分離のためパスを保存
+    if (projectPath) {
+      sessionStorage.setItem("currentProjectPath", projectPath);
+    }
     setProjectReady(true);
   }, []);
 

@@ -218,7 +218,7 @@ export default function EditorApp() {
     if (!result.ok) {
       console.error("イベントファイル保存エラー:", result.errors);
     }
-    saveFile();
+    await saveFile();
   }, [saveAllDirtyFiles, saveFile]);
 
   // Google Fontsの自動ロード

@@ -6,7 +6,12 @@ import { storage } from "../../services/storageService";
 const DB_NAME = "TojinovelDB";
 const STORE_NAME = "gameSaveStore";
 const DB_VERSION = 1;
-const IDB_KEY = `editorState:${location.origin + location.pathname}_eventBuffer`;
+// プロジェクト別のキーにするため関数化（プロジェクト切り替え時のバッファ混在を防ぐ）
+function getIdbKey() {
+  const projectPath = sessionStorage.getItem("currentProjectPath");
+  const base = projectPath || (location.origin + location.pathname);
+  return `editorState:${base}_eventBuffer`;
+}
 
 async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
@@ -88,7 +93,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     try {
       const db = await getDB();
       const serialized = Object.fromEntries(eventBufferRef.current);
-      await db.put(STORE_NAME, serialized, IDB_KEY);
+      await db.put(STORE_NAME, serialized, getIdbKey());
     } catch (e) {
       console.error("イベントバッファのIndexedDB保存エラー:", e);
     }
@@ -330,7 +335,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
   const loadBufferFromIndexedDB = useCallback(async () => {
     try {
       const db = await getDB();
-      const data = await db.get(STORE_NAME, IDB_KEY);
+      const data = await db.get(STORE_NAME, getIdbKey());
       if (data) {
         eventBufferRef.current = new Map(Object.entries(data));
         updateHasDirtyFiles();
