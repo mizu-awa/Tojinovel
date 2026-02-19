@@ -298,12 +298,64 @@ tojinovel/
 
 ---
 
-## 次のステップ
+---
 
-### ステップ5: 仕上げ
-- エクスポート機能（プロジェクトZIP出力）
-- エラーハンドリング改善
-- クロスプラットフォームテスト
+### ステップ5: system/修正 + エクスプローラー改善 + エクスポート機能 ✅ 完了
+
+**実施日**: 2026-02-19
+**ブランチ**: feature/toWails
+
+#### 実施内容
+
+1. **`system/`フォルダのパス修正** (`services/project_manager.go`)
+   - `CreateProject`の`data/system/`→ `system/`（トップレベル）に修正
+   - コード上の参照（`./system/...`）と一致させるバグ修正
+   - `embed.FS`を`ProjectManager`に受け渡す形に変更（`NewProjectManager(fileService, assets)`）
+   - `CreateProject`時に埋め込み`dist/system/`から5ファイルをプロジェクトの`system/`にコピー
+     - `transparent.png`, `character_image.png`, `item_image.png`, `scene_image.png`, `image.png`
+   - `copyEmbedDir`ヘルパー（再帰的embed→ディスクコピー）を追加
+
+2. **ExportPlayer機能** (`services/project_manager.go`)
+   - `ExportPlayer()`メソッド追加
+   - 埋め込み`dist/player.html`→ プロジェクトの`index.html`としてコピー
+   - 埋め込み`dist/assets/`→ プロジェクトの`assets/`に全ファイルコピー
+   - `system/`が存在しない場合は再コピー
+
+3. **main.go更新** (`main.go`)
+   - `NewProjectManager(fileService, assets)` に変更（embedFSを渡す）
+
+4. **エクスプローラーをプロジェクトルートから表示** (`src/components/editor/panels/FileExplorer.jsx`)
+   - `readDir("data")` → `readDir("")`（プロジェクトルート）
+   - `parentPath="data"` → `parentPath=""`
+   - ヘッダー表示テキスト修正（`data/` → `/`）
+   - ファイル作成ダイアログに案内テキスト追加
+   - 結果: `data/`, `system/` などトップレベルフォルダがすべて見えるようになった
+
+5. **プレイヤー書き出しUI** (`src/services/wailsAdapter.js`, `src/services/storageService.js`, `src/components/editor/MyAppBar.jsx`)
+   - `wailsAdapter.exportPlayer` → `window.go.services.ProjectManager.ExportPlayer()`
+   - `storageService.exportPlayer` wrapper追加
+   - `MyAppBar`にダウンロードアイコンボタン追加（Wails環境のみ表示）
+   - 書き出し成功/失敗をSnackbarで通知
+
+#### プロジェクト構造（書き出し後）
+
+```
+my-project/
+├── index.html         ← 書き出しで追加（player.htmlをリネーム）
+├── assets/            ← 書き出しで追加（ビルド済みJS/CSS）
+├── system/            ← プロジェクト作成時にコピー（transparent.png等）
+└── data/
+    ├── gamedata.json
+    ├── events/
+    ├── images/
+    └── sounds/
+```
+
+#### 検証結果
+- **go vet**: エラーなし ✅
+- **Go build**: コンパイル成功 ✅
+- **Vitest**: 64テスト全パス ✅
+- **Vite Build**: プロダクションビルド成功 ✅
 
 ---
 
@@ -325,6 +377,7 @@ tojinovel/
 3. **新規プロジェクト作成**
    - 「新規作成」→ プロジェクト名入力 + 作成場所選択 → 作成
    - 指定場所にプロジェクトフォルダ（data/, data/events/ 等）が作成されること
+   - `system/`がトップレベルに作成され、transparent.png等が入っていること
    - デフォルトの gamedata.json が配置されること
 
 4. **デバッグプレイボタン**
@@ -333,10 +386,15 @@ tojinovel/
 
 5. **エクスプローラータブ**
    - 「エクスプローラー」タブが表示されること（Wails環境のみ）
-   - data/ フォルダのファイルツリーが表示されること
+   - プロジェクトルート（`data/`, `system/` など）が表示されること
    - ファイルクリックでパスがクリップボードにコピーされること
    - 右クリックメニュー（パスコピー/リネーム/削除）が動作すること
 
-6. **既存機能の動作確認**
+6. **プレイヤー書き出しボタン**
+   - ツールバーの ⬇ ボタンでプレイヤー書き出しが実行されること
+   - `index.html` と `assets/` フォルダがプロジェクトに作成されること
+   - 出力された `index.html` をブラウザで開いてゲームが動作すること
+
+7. **既存機能の動作確認**
    - ゲームデータの読み込み・保存が正常に動作すること
    - シナリオエディタでイベントファイルの読み書きが正常なこと

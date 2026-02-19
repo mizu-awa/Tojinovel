@@ -323,7 +323,7 @@ export default function FileExplorer({ onFileSelect }) {
   const loadRoot = useCallback(async () => {
     setLoading(true);
     try {
-      const entries = await storage.readDir("data");
+      const entries = await storage.readDir("");
       const sorted = (entries || []).sort((a, b) => {
         if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
         return a.name.localeCompare(b.name);
@@ -397,7 +397,7 @@ export default function FileExplorer({ onFileSelect }) {
       {/* ヘッダー */}
       <Box sx={{ display: "flex", alignItems: "center", px: 1, py: 0.5, borderBottom: 1, borderColor: "divider" }}>
         <Typography variant="subtitle2" sx={{ flex: 1, color: "text.secondary", fontSize: "0.75rem" }}>
-          {selectedFolder ? selectedFolder + "/" : "data/"}
+          {selectedFolder ? selectedFolder + "/" : "/"}
         </Typography>
         <IconButton size="small" onClick={handleOpenCreateDialog} title="新規txtファイル作成">
           <NoteAdd fontSize="small" />
@@ -420,7 +420,7 @@ export default function FileExplorer({ onFileSelect }) {
                 key={entry.name}
                 name={entry.name}
                 isDir={entry.isDir}
-                parentPath="data"
+                parentPath=""
                 depth={0}
                 onFileSelect={onFileSelect}
                 selectedFolder={selectedFolder}
@@ -445,7 +445,7 @@ export default function FileExplorer({ onFileSelect }) {
         <DialogTitle>新規ファイル作成</DialogTitle>
         <DialogContent>
           <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1 }}>
-            作成場所: {selectedFolder || "data/events"}/
+            作成場所: {selectedFolder || "data/events"}/（フォルダを選択してから作成してください）
           </Typography>
           <TextField
             autoFocus

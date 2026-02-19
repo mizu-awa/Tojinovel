@@ -15,7 +15,7 @@ var assets embed.FS
 
 func main() {
 	fileService := services.NewFileService()
-	projectManager := services.NewProjectManager(fileService)
+	projectManager := services.NewProjectManager(fileService, assets)
 	app := NewApp(fileService, projectManager)
 	assetHandler := services.NewAssetHandler(fileService)
 

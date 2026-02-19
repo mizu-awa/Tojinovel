@@ -1,8 +1,14 @@
-import { PlayArrow, Redo, Save, Undo } from "@mui/icons-material";
-import { AppBar, Box, Divider, IconButton, Toolbar, Typography } from "@mui/material"
-import { memo, useCallback } from "react";
+import { FileDownload, PlayArrow, Redo, Save, Undo } from "@mui/icons-material";
+import { AppBar, Box, Divider, IconButton, Snackbar, Toolbar, Typography } from "@mui/material"
+import { memo, useCallback, useState } from "react";
+import { storage } from "../../services/storageService";
 
 const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo}) => {
+  const isWails = !!window?.go;
+
+  // エクスポート通知
+  const [snack, setSnack] = useState({ open: false, message: "" });
+
   // デバッグプレイ: 保存してからデバッグモードに遷移
   const handleDebugPlay = useCallback(async () => {
     if (!isSaved) {
@@ -10,6 +16,16 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo}) => {
     }
     window.location.search = "?debug";
   }, [save, isSaved]);
+
+  // プレイヤー書き出し
+  const handleExport = useCallback(async () => {
+    try {
+      await storage.exportPlayer();
+      setSnack({ open: true, message: "index.html と assets/ を書き出しました" });
+    } catch (e) {
+      setSnack({ open: true, message: `書き出し失敗: ${e}` });
+    }
+  }, []);
 
   return(
     <AppBar position="static" color="secondary">
@@ -35,8 +51,24 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo}) => {
           <IconButton onClick={handleDebugPlay} title="デバッグプレイ" sx={{color: "primary.contrastText"}}>
             <PlayArrow />
           </IconButton>
+          {isWails && (
+            <>
+              <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: "rgba(255,255,255,0.3)" }} />
+              <IconButton onClick={handleExport} title="プレイヤー書き出し（index.html + assets/）" sx={{color: "primary.contrastText"}}>
+                <FileDownload />
+              </IconButton>
+            </>
+          )}
         </Box>
       </Toolbar>
+
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={3000}
+        onClose={() => setSnack(s => ({ ...s, open: false }))}
+        message={snack.message}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </AppBar>
   )
 })

@@ -2,8 +2,10 @@ package services
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -17,6 +19,7 @@ type ProjectManager struct {
 	ctx         context.Context
 	fileService *FileService
 	configPath  string
+	embedFS     embed.FS
 }
 
 // RecentProject - 最近開いたプロジェクト情報
@@ -32,7 +35,7 @@ type appConfig struct {
 }
 
 // NewProjectManager - ProjectManager構造体を作成
-func NewProjectManager(fileService *FileService) *ProjectManager {
+func NewProjectManager(fileService *FileService, embedFS embed.FS) *ProjectManager {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		configDir = "."
@@ -42,6 +45,7 @@ func NewProjectManager(fileService *FileService) *ProjectManager {
 	return &ProjectManager{
 		fileService: fileService,
 		configPath:  configPath,
+		embedFS:     embedFS,
 	}
 }
 
@@ -84,18 +88,24 @@ func (p *ProjectManager) CreateProject(name string, parentDir string) (string, e
 		return "", fmt.Errorf("フォルダが既に存在します: %s", projectPath)
 	}
 
-	// プロジェクト構造を作成
+	// プロジェクト構造を作成（system/はトップレベル）
 	dirs := []string{
 		filepath.Join(projectPath, "data"),
 		filepath.Join(projectPath, "data", "events"),
 		filepath.Join(projectPath, "data", "images"),
 		filepath.Join(projectPath, "data", "sounds"),
-		filepath.Join(projectPath, "data", "system"),
 	}
 	for _, dir := range dirs {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return "", fmt.Errorf("ディレクトリ作成に失敗: %w", err)
 		}
+	}
+
+	// system/ フォルダをトップレベルに作成（埋め込みdist/system/からコピー）
+	systemDest := filepath.Join(projectPath, "system")
+	if err := p.copyEmbedDir("dist/system", systemDest); err != nil {
+		// dist/system/がない場合（開発中など）は空フォルダだけ作成
+		_ = os.MkdirAll(systemDest, 0755)
 	}
 
 	// デフォルトのgamedata.jsonを配置
@@ -115,6 +125,37 @@ func (p *ProjectManager) CreateProject(name string, parentDir string) (string, e
 	}
 
 	return projectPath, nil
+}
+
+// ExportPlayer - プレイヤーファイルをプロジェクトフォルダに書き出す
+// 埋め込みdist/から player.html（→index.html）と assets/ をコピーする
+func (p *ProjectManager) ExportPlayer() error {
+	projectPath := p.fileService.GetProjectPath()
+	if projectPath == "" {
+		return fmt.Errorf("プロジェクトが選択されていません")
+	}
+
+	// player.html → index.html としてコピー
+	playerHTML, err := p.embedFS.ReadFile("dist/player.html")
+	if err != nil {
+		return fmt.Errorf("player.htmlの読み込みに失敗: %w", err)
+	}
+	if err := os.WriteFile(filepath.Join(projectPath, "index.html"), playerHTML, 0644); err != nil {
+		return fmt.Errorf("index.htmlの書き込みに失敗: %w", err)
+	}
+
+	// assets/ フォルダをコピー（Viteビルド済みJS/CSS）
+	if err := p.copyEmbedDir("dist/assets", filepath.Join(projectPath, "assets")); err != nil {
+		return fmt.Errorf("assetsのコピーに失敗: %w", err)
+	}
+
+	// system/ フォルダが存在しない場合はコピー（プロジェクト作成後に手動削除された場合など）
+	systemDest := filepath.Join(projectPath, "system")
+	if _, err := os.Stat(systemDest); os.IsNotExist(err) {
+		_ = p.copyEmbedDir("dist/system", systemDest)
+	}
+
+	return nil
 }
 
 // SelectProjectDialog - OSフォルダ選択ダイアログを表示
@@ -164,6 +205,38 @@ func (p *ProjectManager) GetCurrentProjectName() string {
 }
 
 // --- 内部メソッド ---
+
+// copyEmbedDir - 埋め込みFSからディスクにディレクトリを再帰コピー
+func (p *ProjectManager) copyEmbedDir(srcDir string, destDir string) error {
+	entries, err := p.embedFS.ReadDir(srcDir)
+	if err != nil {
+		return fmt.Errorf("埋め込みディレクトリの読み込みに失敗 (%s): %w", srcDir, err)
+	}
+
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return fmt.Errorf("ディレクトリ作成に失敗 (%s): %w", destDir, err)
+	}
+
+	for _, entry := range entries {
+		srcPath := srcDir + "/" + entry.Name()
+		destPath := filepath.Join(destDir, entry.Name())
+
+		if entry.IsDir() {
+			if err := p.copyEmbedDir(srcPath, destPath); err != nil {
+				return err
+			}
+		} else {
+			data, err := fs.ReadFile(p.embedFS, srcPath)
+			if err != nil {
+				return fmt.Errorf("ファイル読み込みに失敗 (%s): %w", srcPath, err)
+			}
+			if err := os.WriteFile(destPath, data, 0644); err != nil {
+				return fmt.Errorf("ファイル書き込みに失敗 (%s): %w", destPath, err)
+			}
+		}
+	}
+	return nil
+}
 
 // loadConfig - 設定ファイルを読み込む
 func (p *ProjectManager) loadConfig() (*appConfig, error) {
@@ -273,8 +346,8 @@ func (p *ProjectManager) getDefaultGameData() map[string]any {
 				"name":       "シーン1",
 				"background": "",
 				"hotspots":   []any{},
-				"directions":  map[string]any{},
-				"visitEvent":  "",
+				"directions": map[string]any{},
+				"visitEvent": "",
 			},
 		},
 		"items": []any{},

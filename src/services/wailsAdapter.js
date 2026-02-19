@@ -44,4 +44,7 @@ export const wailsAdapter = {
   deleteFile: (path) => window.go.services.FileService.DeleteFile(path),
   renameFile: (oldPath, newPath) => window.go.services.FileService.RenameFile(oldPath, newPath),
   createFile: (path) => window.go.services.FileService.CreateFile(path),
+
+  // プレイヤー書き出し
+  exportPlayer: () => window.go.services.ProjectManager.ExportPlayer(),
 };
