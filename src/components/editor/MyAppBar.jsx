@@ -9,23 +9,22 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo}) => {
   // エクスポート通知
   const [snack, setSnack] = useState({ open: false, message: "" });
 
-  // デバッグプレイ: 保存してからデバッグモードに遷移
+  // デバッグプレイ: gamedata.json + イベントファイルを全保存してからデバッグモードに遷移
   const handleDebugPlay = useCallback(async () => {
-    if (!isSaved) {
-      await save();
-    }
+    await save();
     window.location.search = "?debug";
-  }, [save, isSaved]);
+  }, [save]);
 
-  // プレイヤー書き出し
+  // プレイヤー書き出し: 先に全保存してからエクスポート
   const handleExport = useCallback(async () => {
     try {
+      await save();
       await storage.exportPlayer();
       setSnack({ open: true, message: "index.html と assets/ を書き出しました" });
     } catch (e) {
       setSnack({ open: true, message: `書き出し失敗: ${e}` });
     }
-  }, []);
+  }, [save]);
 
   return(
     <AppBar position="static" color="secondary">

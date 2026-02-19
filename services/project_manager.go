@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -195,6 +196,66 @@ func (p *ProjectManager) SelectNewProjectParentDialog() (string, error) {
 	return dir, nil
 }
 
+// ImportFile - ファイル選択ダイアログを開き、選択したファイルをプロジェクト内の指定フォルダにコピー
+func (p *ProjectManager) ImportFile(destDir string) (string, error) {
+	if p.ctx == nil {
+		return "", fmt.Errorf("コンテキストが未設定です")
+	}
+
+	projectPath := p.fileService.GetProjectPath()
+	if projectPath == "" {
+		return "", fmt.Errorf("プロジェクトが選択されていません")
+	}
+
+	// ファイル選択ダイアログを開く
+	filePath, err := wailsRuntime.OpenFileDialog(p.ctx, wailsRuntime.OpenDialogOptions{
+		Title: "インポートするファイルを選択",
+	})
+	if err != nil {
+		return "", fmt.Errorf("ダイアログエラー: %w", err)
+	}
+	// キャンセルされた場合
+	if filePath == "" {
+		return "", nil
+	}
+
+	// コピー先ディレクトリを検証・作成
+	destRelClean := strings.TrimPrefix(filepath.ToSlash(destDir), "./")
+	destAbsDir := filepath.Join(projectPath, filepath.FromSlash(destRelClean))
+
+	absProject, err := filepath.Abs(projectPath)
+	if err != nil {
+		return "", fmt.Errorf("プロジェクトパス解決失敗: %w", err)
+	}
+	absDestDir, err := filepath.Abs(destAbsDir)
+	if err != nil {
+		return "", fmt.Errorf("コピー先パス解決失敗: %w", err)
+	}
+	if !strings.HasPrefix(absDestDir, absProject) {
+		return "", fmt.Errorf("コピー先がプロジェクト外です")
+	}
+
+	if err := os.MkdirAll(destAbsDir, 0755); err != nil {
+		return "", fmt.Errorf("フォルダ作成失敗: %w", err)
+	}
+
+	// ファイルをコピー
+	srcData, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("ファイル読み込み失敗: %w", err)
+	}
+
+	fileName := filepath.Base(filePath)
+	destFilePath := filepath.Join(destAbsDir, fileName)
+	if err := os.WriteFile(destFilePath, srcData, 0644); err != nil {
+		return "", fmt.Errorf("ファイル書き込み失敗: %w", err)
+	}
+
+	// フロントエンドに返す相対パス（./ + destDir/ファイル名）
+	relPath := "./" + filepath.ToSlash(filepath.Join(destRelClean, fileName))
+	return relPath, nil
+}
+
 // GetCurrentProjectName - 現在のプロジェクト名を取得
 func (p *ProjectManager) GetCurrentProjectName() string {
 	path := p.fileService.GetProjectPath()
@@ -306,50 +367,342 @@ func (p *ProjectManager) addToRecent(path string) {
 }
 
 // getDefaultGameData - 新規プロジェクト用のデフォルトゲームデータ
+// src/datas/defaultGameData.js の defaultGameData と対応
 func (p *ProjectManager) getDefaultGameData() map[string]any {
+	defaultUsedItem := map[string]any{"item": "", "file": "", "label": ""}
+	defaultState := map[string]any{
+		"name":       "default",
+		"x":          0,
+		"y":          0,
+		"width":      100,
+		"height":     100,
+		"background": "",
+		"text":       "",
+		"zIndex":     10,
+		"visibility": true,
+		"style": map[string]any{
+			"backgroundColor": "rgba(0,0,0,0)",
+			"borderStyle":     "none",
+			"borderWidth":     "1px",
+			"borderColor":     "rgba(0,0,0,0)",
+			"shadowColor":     "rgba(0,0,0,0)",
+			"fontSize":        "16px",
+			"color":           "rgba(0,0,0,1)",
+			"textAlign":       "left",
+			"fontWeight":      400,
+			"borderRadius":    0,
+			"textVAlign":      "center",
+			"textPadding":     "0px",
+			"rotate":          0,
+			"fontFamily":      "",
+		},
+		"hover":         "none",
+		"inputMode":     false,
+		"inputVariable": "",
+		"draggable":     false,
+		"onDragEnd":     map[string]any{"file": "", "label": ""},
+		"onClick":       map[string]any{"file": "", "label": ""},
+		"usedItems":     []any{defaultUsedItem},
+	}
+	defaultHotspot := map[string]any{
+		"name":   "New hotspot",
+		"state":  "default",
+		"states": []any{defaultState},
+	}
+	defaultExpression := map[string]any{
+		"name":  "通常",
+		"image": "./system/character_image.png",
+	}
+	defaultCharacter := map[string]any{
+		"name":              "キャラクター1",
+		"defaultExpression": "通常",
+		"expressions":       []any{defaultExpression},
+	}
+	defaultScene := map[string]any{
+		"name":       "New Scene",
+		"background": "./system/scene_image.png",
+		"visitEvent": map[string]any{"file": "", "label": ""},
+		"directions": map[string]any{
+			"top":    map[string]any{"target": ""},
+			"right":  map[string]any{"target": ""},
+			"bottom": map[string]any{"target": ""},
+			"left":   map[string]any{"target": ""},
+		},
+		"hotspots": []any{defaultHotspot},
+	}
+	defaultItem := map[string]any{
+		"name":     "New item",
+		"image":    "./system/item_image.png",
+		"have":     true,
+		"hotspots": []any{defaultHotspot},
+	}
+	defaultVariable := map[string]any{"name": "New data", "value": "0"}
+
 	return map[string]any{
 		"game": map[string]any{
-			"title":           "新しいゲーム",
+			"title":           "Game title",
 			"screenSize":      []int{800, 480},
-			"startScene":      "シーン1",
+			"startScene":      "New Scene",
 			"commonSceneName": "",
+			"character":       map[string]any{"slots": 3},
+			"save": map[string]any{
+				"slots":      3,
+				"auto":       false,
+				"dataText":   "Save Data",
+				"saveText":   "Save",
+				"loadText":   "Load",
+				"noDataText": "No Data",
+				"autoText":   "Auto",
+				"hover":      "none",
+				"gap":        10,
+				"backStyle": map[string]any{
+					"backgroundColor": "rgba(222,222,222,1)",
+					"backgroundImage": "",
+					"padding":         "10px 30px",
+				},
+				"titleStyle": map[string]any{
+					"fontSize":        "24px",
+					"color":           "rgba(0,0,0,1)",
+					"backgroundColor": "transparent",
+					"padding":         "0px",
+				},
+				"closeBtnStyle": map[string]any{
+					"size":  24,
+					"color": "rgba(0,0,0,1)",
+					"hover": "hoverOp",
+				},
+				"buttonStyle": map[string]any{
+					"padding":         10,
+					"color":           "rgba(0,0,0,1)",
+					"fontSize":        "16px",
+					"backgroundColor": "rgba(255,255,255,1)",
+					"backgroundImage": "",
+					"borderStyle":     "none",
+					"borderWidth":     "1px",
+					"borderColor":     "rgba(0, 0, 0, 1)",
+					"borderRadius":    "5px",
+				},
+			},
 			"backStyle": map[string]any{
-				"backgroundColor": "rgba(255, 255, 255, 1)",
+				"backgroundColor": "rgba(255,255,255,1)",
 				"backgroundImage": "",
 			},
 			"gameStyle": map[string]any{
-				"backgroundColor": "rgba(0,0,0,1)",
-				"fontFamily":      "system-ui",
-				"shadowColor":     "rgba(0, 0, 0, 0.5)",
+				"borderColor": "rgba(0,0,0,1)",
+				"borderWidth": 1,
+				"borderStyle": "none",
+				"shadowColor": "rgba(0, 0, 0, 0.3)",
+				"color":       "rgba(0,0,0,1)",
+				"fontFamily":  "system-ui",
+			},
+			"itemBox": map[string]any{
+				"size":           160,
+				"position":       "right",
+				"space":          10,
+				"paginationSize": 16,
+				"columnCount":    2,
+				"hover":          "none",
+				"foldable":       false,
+				"boxStyle": map[string]any{
+					"backgroundColor": "rgba(240,240,240,1)",
+					"backgroundImage": "",
+					"color":           "rgba(0,0,0,1)",
+				},
+				"itemStyle": map[string]any{
+					"backgroundColor": "rgba(255,255,255,1)",
+					"borderRadius":    "0px",
+				},
+				"selectedItemBorder": map[string]any{
+					"color": "rgba(255,0,0,1)",
+					"width": "2px",
+					"style": "solid",
+				},
+			},
+			"itemDrawer": map[string]any{
+				"size": []int{320, 240},
+				"style": map[string]any{
+					"backgroundColor": "rgba(255,255,255,1)",
+					"borderRadius":    "0px",
+				},
+				"backStyle": map[string]any{
+					"backgroundColor": "rgba(0,0,0,0.5)",
+				},
+			},
+			"textBox": map[string]any{
+				"position": []int{20, 320},
+				"size":     []int{600, 150},
+				"speed":    80,
+				"style": map[string]any{
+					"backgroundColor":      "rgba(0,0,0,0.6)",
+					"backgroundImage":      "",
+					"borderTopStyle":       "solid",
+					"borderTopWidth":       "0px",
+					"borderTopColor":       "rgba(0,0,0,0)",
+					"padding":              10,
+					"lineHeight":           1.2,
+					"textAlign":            "left",
+					"borderTopRightRadius": "0px",
+					"color":                "rgba(255,255,255,1)",
+					"fontSize":             "16px",
+				},
+				"highlightStyle": map[string]any{
+					"color":       "rgba(255,0,0,1)",
+					"strokeColor": "rgba(255,255,255,1)",
+				},
+				"nameStyle": map[string]any{
+					"backgroundColor": "rgba(0,0,0,0.6)",
+					"backgroundImage": "",
+					"color":           "rgba(255,255,255,1)",
+					"fontSize":        "16px",
+					"padding":         12,
+					"minWidth":        120,
+					"distance":        0,
+					"borderWidth":     "0px",
+					"borderStyle":     "solid",
+					"borderColor":     "rgba(0,0,0,0)",
+					"borderRadius":    "0px",
+				},
+				"indicator": map[string]any{"text": "▼"},
+			},
+			"direction": map[string]any{
+				"size":            40,
+				"useDefaultArrow": true,
+				"hover":           "none",
+				"style": map[string]any{
+					"backgroundColor": "rgba(0,0,0,0)",
+					"color":           "rgba(125,125,125,1)",
+				},
+				"images": map[string]any{
+					"top": "", "right": "", "bottom": "", "left": "",
+				},
+			},
+			"option": map[string]any{
+				"position": []int{50, 50},
+				"size":     180,
+				"gap":      20,
+				"hover":    "none",
+				"style": map[string]any{
+					"backgroundColor": "rgba(0,0,0,0.5)",
+					"backgroundImage": "",
+					"padding":         5,
+					"borderStyle":     "none",
+					"borderColor":     "rgba(0,0,0,1)",
+					"borderWidth":     "0px",
+					"borderRadius":    "0px",
+					"fontSize":        "16px",
+					"color":           "rgba(0,0,0,1)",
+					"textAlign":       "left",
+				},
+			},
+			"image": map[string]any{
+				"position": []int{180, 50},
+				"size":     []int{300, 400},
+				"style": map[string]any{
+					"borderStyle": "none",
+					"borderWidth": "1px",
+					"borderColor": "rgba(255,255,255,1)",
+				},
+			},
+			"input": map[string]any{
+				"position": []int{180, 80},
+				"size":     []int{300, 140},
+				"hover":    "none",
+				"backStyle": map[string]any{
+					"backgroundColor": "rgba(0,0,0,0.2)",
+					"backgroundImage": "",
+					"borderRadius":    "5px",
+					"borderStyle":     "none",
+					"borderWidth":     "1px",
+					"borderColor":     "rgba(255, 255, 255, 1)",
+				},
+				"inputStyle": map[string]any{
+					"color":           "rgba(0,0,0,1)",
+					"fontSize":        "16px",
+					"backgroundColor": "rgba(255,255,255,1)",
+					"borderStyle":     "solid",
+					"borderWidth":     "1",
+					"borderColor":     "rgba(0, 0, 0, 1)",
+					"borderRadius":    "0px",
+				},
+				"buttonStyle": map[string]any{
+					"color":           "rgba(0,0,0,1)",
+					"fontSize":        "16px",
+					"backgroundColor": "rgba(255,255,255,1)",
+					"borderStyle":     "none",
+					"borderWidth":     "1px",
+					"borderColor":     "rgba(0, 0, 0, 1)",
+					"borderRadius":    "5px",
+				},
+			},
+			"menu": map[string]any{
+				"position":      "bottom right",
+				"saveText":      "Save",
+				"loadText":      "Load",
+				"configText":    "config",
+				"visibleSave":   true,
+				"visibleLoad":   true,
+				"visibleConfig": true,
+				"hover":         "none",
+				"style": map[string]any{
+					"fontSize":   "16px",
+					"gap":        10,
+					"fontWeight": 500,
+				},
+			},
+			"config": map[string]any{
+				"bgmText":      "BGM音量",
+				"seText":       "SE音量",
+				"voiceText":    "ボイス音量",
+				"speedText":    "文字送り速度",
+				"visibleBGM":   true,
+				"visibleSE":    true,
+				"visibleVoice": true,
+				"visibleSpeed": true,
+				"visibleAuto":  true,
+				"autoText":     "オート",
+				"backStyle": map[string]any{
+					"backgroundColor": "rgba(255,255,255,1)",
+					"backgroundImage": "",
+				},
+				"containerStyle": map[string]any{
+					"backgroundColor": "rgba(200,200,200,1)",
+					"backgroundImage": "",
+					"width":           450,
+					"gap":             12,
+					"color":           "rgba(0,0,0,1)",
+					"fontSize":        "16px",
+					"borderStyle":     "none",
+					"borderWidth":     "1px",
+					"borderColor":     "rgba(0, 0, 0, 1)",
+					"borderRadius":    "5px",
+					"shadowColor":     "rgba(0, 0, 0, 1)",
+				},
+				"trackStyle": map[string]any{
+					"height":          6,
+					"borderRadius":    "3px",
+					"backgroundColor": "rgba(180, 42, 42, 1)",
+				},
+				"thumbStyle": map[string]any{
+					"size":            20,
+					"backgroundColor": "rgba(55, 80, 202, 1)",
+					"borderColor":     "rgba(255, 255, 255, 1)",
+					"borderStyle":     "solid",
+					"borderWidth":     "2px",
+				},
+			},
+			"auto": map[string]any{
+				"enabled": false,
+				"speed":   2000,
 			},
 			"sound": map[string]any{
 				"bgm":   0.8,
 				"se":    1,
 				"voice": 1,
 			},
-			"textBox": map[string]any{
-				"speed": 30,
-			},
-			"itemBox": map[string]any{
-				"position": "right",
-				"size":     100,
-				"foldable": false,
-			},
-			"character": map[string]any{
-				"slots": 3,
-			},
 		},
-		"variables":  []any{},
-		"characters": []any{},
-		"scenes": []any{
-			map[string]any{
-				"name":       "シーン1",
-				"background": "",
-				"hotspots":   []any{},
-				"directions": map[string]any{},
-				"visitEvent": "",
-			},
-		},
-		"items": []any{},
+		"variables":  []any{defaultVariable},
+		"characters": []any{defaultCharacter},
+		"scenes":     []any{defaultScene},
+		"items":      []any{defaultItem},
 	}
 }

@@ -7,7 +7,7 @@ import {
 import {
   AudioFile, ChevronRight, ContentCopy, Delete,
   DriveFileRenameOutline, ExpandMore, Folder,
-  FolderOpen, Image, InsertDriveFile, NoteAdd, Refresh, TextSnippet
+  FolderOpen, FileUpload, Image, InsertDriveFile, NoteAdd, Refresh, TextSnippet
 } from "@mui/icons-material";
 import { storage } from "../../../services/storageService";
 
@@ -359,6 +359,25 @@ export default function FileExplorer({ onFileSelect }) {
     dragState.current = null;
   }, []);
 
+  // インポートスナックバー
+  const [importSnack, setImportSnack] = useState({ open: false, message: "" });
+
+  // ファイルインポート（選択フォルダへダイアログ経由でコピー）
+  const handleImportFile = useCallback(async () => {
+    const destDir = selectedFolder || "data";
+    try {
+      const relPath = await storage.importFile(destDir);
+      if (relPath) {
+        setImportSnack({ open: true, message: `インポート完了: ${relPath}` });
+        handleRefresh();
+        // テキストファイルはエディタで開く
+        if (onFileSelect && relPath.endsWith(".txt")) onFileSelect(relPath);
+      }
+    } catch (e) {
+      setImportSnack({ open: true, message: `インポート失敗: ${e}` });
+    }
+  }, [selectedFolder, handleRefresh, onFileSelect]);
+
   // ファイル作成ダイアログを開く
   const handleOpenCreateDialog = useCallback(() => {
     setNewFileName("新規イベント.txt");
@@ -399,6 +418,9 @@ export default function FileExplorer({ onFileSelect }) {
         <Typography variant="subtitle2" sx={{ flex: 1, color: "text.secondary", fontSize: "0.75rem" }}>
           {selectedFolder ? selectedFolder + "/" : "/"}
         </Typography>
+        <IconButton size="small" onClick={handleImportFile} title="ファイルをインポート（選択フォルダへコピー）">
+          <FileUpload fontSize="small" />
+        </IconButton>
         <IconButton size="small" onClick={handleOpenCreateDialog} title="新規txtファイル作成">
           <NoteAdd fontSize="small" />
         </IconButton>
@@ -470,6 +492,15 @@ export default function FileExplorer({ onFileSelect }) {
           <Button onClick={handleCreateFile} variant="contained">作成</Button>
         </DialogActions>
       </Dialog>
+
+      {/* インポート通知 */}
+      <Snackbar
+        open={importSnack.open}
+        autoHideDuration={3000}
+        onClose={() => setImportSnack(s => ({ ...s, open: false }))}
+        message={importSnack.message}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </Box>
   );
 }

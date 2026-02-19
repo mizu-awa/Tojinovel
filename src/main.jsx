@@ -6,8 +6,11 @@ import GameApp from './GameApp.jsx'
 import ProjectSelector from './components/editor/ProjectSelector.jsx'
 import { setAdapter } from './services/storageService'
 import { wailsAdapter } from './services/wailsAdapter'
+import { httpAdapter } from './services/httpAdapter'
 
-setAdapter(wailsAdapter);
+// Wails環境（window.go が存在）かどうかで Adapter を切り替える
+const isWails = !!window.go;
+setAdapter(isWails ? wailsAdapter : httpAdapter);
 
 // URLパラメータでデバッグモード判定（?debug）
 const params = new URLSearchParams(window.location.search);
@@ -20,6 +23,8 @@ function RootApp() {
   const [projectReady, setProjectReady] = useState(!!sessionStorage.getItem("sessionRunning"));
 
   const handleProjectReady = useCallback(() => {
+    // プロジェクト切り替え時はセッションをリセット（前プロジェクトの状態混入防止）
+    sessionStorage.clear();
     setProjectReady(true);
   }, []);
 

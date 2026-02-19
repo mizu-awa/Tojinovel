@@ -47,4 +47,7 @@ export const wailsAdapter = {
 
   // プレイヤー書き出し
   exportPlayer: () => window.go.services.ProjectManager.ExportPlayer(),
+
+  // ファイルインポート（ダイアログ経由、コピー先フォルダを指定）
+  importFile: (destDir) => window.go.services.ProjectManager.ImportFile(destDir),
 };

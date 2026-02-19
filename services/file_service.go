@@ -149,6 +149,10 @@ func (f *FileService) ReadDir(relativePath string) ([]FileInfo, error) {
 
 	var result []FileInfo
 	for _, entry := range entries {
+		// ドットファイル（.gitignore等）は非表示
+		if strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
 		info, err := entry.Info()
 		if err != nil {
 			continue
