@@ -39,4 +39,5 @@ export const wailsAdapter = {
   readDir: (path) => window.go.services.FileService.ReadDir(path),
   deleteFile: (path) => window.go.services.FileService.DeleteFile(path),
   renameFile: (oldPath, newPath) => window.go.services.FileService.RenameFile(oldPath, newPath),
+  createFile: (path) => window.go.services.FileService.CreateFile(path),
 };

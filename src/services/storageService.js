@@ -31,4 +31,5 @@ export const storage = {
   readDir: (...args) => adapter.readDir?.(...args) ?? Promise.resolve(null),
   deleteFile: (...args) => adapter.deleteFile?.(...args) ?? Promise.resolve(null),
   renameFile: (...args) => adapter.renameFile?.(...args) ?? Promise.resolve(null),
+  createFile: (...args) => adapter.createFile?.(...args) ?? Promise.resolve(null),
 };

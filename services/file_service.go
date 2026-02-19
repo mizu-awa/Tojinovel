@@ -172,7 +172,7 @@ func (f *FileService) DeleteFile(relativePath string) error {
 	return os.RemoveAll(fullPath)
 }
 
-// RenameFile - ファイルをリネーム
+// RenameFile - ファイルをリネーム（移動も兼ねる）
 func (f *FileService) RenameFile(oldPath string, newPath string) error {
 	cleanOld := strings.TrimPrefix(oldPath, "./")
 	cleanNew := strings.TrimPrefix(newPath, "./")
@@ -187,4 +187,29 @@ func (f *FileService) RenameFile(oldPath string, newPath string) error {
 	}
 
 	return os.Rename(fullOld, fullNew)
+}
+
+// CreateFile - 空のファイルを新規作成（既存ファイルは上書きしない）
+func (f *FileService) CreateFile(relativePath string) error {
+	cleanPath := strings.TrimPrefix(relativePath, "./")
+	fullPath, err := f.validatePath(cleanPath)
+	if err != nil {
+		return err
+	}
+
+	// 親ディレクトリを自動作成
+	dir := filepath.Dir(fullPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("ディレクトリ作成に失敗: %w", err)
+	}
+
+	// 既存ファイルがある場合はエラー
+	file, err := os.OpenFile(fullPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+	if err != nil {
+		if os.IsExist(err) {
+			return fmt.Errorf("同名のファイルが既に存在します: %s", relativePath)
+		}
+		return fmt.Errorf("ファイル作成に失敗: %w", err)
+	}
+	return file.Close()
 }
