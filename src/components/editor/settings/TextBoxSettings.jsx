@@ -3,13 +3,16 @@ import FormField from "../FormField"
 import BorderStyleSelect from "../BorderStyleSelect"
 import RgbaColorInput from "../RgbaColorInput"
 import { StyledInput } from "../StyledInput"
+import FilePathInput from "../FilePathInput"
 import TextAlignSelector from "../TextAlignSelector"
 import { inputPropsDefaultNum, inputPropsLinehight } from "./inputProps";
 import MyAccordion from "../MyAccordion";
 
 const TextBoxSettings = ({
   gameTextBox,
-  handleDatasetChange
+  handleDatasetChange,
+  fileList,
+  ensureFileListLoaded
 }) => {
 
   return(
@@ -88,8 +91,9 @@ const TextBoxSettings = ({
         </FormField>
 
         <FormField label="背景画像">
-          <StyledInput
-            type="text"
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={gameTextBox.style.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
             onChange={handleDatasetChange}
             data-path="game.textBox.style.backgroundImage"
@@ -216,8 +220,9 @@ const TextBoxSettings = ({
           </FormField>
 
           <FormField label="背景画像">
-            <StyledInput
-              type="text"
+            <FilePathInput
+              options={fileList}
+              onFocus={ensureFileListLoaded}
               value={gameTextBox.nameStyle.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
               onChange={handleDatasetChange}
               data-path="game.textBox.nameStyle.backgroundImage"

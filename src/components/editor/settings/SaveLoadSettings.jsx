@@ -1,6 +1,7 @@
 import { memo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
+import FilePathInput from "../FilePathInput";
 import RgbaColorInput from "../RgbaColorInput";
 import BorderStyleSelect from "../BorderStyleSelect";
 import HoverSelector from "../HoverSelector";
@@ -10,7 +11,9 @@ import MyAccordion from "../MyAccordion";
 
 const SaveLoadSettings = ({
   gameSave,
-  handleDatasetChange
+  handleDatasetChange,
+  fileList,
+  ensureFileListLoaded
 }) => {
 
   return(
@@ -163,8 +166,9 @@ const SaveLoadSettings = ({
         </FormField>
 
         <FormField label="背景画像">
-          <StyledInput
-            type="text"
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={gameSave.backStyle.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
             onChange={handleDatasetChange}
             data-path="game.save.backStyle.backgroundImage"
@@ -194,8 +198,9 @@ const SaveLoadSettings = ({
           </FormField>
 
           <FormField label="背景画像">
-            <StyledInput
-              type="text"
+            <FilePathInput
+              options={fileList}
+              onFocus={ensureFileListLoaded}
               value={gameSave.buttonStyle.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
               onChange={handleDatasetChange}
               data-path="game.save.buttonStyle.backgroundImage"

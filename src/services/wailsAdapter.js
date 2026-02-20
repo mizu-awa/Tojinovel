@@ -41,6 +41,7 @@ export const wailsAdapter = {
 
   // ファイルツリー（仮想エクスプローラー用）
   readDir: (path) => window.go.services.FileService.ReadDir(path),
+  readDirRecursive: () => window.go.services.FileService.ReadDirRecursive(),
   deleteFile: (path) => window.go.services.FileService.DeleteFile(path),
   renameFile: (oldPath, newPath) => window.go.services.FileService.RenameFile(oldPath, newPath),
   createFile: (path) => window.go.services.FileService.CreateFile(path),

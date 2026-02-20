@@ -50,6 +50,7 @@ import useUndoRedo from "./hooks/editor/useUndoRedo";
 import useHandleChange from "./hooks/editor/useHandleChange";
 import useMoveHotspot from "./hooks/editor/useMoveHotSpot";
 import useEditFunctions from "./hooks/editor/useEditFunctions";
+import useFileList from "./hooks/editor/useFileList";
 import ItemSettings from "./components/editor/settings/ItemSettings";
 import ConfigSettings from "./components/editor/settings/ConfigSettings";
 import Config from "./components/Config";
@@ -212,6 +213,9 @@ export default function EditorApp() {
     mainTab
 });
 
+  // ファイルリスト（オートコンプリート用）
+  const { fileList, refreshFileList, ensureLoaded: ensureFileListLoaded } = useFileList();
+
   // 保存処理を統合（gamedata.json + イベントファイル）
   const saveAll = useCallback(async () => {
     const result = await saveAllDirtyFiles();
@@ -368,8 +372,9 @@ export default function EditorApp() {
     if(loadFirst){
       loadFirst();
       loadBufferFromIndexedDB();
+      refreshFileList();
     }
-  },[loadFirst, loadBufferFromIndexedDB])
+  },[loadFirst, loadBufferFromIndexedDB, refreshFileList])
 
   // IndexedDB自動保存 フォーカス外れ等によるページリロード対策
   const timeoutRef = useRef(null);
@@ -449,17 +454,17 @@ export default function EditorApp() {
   const renderGameSetting = () => {
     switch(selectedItem) {
       case "ゲーム情報": return <GameInfoSettings game={gameData.game} scenes={gameData.scenes} handleDatasetChange={handleDatasetChange} />;
-      case "ゲーム画面": return <ScreenSettings game={gameData.game} handleDatasetChange={handleDatasetChange} />;
-      case "アイテムボックス": return <ItemBoxSettings gameItemBox={gameData.game.itemBox} handleDatasetChange={handleDatasetChange} />;
-      case "アイテムドロワー": return <ItemDrawerSettings gameItemDrawer={gameData.game.itemDrawer} handleDatasetChange={handleDatasetChange} />;
-      case "テキストボックス": return <TextBoxSettings gameTextBox={gameData.game.textBox} handleDatasetChange={handleDatasetChange} />;
-      case "方向移動": return <DirectionSettings gameDirection={gameData.game.direction} handleDatasetChange={handleDatasetChange} />;
-      case "選択肢": return <OptionSettings gameOption={gameData.game.option} handleDatasetChange={handleDatasetChange} />;
-      case "画像表示": return <EventImageSettings gameImage={gameData.game.image} handleDatasetChange={handleDatasetChange} />;
-      case "入力フォーム": return <FormSettings gameInput={gameData.game.input} handleDatasetChange={handleDatasetChange}/>;
+      case "ゲーム画面": return <ScreenSettings game={gameData.game} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "アイテムボックス": return <ItemBoxSettings gameItemBox={gameData.game.itemBox} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "アイテムドロワー": return <ItemDrawerSettings gameItemDrawer={gameData.game.itemDrawer} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "テキストボックス": return <TextBoxSettings gameTextBox={gameData.game.textBox} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "方向移動": return <DirectionSettings gameDirection={gameData.game.direction} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "選択肢": return <OptionSettings gameOption={gameData.game.option} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "画像表示": return <EventImageSettings gameImage={gameData.game.image} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "入力フォーム": return <FormSettings gameInput={gameData.game.input} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
       case "ゲームメニュー": return <MenuSettings gameMenu={gameData.game.menu} handleDatasetChange={handleDatasetChange}/>;
-      case "セーブ・ロード": return <SaveLoadSettings gameSave={gameData.game.save} handleDatasetChange={handleDatasetChange} />;
-      case "コンフィグ": return <ConfigSettings gameConfig={gameData.game.config} handleDatasetChange={handleDatasetChange} />;
+      case "セーブ・ロード": return <SaveLoadSettings gameSave={gameData.game.save} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "コンフィグ": return <ConfigSettings gameConfig={gameData.game.config} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
       case "キャラクター表示": return <GameCharacterSettings gameCharacter={gameData.game.character} handleDatasetChange={handleDatasetChange} />;
       default: return null;
     }
@@ -476,6 +481,8 @@ export default function EditorApp() {
           index={selectedItem}
           subIndex={selectedSubItem}
           handleDatasetChange={handleDatasetChange}
+          fileList={fileList}
+          ensureFileListLoaded={ensureFileListLoaded}
         />
       );
       case "scenes": return (
@@ -494,6 +501,8 @@ export default function EditorApp() {
           states={stateList}
           handleDatasetChange={handleDatasetChange}
           loadEventFile={loadEventFile}
+          fileList={fileList}
+          ensureFileListLoaded={ensureFileListLoaded}
         />
       );
       case "items": return (
@@ -512,6 +521,8 @@ export default function EditorApp() {
           states={stateList}
           handleDatasetChange={handleDatasetChange}
           loadEventFile={loadEventFile}
+          fileList={fileList}
+          ensureFileListLoaded={ensureFileListLoaded}
         />
       );
       default: return null;
@@ -575,7 +586,7 @@ export default function EditorApp() {
           paste={paste}
         />
       );
-      case "explorer": return <FileExplorer onFileSelect={handleExplorerFileSelect} />;
+      case "explorer": return <FileExplorer onFileSelect={handleExplorerFileSelect} onFileChange={refreshFileList} />;
       default: return null;
     }
   };

@@ -2,11 +2,14 @@ import { memo } from "react";
 import FormField from "../FormField"
 import RgbaColorInput from "../RgbaColorInput"
 import { StyledInput } from "../StyledInput"
+import FilePathInput from "../FilePathInput"
 import { inputPropsDefaultNum } from "./inputProps";
 
 const ItemDrawerSettings = ({
   gameItemDrawer,
-  handleDatasetChange
+  handleDatasetChange,
+  fileList,
+  ensureFileListLoaded
 }) => {
 
   return(
@@ -40,8 +43,9 @@ const ItemDrawerSettings = ({
       </FormField>
 
       <FormField label="背景画像">
-        <StyledInput
-          type="text"
+        <FilePathInput
+          options={fileList}
+          onFocus={ensureFileListLoaded}
           value={gameItemDrawer.style.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
           onChange={handleDatasetChange}
           data-path="game.itemDrawer.style.backgroundImage"

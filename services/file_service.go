@@ -232,6 +232,46 @@ func (f *FileService) WriteFileBase64(relativePath string, base64Data string) er
 	return os.WriteFile(fullPath, data, 0644)
 }
 
+// ReadDirRecursive - プロジェクト内の全ファイルを再帰的に取得（相対パスのフラット配列）
+func (f *FileService) ReadDirRecursive() ([]string, error) {
+	f.mu.RLock()
+	projectPath := f.projectPath
+	f.mu.RUnlock()
+
+	if projectPath == "" {
+		return nil, fmt.Errorf("プロジェクトが選択されていません")
+	}
+
+	var files []string
+	err := filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil // エラーのあるエントリはスキップ
+		}
+		// ドットファイル・ドットディレクトリはスキップ
+		if strings.HasPrefix(info.Name(), ".") {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		// ディレクトリは除外（ファイルのみ）
+		if info.IsDir() {
+			return nil
+		}
+		rel, err := filepath.Rel(projectPath, path)
+		if err != nil {
+			return nil
+		}
+		// Windowsのバックスラッシュをスラッシュに統一
+		files = append(files, filepath.ToSlash(rel))
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("ディレクトリ走査に失敗: %w", err)
+	}
+	return files, nil
+}
+
 // CreateFile - 空のファイルを新規作成（既存ファイルは上書きしない）
 func (f *FileService) CreateFile(relativePath string) error {
 	cleanPath := strings.TrimPrefix(relativePath, "./")

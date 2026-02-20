@@ -1,6 +1,7 @@
 import { memo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
+import FilePathInput from "../FilePathInput";
 import MyAutoComplete from "../MyAutoComplete";
 import SectionDivider from "../SectionDivider";
 import NameWarn from "../NameWarn";
@@ -10,7 +11,9 @@ const CharacterSettings = ({
   characterList,
   index,
   subIndex,
-  handleDatasetChange
+  handleDatasetChange,
+  fileList,
+  ensureFileListLoaded
 }) => {
   if(!characters[index]) return null;
 
@@ -52,7 +55,9 @@ const CharacterSettings = ({
           </FormField>
 
           <FormField label="画像">
-            <StyledInput
+            <FilePathInput
+              options={fileList}
+              onFocus={ensureFileListLoaded}
               value={characters[index]?.expressions[subIndex]?.image?.replace(/^\.\/(.*)$/, "$1") || ""}
               onChange={handleDatasetChange}
               data-path={`${exPath}.image`}

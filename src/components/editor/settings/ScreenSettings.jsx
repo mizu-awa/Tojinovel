@@ -3,6 +3,7 @@ import FormField from "../FormField"
 import BorderStyleSelect from "../BorderStyleSelect"
 import RgbaColorInput from "../RgbaColorInput"
 import { StyledInput } from "../StyledInput"
+import FilePathInput from "../FilePathInput"
 import StyledCheckbox from "../StyledCheckBox";
 import FontSelector from "../FontSelector";
 import { inputPropsDefaultNum } from "./inputProps";
@@ -11,7 +12,9 @@ import MyAccordion from "../MyAccordion";
 
 const ScreenSettings = ({
   game,
-  handleDatasetChange
+  handleDatasetChange,
+  fileList,
+  ensureFileListLoaded
 }) => {
 
   return(
@@ -75,8 +78,9 @@ const ScreenSettings = ({
         </FormField>
 
         <FormField label="背景画像">
-          <StyledInput
-            type="text"
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={game.backStyle.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
             onChange={handleDatasetChange}
             data-path="game.backStyle.backgroundImage"

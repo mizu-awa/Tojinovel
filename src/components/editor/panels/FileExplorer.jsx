@@ -354,7 +354,7 @@ function TreeNode({
 }
 
 // メインのファイルエクスプローラーコンポーネント
-export default function FileExplorer({ onFileSelect }) {
+export default function FileExplorer({ onFileSelect, onFileChange }) {
   const [rootEntries, setRootEntries] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -397,7 +397,8 @@ export default function FileExplorer({ onFileSelect }) {
 
   const handleRefresh = useCallback(() => {
     loadRoot();
-  }, [loadRoot]);
+    onFileChange?.();
+  }, [loadRoot, onFileChange]);
 
   // functions-----
 

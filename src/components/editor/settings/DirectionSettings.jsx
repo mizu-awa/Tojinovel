@@ -3,13 +3,16 @@ import FormField from "../FormField";
 import HoverSelector from "../HoverSelector";
 import RgbaColorInput from "../RgbaColorInput";
 import { StyledInput } from "../StyledInput";
+import FilePathInput from "../FilePathInput";
 import StyledCheckbox from "../StyledCheckBox";
 import MyAccordion from "../MyAccordion";
 import { inputPropsDefaultNum } from "./inputProps";
 
 const DirectionSettings = ({
   gameDirection,
-  handleDatasetChange
+  handleDatasetChange,
+  fileList,
+  ensureFileListLoaded
 }) => {
   return(
     <>
@@ -61,8 +64,9 @@ const DirectionSettings = ({
 
       <MyAccordion title="カスタム画像">
         <FormField label="上方向の画像">
-          <StyledInput
-            type="text"
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={gameDirection.images?.top || ""}
             onChange={handleDatasetChange}
             data-path="game.direction.images.top"
@@ -70,8 +74,9 @@ const DirectionSettings = ({
         </FormField>
 
         <FormField label="右方向の画像">
-          <StyledInput
-            type="text"
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={gameDirection.images?.right || ""}
             onChange={handleDatasetChange}
             data-path="game.direction.images.right"
@@ -79,8 +84,9 @@ const DirectionSettings = ({
         </FormField>
 
         <FormField label="下方向の画像">
-          <StyledInput
-            type="text"
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={gameDirection.images?.bottom || ""}
             onChange={handleDatasetChange}
             data-path="game.direction.images.bottom"
@@ -88,8 +94,9 @@ const DirectionSettings = ({
         </FormField>
 
         <FormField label="左方向の画像">
-          <StyledInput
-            type="text"
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={gameDirection.images?.left || ""}
             onChange={handleDatasetChange}
             data-path="game.direction.images.left"
