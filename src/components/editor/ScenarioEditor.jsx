@@ -1,6 +1,7 @@
 import { memo, useState, useCallback, useEffect, useRef } from "react";
 import { Box, Typography, IconButton, TextField, Button } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
+import useFileList from "../../hooks/editor/useFileList";
 import { Description, FolderOpen, Close, NoteAdd, Fullscreen, FullscreenExit } from "@mui/icons-material";
 
 // CodeMirror
@@ -9,7 +10,7 @@ import { EditorState } from "@codemirror/state";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { LanguageSupport } from "@codemirror/language";
 import eventLanguage from "./codemirror/eventLanguage";
-import { eventCompletionExtension } from "./codemirror/eventCompletion";
+import { createEventCompletionExtension } from "./codemirror/eventCompletion";
 import { lightExtensions, darkExtensions } from "./codemirror/eventTheme";
 import { closeBracketsExtension } from "./codemirror/eventBrackets";
 
@@ -71,6 +72,11 @@ function ScenarioEditor({
   const editorViewRefStable = useRef(editorViewRef);
   const applyPendingContentRef = useRef(applyPendingContent);
 
+  // ファイルパス補完用
+  const { fileList, ensureLoaded } = useFileList();
+  const fileListRef = useRef(fileList);
+  useEffect(() => { fileListRef.current = fileList; }, [fileList]);
+
   // 手動入力用のローカルstate
   const [inputFilePath, setInputFilePath] = useState("");
   const [inputLabel, setInputLabel] = useState("");
@@ -119,7 +125,7 @@ function ScenarioEditor({
         history(),
         keymap.of([indentWithTab, ...defaultKeymap, ...historyKeymap]),
         language,
-        eventCompletionExtension,
+        createEventCompletionExtension(fileListRef, ensureLoaded),
         closeBracketsExtension,
         updateListener,
         ...(isDark ? darkExtensions : lightExtensions),
