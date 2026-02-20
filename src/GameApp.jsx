@@ -442,7 +442,7 @@ export default function GameApp({ debug }) {
     loadGameData,
     loading,
     error
-  } = useGameData("./data/gamedata.json", visitScene);
+  } = useGameData(visitScene);
   
 
   // effects-----------------------------------------------------------------------------------------

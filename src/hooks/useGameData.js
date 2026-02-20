@@ -1,8 +1,9 @@
 // src/hooks/useGameData.js
 import { useEffect, useState } from "react";
 import { mergeDefault } from "./useMerge";
+import { storage } from "../services/storageService";
 
-export function useGameData(fileName, visitSceneEvent) {
+export function useGameData(visitSceneEvent) {
 
   // states----------------------------------------------------------------------------------
   const [gameData, setGameData] = useState(null);
@@ -41,22 +42,19 @@ export function useGameData(fileName, visitSceneEvent) {
   // effects----------------------------------------------------------------------------------
   useEffect(() => {
     setLoading(true);
-    fetch(`${fileName}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load game data");
-        return res.json();
-      })
+    storage.loadGameData()
       .then((data) => {
         setGameData(mergeDefault(data));
         setCurrentSceneName(data.game.startScene);
-        visitSceneEvent(data.game.startScene,data)
+        visitSceneEvent(data.game.startScene, data);
         setLoading(false);
       })
       .catch((err) => {
         setError(err);
         setLoading(false);
       });
-  }, [fileName]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // export---------------------------------------------------------------------------------------
   if(!loading){
