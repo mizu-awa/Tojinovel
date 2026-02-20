@@ -19,6 +19,7 @@
     "character": {
       "slots": 3
     },
+    "commonSceneName": "",
     "config": {
       "backStyle": {
         "backgroundColor": "rgba(255,255,255,1)",
@@ -67,14 +68,21 @@
         "backgroundColor": "rgba(0,0,0,0)",
         "color": "rgba(125,125,125,1)"
       },
-      "useDefaultArrow": true
+      "useDefaultArrow": true,
+      "images": {
+        "top": "",
+        "right": "",
+        "bottom": "",
+        "left": ""
+      }
     },
     "gameStyle": {
       "borderColor": "rgba(0,0,0,1)",
       "borderStyle": "none",
       "borderWidth": 1,
       "color": "rgba(0,0,0,1)",
-      "shadowColor": "rgba(0, 0, 0, 0.3)"
+      "shadowColor": "rgba(0, 0, 0, 0.3)",
+      "fontFamily": "system-ui"
     },
     "image": {
       "position": [
@@ -219,6 +227,17 @@
         "fontSize": "16px",
         "padding": 10
       },
+      "closeBtnStyle": {
+        "size": 24,
+        "color": "rgba(0,0,0,1)",
+        "hover": "hoverOp"
+      },
+      "titleStyle": {
+        "fontSize": "24px",
+        "color": "rgba(0,0,0,1)",
+        "backgroundColor": "transparent",
+        "padding": "0px"
+      },
       "dataText": "Save Data",
       "hover": "hoverDk",
       "loadText": "Load",
@@ -269,7 +288,16 @@
       },
       "nameStyle": {
         "backgroundColor": "rgba(0, 0, 0, 0.6)",
-        "backgroundImage": ""
+        "backgroundImage": "",
+        "color": "rgba(255,255,255,1)",
+        "fontSize": "16px",
+        "padding": 12,
+        "minWidth": 120,
+        "distance": 0,
+        "borderWidth": "0px",
+        "borderStyle": "solid",
+        "borderColor": "rgba(0,0,0,0)",
+        "borderRadius": "0px"
       },
       "indicator": {
         "text": "▼"
@@ -293,6 +321,13 @@
               "background": "",
               "hover": "none",
               "name": "default",
+              "inputMode": false,
+              "inputVariable": "",
+              "draggable": false,
+              "onDragEnd": {
+                "file": "",
+                "label": ""
+              },
               "onClick": {
                 "file": "",
                 "label": ""
@@ -310,7 +345,8 @@
                 "shadowColor": "rgba(0,0,0,0)",
                 "textAlign": "left",
                 "textPadding": "0px",
-                "textVAlign": "center"
+                "textVAlign": "center",
+                "fontFamily": ""
               },
               "text": "",
               "usedItems": [
@@ -360,6 +396,13 @@
               "background": "",
               "hover": "none",
               "name": "default",
+              "inputMode": false,
+              "inputVariable": "",
+              "draggable": false,
+              "onDragEnd": {
+                "file": "",
+                "label": ""
+              },
               "onClick": {
                 "file": "",
                 "label": ""
@@ -377,7 +420,8 @@
                 "shadowColor": "rgba(0,0,0,0)",
                 "textAlign": "left",
                 "textPadding": "0px",
-                "textVAlign": "center"
+                "textVAlign": "center",
+                "fontFamily": ""
               },
               "text": "",
               "usedItems": [
