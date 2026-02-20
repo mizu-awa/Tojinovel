@@ -1,4 +1,4 @@
-import { StrictMode, useState, useCallback } from 'react'
+import { StrictMode, useState, useCallback, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import EditorApp from './EditorApp.jsx'
@@ -8,9 +8,14 @@ import { setAdapter } from './services/storageService'
 import { wailsAdapter } from './services/wailsAdapter'
 import { httpAdapter } from './services/httpAdapter'
 
-// Wails環境（window.go が存在）かどうかで Adapter を切り替える
-const isWails = !!window.go;
-setAdapter(isWails ? wailsAdapter : httpAdapter);
+// ビルドモード判定
+const isBrowserMode = import.meta.env.VITE_BUILD_MODE === 'browser';
+
+// Wails/HTTP版は同期的にアダプタを設定（従来通り）
+if (!isBrowserMode) {
+  const isWails = !!window.go;
+  setAdapter(isWails ? wailsAdapter : httpAdapter);
+}
 
 // URLパラメータでデバッグモード判定（?debug）
 const params = new URLSearchParams(window.location.search);
@@ -19,8 +24,21 @@ const isDebug = params.has('debug');
 // ルートアプリ: プロジェクト選択フローを挟む
 // eslint-disable-next-line react-refresh/only-export-components
 function RootApp() {
+  // ブラウザ版は非同期初期化が必要
+  const [adapterReady, setAdapterReady] = useState(!isBrowserMode);
   // セッション継続中（デバッグから戻った場合など）はプロジェクト選択不要
   const [projectReady, setProjectReady] = useState(!!sessionStorage.getItem("sessionRunning"));
+
+  // ブラウザ版: 非同期でアダプタ初期化
+  useEffect(() => {
+    if (!isBrowserMode) return;
+    (async () => {
+      const { browserAdapter } = await import('./services/browserAdapter.js');
+      await browserAdapter.init();
+      setAdapter(browserAdapter);
+      setAdapterReady(true);
+    })();
+  }, []);
 
   const handleProjectReady = useCallback((projectPath) => {
     // プロジェクト切り替え時はセッションをリセット（前プロジェクトの状態混入防止）
@@ -31,6 +49,15 @@ function RootApp() {
     }
     setProjectReady(true);
   }, []);
+
+  // アダプタ初期化中
+  if (!adapterReady) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "#666" }}>
+        読み込み中...
+      </div>
+    );
+  }
 
   // デバッグモード（エディタに戻るボタン付き）
   if (isDebug) {

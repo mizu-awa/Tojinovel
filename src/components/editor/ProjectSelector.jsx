@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  Alert,
   Box, Button, Card, CardActionArea, CardContent,
   Dialog, DialogActions, DialogContent, DialogTitle,
+  IconButton, LinearProgress,
   List, ListItem, ListItemIcon, ListItemText,
-  TextField, Typography
+  TextField, Tooltip, Typography
 } from "@mui/material";
-import { Add, FolderOpen, Folder } from "@mui/icons-material";
+import { Add, Delete, Download, FolderOpen, Folder, Upload, Warning } from "@mui/icons-material";
 import { storage } from "../../services/storageService";
+
+const isBrowser = import.meta.env.VITE_BUILD_MODE === "browser";
 
 // プロジェクト選択画面
 export default function ProjectSelector({ onProjectReady }) {
@@ -19,12 +23,21 @@ export default function ProjectSelector({ onProjectReady }) {
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectParent, setNewProjectParent] = useState("");
 
+  // ストレージ情報（ブラウザ版のみ）
+  const [storageInfo, setStorageInfo] = useState(null);
+
   // 初期ロード
   useEffect(() => {
     (async () => {
       try {
         const projects = await storage.listProjects();
         setRecentProjects(projects || []);
+
+        // ブラウザ版: ストレージ使用量を取得
+        if (isBrowser && navigator.storage?.estimate) {
+          const estimate = await navigator.storage.estimate();
+          setStorageInfo(estimate);
+        }
       } catch (e) {
         console.error("プロジェクト一覧の取得に失敗:", e);
       } finally {
@@ -44,7 +57,7 @@ export default function ProjectSelector({ onProjectReady }) {
     }
   }, [onProjectReady]);
 
-  // フォルダ選択ダイアログ
+  // フォルダ選択ダイアログ（Wails版のみ）
   const handleSelectFolder = useCallback(async () => {
     try {
       setError(null);
@@ -58,7 +71,7 @@ export default function ProjectSelector({ onProjectReady }) {
     }
   }, [onProjectReady]);
 
-  // 新規作成ダイアログ: 親フォルダ選択
+  // 新規作成ダイアログ: 親フォルダ選択（Wails版のみ）
   const handleSelectParent = useCallback(async () => {
     try {
       const dir = await storage.selectNewProjectParentDialog();
@@ -72,16 +85,94 @@ export default function ProjectSelector({ onProjectReady }) {
 
   // 新規プロジェクト作成
   const handleCreateProject = useCallback(async () => {
-    if (!newProjectName.trim() || !newProjectParent) return;
+    if (!newProjectName.trim()) return;
+    // Wails版は親ディレクトリ必須
+    if (!isBrowser && !newProjectParent) return;
     try {
       setError(null);
-      const createdPath = await storage.createProject(newProjectName.trim(), newProjectParent);
+      const createdPath = isBrowser
+        ? await storage.createProject(newProjectName.trim())
+        : await storage.createProject(newProjectName.trim(), newProjectParent);
       setNewDialogOpen(false);
       onProjectReady(createdPath);
     } catch (e) {
       setError("プロジェクト作成に失敗: " + e.message);
     }
   }, [newProjectName, newProjectParent, onProjectReady]);
+
+  // ZIPエクスポート（ブラウザ版のみ）
+  const handleExportProject = useCallback(async (e, project) => {
+    e.stopPropagation();
+    try {
+      setError(null);
+      const { exportProjectAsZip } = await import("../../services/zipService.js");
+      await exportProjectAsZip(project.path, project.name);
+    } catch (err) {
+      setError("エクスポートに失敗: " + err.message);
+    }
+  }, []);
+
+  // ZIPインポート（ブラウザ版のみ）
+  const handleImportZip = useCallback(async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".zip";
+    input.onchange = async () => {
+      if (!input.files?.[0]) return;
+      try {
+        setError(null);
+        setLoading(true);
+        const { importProjectFromZip } = await import("../../services/zipService.js");
+        const project = await importProjectFromZip(input.files[0]);
+        await storage.openProject(project.id);
+        onProjectReady(project.id);
+      } catch (err) {
+        setError("インポートに失敗: " + err.message);
+        setLoading(false);
+      }
+    };
+    input.click();
+  }, [onProjectReady]);
+
+  // ドラッグ&ドロップ（ZIPファイル）
+  const handleDrop = useCallback(async (e) => {
+    e.preventDefault();
+    if (!isBrowser) return;
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.name.endsWith(".zip")) {
+      setError("ZIPファイルのみインポートできます");
+      return;
+    }
+    try {
+      setError(null);
+      setLoading(true);
+      const { importProjectFromZip } = await import("../../services/zipService.js");
+      const project = await importProjectFromZip(file);
+      await storage.openProject(project.id);
+      onProjectReady(project.id);
+    } catch (err) {
+      setError("インポートに失敗: " + err.message);
+      setLoading(false);
+    }
+  }, [onProjectReady]);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+  }, []);
+
+  // プロジェクト削除（ブラウザ版のみ）
+  const handleDeleteProject = useCallback(async (e, projectPath) => {
+    e.stopPropagation();
+    if (!confirm("このプロジェクトを削除しますか？この操作は取り消せません。")) return;
+    try {
+      // browserAdapterの追加機能を使用
+      const adapter = (await import("../../services/browserAdapter.js")).browserAdapter;
+      await adapter.deleteProject(projectPath);
+      setRecentProjects((prev) => prev.filter((p) => p.path !== projectPath));
+    } catch (err) {
+      setError("削除に失敗: " + err.message);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -92,16 +183,28 @@ export default function ProjectSelector({ onProjectReady }) {
   }
 
   return (
-    <Box sx={{
-      display: "flex", flexDirection: "column", alignItems: "center",
-      justifyContent: "center", height: "100vh", bgcolor: "background.default", p: 3
-    }}>
+    <Box
+      onDrop={isBrowser ? handleDrop : undefined}
+      onDragOver={isBrowser ? handleDragOver : undefined}
+      sx={{
+        display: "flex", flexDirection: "column", alignItems: "center",
+        justifyContent: "center", height: "100vh", bgcolor: "background.default", p: 3
+      }}
+    >
       <Typography variant="h4" gutterBottom sx={{ color: "text.primary" }}>
-        Tojinovel
+        Tojinovel {isBrowser && <Typography component="span" variant="h6" sx={{ color: "text.secondary" }}>Web Edition</Typography>}
       </Typography>
       <Typography variant="subtitle1" gutterBottom sx={{ color: "text.secondary", mb: 3 }}>
         プロジェクトを選択してください
       </Typography>
+
+      {/* ブラウザ版: データ永続性の警告 */}
+      {isBrowser && (
+        <Alert severity="warning" icon={<Warning />} sx={{ width: "100%", maxWidth: 600, mb: 2 }}>
+          ブラウザ版ではデータはブラウザ内に保存されます。キャッシュクリアでデータが消える場合があります。
+          こまめにZIPエクスポートでバックアップしてください。
+        </Alert>
+      )}
 
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>
@@ -111,16 +214,19 @@ export default function ProjectSelector({ onProjectReady }) {
         <CardContent>
           {/* アクションボタン */}
           <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+            {/* Wails版のみ: フォルダ選択ボタン */}
+            {!isBrowser && (
+              <Button
+                variant="contained"
+                startIcon={<FolderOpen />}
+                onClick={handleSelectFolder}
+                fullWidth
+              >
+                フォルダを選択
+              </Button>
+            )}
             <Button
-              variant="contained"
-              startIcon={<FolderOpen />}
-              onClick={handleSelectFolder}
-              fullWidth
-            >
-              フォルダを選択
-            </Button>
-            <Button
-              variant="outlined"
+              variant={isBrowser ? "contained" : "outlined"}
               startIcon={<Add />}
               onClick={() => {
                 setNewProjectName("");
@@ -131,11 +237,22 @@ export default function ProjectSelector({ onProjectReady }) {
             >
               新規作成
             </Button>
+            {/* ブラウザ版: ZIPインポートボタン */}
+            {isBrowser && (
+              <Button
+                variant="outlined"
+                startIcon={<Upload />}
+                onClick={handleImportZip}
+                fullWidth
+              >
+                ZIPインポート
+              </Button>
+            )}
           </Box>
 
           {/* 最近のプロジェクト */}
           <Typography variant="subtitle2" sx={{ color: "text.secondary", mb: 1 }}>
-            最近のプロジェクト
+            {isBrowser ? "プロジェクト一覧" : "最近のプロジェクト"}
           </Typography>
           {recentProjects.length === 0 ? (
             <Typography variant="body2" sx={{ color: "text.disabled", textAlign: "center", py: 2 }}>
@@ -144,7 +261,28 @@ export default function ProjectSelector({ onProjectReady }) {
           ) : (
             <List dense sx={{ maxHeight: 400, overflowY: "auto" }}>
               {recentProjects.map((project) => (
-                <ListItem key={project.path} disablePadding>
+                <ListItem key={project.path} disablePadding
+                  secondaryAction={
+                    isBrowser && (
+                      <Box sx={{ display: "flex", gap: 0.5 }}>
+                        <Tooltip title="ZIPエクスポート">
+                          <IconButton size="small"
+                            onClick={(e) => handleExportProject(e, project)}
+                          >
+                            <Download fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="プロジェクトを削除">
+                          <IconButton edge="end" size="small"
+                            onClick={(e) => handleDeleteProject(e, project.path)}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    )
+                  }
+                >
                   <CardActionArea
                     onClick={() => handleOpenProject(project.path)}
                     sx={{ px: 1, py: 0.5, borderRadius: 1 }}
@@ -155,7 +293,7 @@ export default function ProjectSelector({ onProjectReady }) {
                       </ListItemIcon>
                       <ListItemText
                         primary={project.name}
-                        secondary={project.path}
+                        secondary={isBrowser ? project.lastModified : project.path}
                         secondaryTypographyProps={{ noWrap: true, fontSize: "0.75rem" }}
                       />
                     </Box>
@@ -163,6 +301,28 @@ export default function ProjectSelector({ onProjectReady }) {
                 </ListItem>
               ))}
             </List>
+          )}
+
+          {/* ブラウザ版: ドラッグ&ドロップヒント */}
+          {isBrowser && (
+            <Typography variant="caption" sx={{ color: "text.disabled", textAlign: "center", display: "block", mt: 1 }}>
+              ZIPファイルをドラッグ&ドロップしてインポートすることもできます
+            </Typography>
+          )}
+
+          {/* ブラウザ版: ストレージ使用量 */}
+          {isBrowser && storageInfo && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                ストレージ使用量: {formatBytes(storageInfo.usage)} / {formatBytes(storageInfo.quota)}
+              </Typography>
+              <LinearProgress
+                variant="determinate"
+                value={Math.min((storageInfo.usage / storageInfo.quota) * 100, 100)}
+                color={storageInfo.usage / storageInfo.quota > 0.8 ? "warning" : "primary"}
+                sx={{ mt: 0.5 }}
+              />
+            </Box>
           )}
         </CardContent>
       </Card>
@@ -178,26 +338,34 @@ export default function ProjectSelector({ onProjectReady }) {
             value={newProjectName}
             onChange={(e) => setNewProjectName(e.target.value)}
             sx={{ mt: 1, mb: 2 }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && isBrowser && newProjectName.trim()) {
+                handleCreateProject();
+              }
+            }}
           />
-          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-            <TextField
-              label="作成場所"
-              fullWidth
-              value={newProjectParent}
-              InputProps={{ readOnly: true }}
-              placeholder="フォルダを選択..."
-            />
-            <Button variant="outlined" onClick={handleSelectParent} sx={{ whiteSpace: "nowrap" }}>
-              参照
-            </Button>
-          </Box>
+          {/* Wails版のみ: 作成場所の選択 */}
+          {!isBrowser && (
+            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+              <TextField
+                label="作成場所"
+                fullWidth
+                value={newProjectParent}
+                InputProps={{ readOnly: true }}
+                placeholder="フォルダを選択..."
+              />
+              <Button variant="outlined" onClick={handleSelectParent} sx={{ whiteSpace: "nowrap" }}>
+                参照
+              </Button>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNewDialogOpen(false)}>キャンセル</Button>
           <Button
             onClick={handleCreateProject}
             variant="contained"
-            disabled={!newProjectName.trim() || !newProjectParent}
+            disabled={!newProjectName.trim() || (!isBrowser && !newProjectParent)}
           >
             作成
           </Button>
@@ -205,4 +373,13 @@ export default function ProjectSelector({ onProjectReady }) {
       </Dialog>
     </Box>
   );
+}
+
+// バイト数を読みやすい形式に変換
+function formatBytes(bytes) {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }

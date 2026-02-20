@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "dev:browser": "cross-env VITE_BUILD_MODE=browser vite",
+    "build:browser": "cross-env VITE_BUILD_MODE=browser vite build"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.0",
@@ -26,6 +28,7 @@
     "@uiw/react-codemirror": "^4.25.4",
     "howler": "^2.2.4",
     "idb": "^8.0.3",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-colorful": "^5.6.1",
@@ -40,6 +43,7 @@
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
     "baseline-browser-mapping": "^2.8.28",
+    "cross-env": "^7.0.3",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
