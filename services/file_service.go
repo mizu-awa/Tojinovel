@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -206,6 +207,29 @@ func (f *FileService) RenameFile(oldPath string, newPath string) error {
 	}
 
 	return os.Rename(fullOld, fullNew)
+}
+
+// WriteFileBase64 - base64エンコードされたバイナリデータをファイルに書き込む（D&Dインポート用）
+func (f *FileService) WriteFileBase64(relativePath string, base64Data string) error {
+	cleanPath := strings.TrimPrefix(relativePath, "./")
+	fullPath, err := f.validatePath(cleanPath)
+	if err != nil {
+		return err
+	}
+
+	// base64デコード
+	data, err := base64.StdEncoding.DecodeString(base64Data)
+	if err != nil {
+		return fmt.Errorf("base64デコードに失敗: %w", err)
+	}
+
+	// 親ディレクトリを自動作成
+	dir := filepath.Dir(fullPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("ディレクトリ作成に失敗: %w", err)
+	}
+
+	return os.WriteFile(fullPath, data, 0644)
 }
 
 // CreateFile - 空のファイルを新規作成（既存ファイルは上書きしない）

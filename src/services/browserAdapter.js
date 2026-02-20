@@ -228,6 +228,13 @@ async function importFile(destDir) {
   });
 }
 
+// ファイルD&Dインポート（Blobをそのまま書き込む）
+async function writeFileBlob(destPath, blob) {
+  if (!currentProjectId) return null;
+  await writeFile(currentProjectId, destPath, blob, blob.type);
+  return destPath;
+}
+
 // プロジェクト削除（ブラウザ版追加機能）
 async function adapterDeleteProject(id) {
   await fsDeleteProject(id);
@@ -275,6 +282,9 @@ export const browserAdapter = {
 
   // ファイルインポート
   importFile,
+
+  // ファイルD&Dインポート
+  writeFileBlob,
 
   // ブラウザ版追加機能
   deleteProject: adapterDeleteProject,

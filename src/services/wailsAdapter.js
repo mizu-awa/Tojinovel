@@ -50,4 +50,17 @@ export const wailsAdapter = {
 
   // ファイルインポート（ダイアログ経由、コピー先フォルダを指定）
   importFile: (destDir) => window.go.services.ProjectManager.ImportFile(destDir),
+
+  // ファイルD&Dインポート（BlobをBase64エンコードしてGo経由で書き込む）
+  writeFileBlob: async (destPath, blob) => {
+    const buffer = await blob.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
+    await window.go.services.FileService.WriteFileBase64(destPath, base64);
+    return destPath;
+  },
 };

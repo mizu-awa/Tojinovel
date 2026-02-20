@@ -25,7 +25,7 @@ function getFileIcon(name) {
 function TreeNode({
   name, isDir, parentPath, depth, onFileSelect,
   selectedFolder, onFolderSelect, onRefresh,
-  dragState, onDragStart, onDrop,
+  dragState, onDragStart, onDrop, onDropExternal,
   expandedPaths, onExpandedPathsChange,
 }) {
   const relativePath = parentPath ? `${parentPath}/${name}` : name;
@@ -157,12 +157,16 @@ function TreeNode({
   // ドラッグオーバー（フォルダのみ受け付け）
   const handleDragOver = useCallback((e) => {
     if (!isDir) return;
-    // 自分自身または自分の子へのドロップは禁止
-    const dragging = dragState.current;
-    if (dragging && (dragging === relativePath || relativePath.startsWith(dragging + "/"))) return;
+    // 外部ファイルD&Dの場合は常に受け付ける
+    const hasExternalFiles = e.dataTransfer.types.includes("Files");
+    if (!hasExternalFiles) {
+      // 内部D&D: 自分自身または自分の子へのドロップは禁止
+      const dragging = dragState.current;
+      if (dragging && (dragging === relativePath || relativePath.startsWith(dragging + "/"))) return;
+    }
     e.preventDefault();
     e.stopPropagation();
-    e.dataTransfer.dropEffect = "move";
+    e.dataTransfer.dropEffect = hasExternalFiles ? "copy" : "move";
     setDragOver(true);
   }, [isDir, relativePath, dragState]);
 
@@ -171,13 +175,31 @@ function TreeNode({
     setDragOver(false);
   }, []);
 
-  // ドロップ（移動実行）
+  // ドロップ（移動 or 外部ファイル追加）
   const handleDrop = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragOver(false);
     if (!isDir) return;
 
+    // 外部ファイルD&D（OSからのファイル）
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const files = Array.from(e.dataTransfer.files);
+      const results = await Promise.allSettled(
+        files.map(async (file) => {
+          const destPath = `${relativePath}/${file.name}`;
+          await storage.writeFileBlob(destPath, file);
+          return destPath;
+        })
+      );
+      const succeeded = results.filter(r => r.status === "fulfilled").length;
+      const failed = results.filter(r => r.status === "rejected").length;
+      onDropExternal(succeeded, failed);
+      onRefresh();
+      return;
+    }
+
+    // 内部D&D（ツリー内移動）
     const srcPath = e.dataTransfer.getData("text/plain");
     if (!srcPath) return;
     // 自分自身や子へのドロップは無視
@@ -195,7 +217,7 @@ function TreeNode({
       alert(`移動に失敗しました: ${e}`);
     }
     onDrop();
-  }, [isDir, relativePath, onRefresh, onDrop]);
+  }, [isDir, relativePath, onRefresh, onDrop, onDropExternal]);
 
   const handleDragEnd = useCallback(() => {
     onDrop();
@@ -279,6 +301,7 @@ function TreeNode({
                   dragState={dragState}
                   onDragStart={onDragStart}
                   onDrop={onDrop}
+                  onDropExternal={onDropExternal}
                   expandedPaths={expandedPaths}
                   onExpandedPathsChange={onExpandedPathsChange}
                 />
@@ -349,6 +372,10 @@ export default function FileExplorer({ onFileSelect }) {
   // D&D中のパスを追跡（refでリアルタイム参照）
   const dragState = useRef(null);
 
+  // 外部ファイルD&Dオーバーレイ表示フラグ
+  const [externalDragOver, setExternalDragOver] = useState(false);
+  const dragCounterRef = useRef(0);
+
   const loadRoot = useCallback(async () => {
     setLoading(true);
     try {
@@ -389,6 +416,60 @@ export default function FileExplorer({ onFileSelect }) {
   const handleDrop = useCallback(() => {
     dragState.current = null;
   }, []);
+
+  // 外部ファイルD&D完了通知（TreeNodeから）
+  const handleDropExternal = useCallback((succeeded, failed) => {
+    const msg = failed > 0
+      ? `${succeeded}件追加、${failed}件失敗`
+      : `${succeeded}件のファイルを追加しました`;
+    setImportSnack({ open: true, message: msg });
+  }, []);
+
+  // エリア全体へのD&Dハンドラ（ツリー以外の空白部分）
+  const handleAreaDragEnter = useCallback((e) => {
+    if (!e.dataTransfer.types.includes("Files")) return;
+    dragCounterRef.current += 1;
+    setExternalDragOver(true);
+  }, []);
+
+  const handleAreaDragLeave = useCallback((e) => {
+    if (!e.dataTransfer.types.includes("Files")) return;
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current <= 0) {
+      dragCounterRef.current = 0;
+      setExternalDragOver(false);
+    }
+  }, []);
+
+  const handleAreaDragOver = useCallback((e) => {
+    if (!e.dataTransfer.types.includes("Files")) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  }, []);
+
+  const handleAreaDrop = useCallback(async (e) => {
+    e.preventDefault();
+    dragCounterRef.current = 0;
+    setExternalDragOver(false);
+    if (!e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+
+    const destDir = selectedFolder || "data";
+    const files = Array.from(e.dataTransfer.files);
+    const results = await Promise.allSettled(
+      files.map(async (file) => {
+        const destPath = `${destDir}/${file.name}`;
+        await storage.writeFileBlob(destPath, file);
+        return destPath;
+      })
+    );
+    const succeeded = results.filter(r => r.status === "fulfilled").length;
+    const failed = results.filter(r => r.status === "rejected").length;
+    const msg = failed > 0
+      ? `${succeeded}件追加、${failed}件失敗`
+      : `${succeeded}件のファイルを追加しました`;
+    setImportSnack({ open: true, message: msg });
+    handleRefresh();
+  }, [selectedFolder, handleRefresh]);
 
   // インポートスナックバー
   const [importSnack, setImportSnack] = useState({ open: false, message: "" });
@@ -443,7 +524,13 @@ export default function FileExplorer({ onFileSelect }) {
   }, [newFileName, selectedFolder, handleRefresh, onFileSelect]);
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <Box
+      sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}
+      onDragEnter={handleAreaDragEnter}
+      onDragLeave={handleAreaDragLeave}
+      onDragOver={handleAreaDragOver}
+      onDrop={handleAreaDrop}
+    >
       {/* ヘッダー */}
       <Box sx={{ display: "flex", alignItems: "center", px: 1, py: 0.5, borderBottom: 1, borderColor: "divider" }}>
         <Typography variant="subtitle2" sx={{ flex: 1, color: "text.secondary", fontSize: "0.75rem" }}>
@@ -459,6 +546,31 @@ export default function FileExplorer({ onFileSelect }) {
           <Refresh fontSize="small" />
         </IconButton>
       </Box>
+
+      {/* 外部ファイルD&Dオーバーレイ */}
+      {externalDragOver && (
+        <Box sx={{
+          position: "absolute", inset: 0, zIndex: 10,
+          bgcolor: "primary.main", opacity: 0.15,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          pointerEvents: "none",
+        }} />
+      )}
+      {externalDragOver && (
+        <Box sx={{
+          position: "absolute", inset: 0, zIndex: 11,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          pointerEvents: "none",
+        }}>
+          <Typography variant="caption" sx={{
+            color: "primary.light", fontWeight: "bold", textAlign: "center",
+            bgcolor: "background.paper", px: 1.5, py: 0.75, borderRadius: 1,
+            border: 2, borderColor: "primary.main", borderStyle: "dashed",
+          }}>
+            {selectedFolder || "data"} にドロップして追加
+          </Typography>
+        </Box>
+      )}
 
       {/* ツリー */}
       <Box sx={{ flex: 1, overflowY: "auto" }}>
@@ -482,6 +594,7 @@ export default function FileExplorer({ onFileSelect }) {
                 dragState={dragState}
                 onDragStart={handleDragStart}
                 onDrop={handleDrop}
+                onDropExternal={handleDropExternal}
                 expandedPaths={expandedPaths}
                 onExpandedPathsChange={handleExpandedPathsChange}
               />

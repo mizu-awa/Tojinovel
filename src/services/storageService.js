@@ -38,4 +38,7 @@ export const storage = {
 
   // ファイルインポート（ダイアログ経由）
   importFile: (...args) => adapter.importFile?.(...args) ?? Promise.resolve(null),
+
+  // ファイルD&Dインポート（BlobをそのままD&D先フォルダに書き込む）
+  writeFileBlob: (...args) => adapter.writeFileBlob?.(...args) ?? Promise.resolve(null),
 };
