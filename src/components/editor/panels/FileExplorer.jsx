@@ -26,8 +26,11 @@ function TreeNode({
   name, isDir, parentPath, depth, onFileSelect,
   selectedFolder, onFolderSelect, onRefresh,
   dragState, onDragStart, onDrop,
+  expandedPaths, onExpandedPathsChange,
 }) {
-  const [open, setOpen] = useState(false);
+  const relativePath = parentPath ? `${parentPath}/${name}` : name;
+  const isOpen = expandedPaths.has(relativePath);
+
   const [children, setChildren] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -47,7 +50,6 @@ function TreeNode({
   // 削除確認ダイアログ
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const relativePath = parentPath ? `${parentPath}/${name}` : name;
   const isSelectedFolder = isDir && selectedFolder === relativePath;
 
   // フォルダ展開（子リスト読み込み）
@@ -70,11 +72,17 @@ function TreeNode({
 
   const handleToggle = useCallback(async () => {
     if (!isDir) return;
-    if (!open && children === null) {
+    if (!isOpen && children === null) {
       await loadChildren();
     }
-    setOpen(prev => !prev);
-  }, [isDir, open, children, loadChildren]);
+    const newExpandedPaths = new Set(expandedPaths);
+    if (isOpen) {
+      newExpandedPaths.delete(relativePath);
+    } else {
+      newExpandedPaths.add(relativePath);
+    }
+    onExpandedPathsChange(newExpandedPaths);
+  }, [isDir, isOpen, children, loadChildren, relativePath, expandedPaths, onExpandedPathsChange]);
 
   // パスをクリップボードにコピー
   const handleCopyPath = useCallback(() => {
@@ -196,7 +204,6 @@ function TreeNode({
   // リフレッシュ時に子リストをリセット
   const handleChildRefresh = useCallback(() => {
     setChildren(null);
-    setOpen(false);
     onRefresh();
   }, [onRefresh]);
 
@@ -219,12 +226,12 @@ function TreeNode({
       >
         {isDir && (
           <ListItemIcon sx={{ minWidth: 24 }}>
-            {open ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
+            {isOpen ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
           </ListItemIcon>
         )}
         <ListItemIcon sx={{ minWidth: 28 }}>
           {isDir
-            ? (open ? <FolderOpen fontSize="small" color="warning" /> : <Folder fontSize="small" color="warning" />)
+            ? (isOpen ? <FolderOpen fontSize="small" color="warning" /> : <Folder fontSize="small" color="warning" />)
             : getFileIcon(name)}
         </ListItemIcon>
         {renaming ? (
@@ -251,7 +258,7 @@ function TreeNode({
 
       {/* 子要素 */}
       {isDir && (
-        <Collapse in={open} timeout="auto" unmountOnExit>
+        <Collapse in={isOpen} timeout="auto" unmountOnExit>
           {loading ? (
             <Typography variant="caption" sx={{ pl: 3 + depth * 2, color: "text.disabled" }}>
               読み込み中...
@@ -272,6 +279,8 @@ function TreeNode({
                   dragState={dragState}
                   onDragStart={onDragStart}
                   onDrop={onDrop}
+                  expandedPaths={expandedPaths}
+                  onExpandedPathsChange={onExpandedPathsChange}
                 />
               ))}
             </List>
@@ -325,11 +334,12 @@ function TreeNode({
 export default function FileExplorer({ onFileSelect }) {
   const [rootEntries, setRootEntries] = useState(null);
   const [loading, setLoading] = useState(true);
-  const refreshKeyRef = useRef(0);
-  const [, forceUpdate] = useState(0);
 
   // 選択中フォルダ（ファイル新規作成の対象）
   const [selectedFolder, setSelectedFolder] = useState("data/events");
+
+  // 展開状態管理（パス -> 展開フラグ）
+  const [expandedPaths, setExpandedPaths] = useState(new Set());
 
   // ファイル作成ダイアログ
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -359,8 +369,6 @@ export default function FileExplorer({ onFileSelect }) {
   useEffect(() => { loadRoot(); }, [loadRoot]);
 
   const handleRefresh = useCallback(() => {
-    refreshKeyRef.current += 1;
-    forceUpdate(n => n + 1);
     loadRoot();
   }, [loadRoot]);
 
@@ -368,6 +376,10 @@ export default function FileExplorer({ onFileSelect }) {
 
   const handleFolderSelect = useCallback((path) => {
     setSelectedFolder(path);
+  }, []);
+
+  const handleExpandedPathsChange = useCallback((newExpandedPaths) => {
+    setExpandedPaths(newExpandedPaths);
   }, []);
 
   const handleDragStart = useCallback((path) => {
@@ -455,7 +467,7 @@ export default function FileExplorer({ onFileSelect }) {
         ) : rootEntries?.length === 0 ? (
           <Typography variant="body2" sx={{ p: 2, color: "text.disabled" }}>ファイルがありません</Typography>
         ) : (
-          <List key={refreshKeyRef.current} dense disablePadding>
+          <List dense disablePadding>
             {rootEntries?.map((entry) => (
               <TreeNode
                 key={entry.name}
@@ -470,6 +482,8 @@ export default function FileExplorer({ onFileSelect }) {
                 dragState={dragState}
                 onDragStart={handleDragStart}
                 onDrop={handleDrop}
+                expandedPaths={expandedPaths}
+                onExpandedPathsChange={handleExpandedPathsChange}
               />
             ))}
           </List>
