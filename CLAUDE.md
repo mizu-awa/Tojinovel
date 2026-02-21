@@ -2,7 +2,10 @@
 
 ## 概要
 
-デスクトップアプリ（Wails v2）ベースの脱出ゲーム・ノベルゲーム制作ツール。React + Go構成。Wailsビルドしたバイナリがゲーム制作者に配布される。
+脱出ゲーム・ノベルゲーム制作ツール。React + Go構成。**2つのビルドターゲット**を持つ。
+
+### Wails版（デスクトップアプリ）
+Wails v2ビルドバイナリをゲーム制作者に配布。
 
 - **エディタ**: `editor.html` → `src/editor.jsx` → `src/EditorApp.jsx`（Wails WebView上で動作）
 - **デバッグプレイ**: `?debug` パラメータ → `src/GameApp.jsx`（debug prop付き）
@@ -10,12 +13,26 @@
 - **データ**: プロジェクトフォルダ内 `data/gamedata.json`、セーブは IndexedDB
 - **プロジェクト管理**: 起動時にプロジェクト選択画面を表示。複数プロジェクト対応。設定は `%APPDATA%/Tojinovel/config.json`
 
+### ブラウザ版（Web Edition）
+静的ホスティング（GitHub Pages等）で動作するWebエディタ。Goバックエンド不要。
+
+- **ビルドモード**: `VITE_BUILD_MODE=browser`（`npm run build:browser`）
+- **ストレージ**: IndexedDB仮想FS（`browserFS.js`）でファイル管理。セーブも IndexedDB
+- **アセット配信**: Service Worker（`browser-asset-sw.js`）が `data/`/`system/` リクエストを傍受しIndexedDBから返却
+- **ZIP連携**: JSZipによるプロジェクトのエクスポート/インポート（Wails版プロジェクト構造と互換）
+- **Adapter切り替え**: `main.jsx`で `VITE_BUILD_MODE` を検出し `browserAdapter` をセット
+
+### 共通
+ストレージ操作は Adapter Pattern（`storageService.js`）で抽象化。アダプタ差し替えで Wails版/ブラウザ版/フォールバック(http)を切り替え。
+
 ## コマンド
 
 ```bash
-npm run build        # プロダクションビルド（Wailsビルド前に必要）
-npm run lint         # ESLint
-npm run test:run     # Vitest一回実行
+npm run build          # Wails版フロントエンドビルド（dist/）
+npm run build:browser  # ブラウザ版ビルド（dist-browser/）
+npm run dev:browser    # ブラウザ版開発サーバー
+npm run lint           # ESLint
+npm run test:run       # Vitest一回実行
 ```
 ```powershell
 wails dev                              # Wails開発サーバー（推奨）
@@ -37,17 +54,23 @@ src/
 ├── services/                       # ストレージ抽象化層（Adapter Pattern）
 │   ├── storageService.js           # Adapter管理（setAdapter/getAdapter/storage）
 │   ├── wailsAdapter.js             # Wails Goバインディング呼び出し（window.go.services.*）
+│   ├── browserAdapter.js           # ブラウザ版Adapter（IndexedDB仮想FS + ZIP）
+│   ├── browser/browserFS.js        # IndexedDB仮想ファイルシステム（TojinovelBrowserFS DB）
+│   ├── zipService.js               # JSZipラッパー（プロジェクトのエクスポート/インポート）
 │   └── httpAdapter.js              # フォールバック用fetchベースAdapter
 ├── datas/defaultGameData.js        # デフォルトスキーマ
 └── theme/Theme.jsx                 # MUIテーマ
 
-# Goバックエンド
+# Goバックエンド（Wails版のみ）
 main.go                             # Wails v2エントリポイント（embed.FSでdist/を内包）
 app.go                              # Wailsアプリライフサイクル管理（startup/domReady）
 services/
 ├── file_service.go                 # ファイルI/O（gamedata.json / イベントファイル / ReadDir等）
 ├── project_manager.go              # プロジェクト管理・プレイヤー書き出し・設定保存
 └── asset_handler.go                # プロジェクトフォルダの画像・音声を相対パスで配信
+
+# ブラウザ版固有
+public/browser-asset-sw.js         # Service Worker（アセット配信・Go AssetHandlerと同等）
 ```
 
 ## コーディング規約

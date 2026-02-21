@@ -4,16 +4,21 @@
 本リポジトリは、ゲーム再生画面 および エディタ画面（React/Vite）と
 デスクトップアプリ基盤（Wails / Go + WebView2）をまとめた開発環境です。
 
+**2つのビルドターゲット**があります：
+- **Wails版**（デスクトップアプリ）— バイナリを配布
+- **ブラウザ版 (Web Edition)**（静的ホスティング）— GitHub Pages等にデプロイ可能
+
 ---
 
 ## 📦 機能概要
 
-- デスクトップアプリ上でゲームデータを編集
-- デスクトップアプリ上でゲームをプレビュー
+- ゲームデータを編集（Wails版: デスクトップアプリ / ブラウザ版: Webブラウザ）
+- ゲームをプレビュー（デバッグプレイ）
 - ゲームデータ（JSON）・イベントファイル（テキスト）の保存・読み込み
-- 複数プロジェクトの管理（最近使ったプロジェクト一覧）
-- プレイヤー書き出し（`index.html` + `assets/` をプロジェクトフォルダへ出力）
-- Windows / macOS / Linux 対応
+- 複数プロジェクトの管理
+- プレイヤー書き出し（`index.html` + `assets/` を出力）
+- Windows / macOS / Linux 対応（Wails版）
+- ブラウザ版: データはIndexedDBに保存。ZIPでエクスポート/インポート可能
 
 ---
 
@@ -34,6 +39,8 @@
 
 ## 🚀 開発環境の起動
 
+### Wails版（推奨）
+
 ```powershell
 npm install
 wails dev
@@ -42,7 +49,17 @@ wails dev
 Wails が Vite 開発サーバー（HMR）と Go バックエンドを同時に起動します。
 WebView2 ウィンドウが自動で開き、エディタが表示されます。
 
-### Vite のみで起動する場合（ブラウザ確認）
+### ブラウザ版
+
+```bash
+npm install
+npm run dev:browser
+```
+
+ブラウザで `http://localhost:5173` を開くとエディタが表示されます。
+データは IndexedDB に保存され、Go バックエンドは不要です。
+
+### Vite のみで起動する場合（UI確認のみ）
 
 ```bash
 npm run dev
@@ -110,12 +127,20 @@ npm run test:run
 ├─ src/                 # React（Vite）側リソース
 │   ├─ components/      # UI コンポーネント
 │   ├─ hooks/           # カスタムフック
-│   └─ services/        # ストレージアダプター（storageService, wailsAdapter 等）
+│   └─ services/        # ストレージアダプター
+│       ├─ storageService.js    # Adapter管理（共通）
+│       ├─ wailsAdapter.js      # Wails版アダプター
+│       ├─ browserAdapter.js    # ブラウザ版アダプター
+│       ├─ browser/browserFS.js # IndexedDB仮想FS
+│       ├─ zipService.js        # ZIPエクスポート/インポート
+│       └─ httpAdapter.js       # フォールバック用
 ├─ index.html           # エントリポイント（エディタ）
+├─ public/
+│   └─ browser-asset-sw.js  # ブラウザ版 Service Worker
 │
 ├─ main.go              # Wails エントリポイント（embed.FS でdist/を内包）
 ├─ app.go               # Wails アプリライフサイクル管理
-├─ services/            # Go バックエンドサービス
+├─ services/            # Go バックエンドサービス（Wails版のみ）
 │   ├─ file_service.go  # ファイルI/O（gamedata.json / イベントファイル）
 │   ├─ project_manager.go # プロジェクト管理・プレイヤー書き出し
 │   └─ asset_handler.go # プロジェクトフォルダの画像・音声を配信
@@ -124,6 +149,8 @@ npm run test:run
 ├─ scripts/             # ビルド・開発補助スクリプト
 ├─ samples/             # サンプルプロジェクト
 ├─ public/              # 開発用デフォルトプロジェクト
+├─ dist/                # Wails版フロントエンドビルド出力
+├─ dist-browser/        # ブラウザ版ビルド出力
 ├─ release/             # 配布用成果物（ビルド時に生成）
 ├─ package.json
 └─ README.md
@@ -133,7 +160,7 @@ npm run test:run
 
 ## 🔨 ビルド（配布物の生成）
 
-### フロントエンドのみビルド
+### Wails版フロントエンドのみビルド
 ```bash
 npm run build
 ```
@@ -151,9 +178,17 @@ wails build
 ```
 `wails build` 実行後、バイナリ・ライセンス等をまとめて `release/` にZIP出力します。
 
+### ブラウザ版をビルド
+```bash
+npm run build:browser
+```
+出力先: `dist-browser/`（静的ファイル一式）。GitHub Pages / Netlify / Vercel 等にデプロイ可能。**HTTPS必須**（Service Worker の制約）。
+
 ---
 
 ## 📘 使い方（ユーザ向け）
+
+### Wails版（デスクトップアプリ）
 
 1. ダウンロードした zip を任意のフォルダに展開
 2. OS に合ったバイナリを起動
@@ -161,3 +196,13 @@ wails build
 4. エディタ画面でゲームを制作・編集・保存
 5. アプリバーの「書き出し」ボタンでプレイヤー用ファイルを出力
 6. 出力された `index.html` と `assets/` フォルダをサーバーにアップロードしてゲームを公開
+
+### ブラウザ版（Web Edition）
+
+1. ブラウザでデプロイ先URLを開く
+2. 「新規プロジェクト」を作成、またはZIPファイルをドラッグ＆ドロップでインポート
+3. エディタ画面でゲームを制作・編集・保存（データはブラウザのIndexedDBに保存）
+4. プロジェクト選択画面の「ZIPエクスポート」でバックアップ
+5. 書き出し後、ZIPに含まれる `index.html` + `data/` + `assets/` をサーバーにアップロードして公開
+
+> ⚠️ ブラウザ版のデータはブラウザ内に保存されます。キャッシュクリアやブラウザのストレージ解放でデータが消える場合があります。定期的にZIPエクスポートでバックアップしてください。
