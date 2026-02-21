@@ -6,7 +6,8 @@ function SaveLoad({
   save,
   saveClick,
   loadClick,
-  closeSaveLoad
+  closeSaveLoad,
+  debug
 }){
     // 2桁ゼロ埋め関数
     const pad = (n) => n.toString().padStart(2, '0');
@@ -80,19 +81,22 @@ function SaveLoad({
                   }}
                   key={slotNum}
                   onClick={()=>{
+                    if(debug) return;
                     if(saveLoadSlots.type === "save"){
                         saveClick(slotNum)
                     }
                     else if(slot && saveLoadSlots.type === "load"){
                         loadClick(slotNum)
-                    } 
+                    }
                   }}
                 >
                   <p>
                     {slot ? save.dataText + " " + slotText : save.noDataText}
                   </p>
                   <p>
-                    {slot && slot.date ?  toTimeStamp(new Date(slot.date)) : ""}
+                    {debug
+                      ? "デバッグモードではセーブ・ロードは利用できません"
+                      : slot && slot.date ? toTimeStamp(new Date(slot.date)) : ""}
                   </p>
                 </div>
               )
