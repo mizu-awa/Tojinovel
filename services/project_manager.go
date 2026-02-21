@@ -156,6 +156,16 @@ func (p *ProjectManager) ExportPlayer() error {
 		_ = p.copyEmbedDir("dist/system", systemDest)
 	}
 
+	// アイコンSVG: 存在しない場合のみコピー（ユーザが差し替えた場合は上書きしない）
+	for _, iconName := range []string{"tojinovel.svg", "tojinovel_dark.svg"} {
+		iconDest := filepath.Join(projectPath, iconName)
+		if _, err := os.Stat(iconDest); os.IsNotExist(err) {
+			if iconData, err := p.embedFS.ReadFile("dist/" + iconName); err == nil {
+				_ = os.WriteFile(iconDest, iconData, 0644)
+			}
+		}
+	}
+
 	return nil
 }
 
