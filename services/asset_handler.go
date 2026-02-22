@@ -73,7 +73,7 @@ func (h *AssetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Content-Type自動判定してファイル配信
 	// キャッシュ無効化（開発時にアセットが即座に反映されるように）
-	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+	w.Header().Set("Cache-Control", "no-cache")
 
 	// Content-Type を拡張子から判定
 	ext := strings.ToLower(filepath.Ext(fullPath))
