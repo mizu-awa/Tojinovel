@@ -688,6 +688,11 @@ export default function useEventViewer({
                 opDepth.current = 0;
                 opSkip.current = false;
                 opLabel.current = null;
+
+                // バックグラウンドイベントからのジャンプは完了扱い（isBackEventRunningをリセット）
+                if(!lines.isView){
+                    onComplete?.();
+                }
             }
             else if(!lines.isView && i >= lines.lines.length){ // バックグラウンドイベント実行完了
                 // #if終了 欠落チェック
