@@ -34,7 +34,8 @@ export default function useEventViewer({
   setVisibleCount,
   onConsoleLog,
   currentSceneName,
-  viewItemName
+  viewItemName,
+  selectItem
 }){
     // states------------------------------------------------------------------------------------------
     const [inputValue, setInputValue] = useState("");
@@ -364,8 +365,10 @@ export default function useEventViewer({
                 const itemIndex = newGameData.items.findIndex((i) => i.name === line.itemName);
                 // 存在している場合のみ処理
                 if(itemIndex !== -1){
-                // アイテムを破棄状態にする
+                    // アイテムを破棄状態にする
                     newGameData.items[itemIndex].have = false;
+                    // 破棄したアイテムが選択中だった場合、選択を解除する
+                    selectItem?.(prev => prev === line.itemName ? null : prev);
                 }
             }
             else if(line.type === "changeState"){// ステート変更

@@ -27,7 +27,8 @@ function EventViewer({
   onConsoleLog,
   configVisible,
   currentSceneName,
-  viewItemName
+  viewItemName,
+  selectItem
 }) {
 
   // states-----------------------------------------------------------------------------------------------------------------------
@@ -67,7 +68,8 @@ function EventViewer({
         setVisibleCount,
         onConsoleLog,
         currentSceneName,
-        viewItemName
+        viewItemName,
+        selectItem
     });
   
   // effects--------------------------------------------------------------------------------------------------------------------

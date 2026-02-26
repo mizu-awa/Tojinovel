@@ -810,6 +810,7 @@ export default function GameApp({ debug }) {
         configVisible={viewConfig}
         currentSceneName={currentScene.name}
         viewItemName={viewItemName}
+        selectItem={selectItem}
       />
 
       {/* イベント表示(バックグラウンド) */}
