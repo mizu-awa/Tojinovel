@@ -164,6 +164,9 @@ export default function useEventViewer({
 
     // クリック時処理
     const handleClick = (lines) => {
+        // 選択肢表示中は choiceOption 経由（opLabel セット済み）以外の呼び出しを無視
+        if (currentOptions && opLabel.current === null) return;
+
         let newGameData = { ...gameData }; // 親に渡す更新データ
         const nLine = expandVarsShallow(lines.lines[index], newGameData.variables); // クリック待ちのために停止した行
         let cLine = currentLine; // 今表示している行の内容かつ、次に表示する行の内容。何もなければ表示に変化なし

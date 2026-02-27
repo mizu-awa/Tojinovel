@@ -439,8 +439,11 @@ function Options({options, config, choiceOption}){
   return(
     // クリック要素のクリック防止のために全体に広げる
     <div
+      onClick={e => e.stopPropagation()}
       style={{
           position: "absolute",
+          left: 0,
+          top: 0,
           width: "100%",
           height: "100%",
           zIndex: 2005,
@@ -565,10 +568,13 @@ function Input({config, inputVar, inputValue, handleChange, commitInput }){
   return(
     // クリック要素のクリック防止のために全体に広げる
     <div
+      onClick={e => e.stopPropagation()}
       style={{
           position: "absolute",
           width: "100%",
           height: "100%",
+          top: 0,
+          left: 0,
           zIndex: 2005,
           backgroundColor: "transparent"
       }}
