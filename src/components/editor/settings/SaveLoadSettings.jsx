@@ -78,10 +78,12 @@ const SaveLoadSettings = ({
 
         <FormField label="パディング">
           <StyledInput
-            type="text"
-            value={gameSave.titleStyle?.padding}
+            type="number"
+            value={parseInt(gameSave.titleStyle?.padding) || 0}
             onChange={handleDatasetChange}
+            inputProps={inputPropsDefaultNum}
             data-path="game.save.titleStyle.padding"
+            data-type="px"
           />
         </FormField>
       </MyAccordion>
@@ -178,17 +180,17 @@ const SaveLoadSettings = ({
       </MyAccordion>
 
       <MyAccordion title="ボタンスタイル">
-        <MyAccordion title="背景" defaultOpen={false}>
-          <FormField label="余白">
-            <StyledInput
-              type="number"
-              value={gameSave.buttonStyle.padding}
-              onChange={handleDatasetChange}
-              inputProps={inputPropsDefaultNum}
-              data-path="game.save.buttonStyle.padding"
-            />
-          </FormField>
+        <FormField label="余白">
+          <StyledInput
+            type="number"
+            value={gameSave.buttonStyle.padding}
+            onChange={handleDatasetChange}
+            inputProps={inputPropsDefaultNum}
+            data-path="game.save.buttonStyle.padding"
+          />
+        </FormField>
 
+        <MyAccordion title="背景" defaultOpen={false}>
           <FormField label="背景色">
             <RgbaColorInput
               value={gameSave.buttonStyle.backgroundColor}

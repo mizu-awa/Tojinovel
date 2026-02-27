@@ -244,9 +244,10 @@ export default function useEditorData(){
             ]
           : [], [mainTab, gameData.game.character.slots, nowCharacter, selectedSubItem, selectedItem]);
     
-      const linesForEditor = useMemo(() => 
-        ((selectedItem === "テキストボックス"
-            || selectedItem === "選択肢" 
+      const linesForEditor = useMemo(() =>
+        ((selectedItem === "ゲーム画面"
+            || selectedItem === "テキストボックス"
+            || selectedItem === "選択肢"
             || selectedItem === "画像表示"
             || selectedItem === "入力フォーム"
             || selectedItem === "キャラクター表示"

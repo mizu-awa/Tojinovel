@@ -452,7 +452,10 @@ export default function EditorApp() {
               : gameData.game.itemBox.position === "bottom" ? "column"
               : "row",
       overflow: "clip",
-      flexShrink: 0
+      flexShrink: 0,
+      backgroundImage: 
+        "linear-gradient(to right, rgba(125, 125, 125, 0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(125, 125, 125, 0.5) 1px, transparent 1px)",
+      backgroundSize: "40px 40px",
     };
   }, [gameData?.game?.gameStyle, gameData?.game?.screenSize, gameData?.game?.itemBox?.position]);
 

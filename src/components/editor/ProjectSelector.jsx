@@ -188,7 +188,7 @@ export default function ProjectSelector({ onProjectReady }) {
       onDragOver={isBrowser ? handleDragOver : undefined}
       sx={{
         display: "flex", flexDirection: "column", alignItems: "center",
-        justifyContent: "center", height: "100vh", bgcolor: "background.default", p: 3
+        justifyContent: "center", height: "100vh", width: "100vw", bgcolor: "background.default"
       }}
     >
       <Typography variant="h4" gutterBottom sx={{ color: "text.primary" }}>
