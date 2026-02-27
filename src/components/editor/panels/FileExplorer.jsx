@@ -166,21 +166,26 @@ function TreeNode({
     onDragStart(relativePath);
   }, [relativePath, name, onDragStart]);
 
-  // ドラッグオーバー（フォルダのみ受け付け）
+  // ドラッグオーバー（フォルダ: そのフォルダへ / ファイル: 親フォルダへ）
   const handleDragOver = useCallback((e) => {
-    if (!isDir) return;
-    // 外部ファイルD&Dの場合は常に受け付ける
     const hasExternalFiles = e.dataTransfer.types.includes("Files");
+    // 外部ファイルはフォルダのみ受け付け
+    if (hasExternalFiles && !isDir) return;
     if (!hasExternalFiles) {
-      // 内部D&D: 自分自身または自分の子へのドロップは禁止
+      // 内部D&D: ドロップ先ディレクトリを計算（ファイルなら親フォルダ）
       const dragging = dragState.current;
-      if (dragging && (dragging === relativePath || relativePath.startsWith(dragging + "/"))) return;
+      if (!dragging) return;
+      const targetDir = isDir ? relativePath : (parentPath || "");
+      if (dragging === targetDir || targetDir.startsWith(dragging + "/")) return;
+      const fileName = dragging.split("/").pop();
+      const destPath = targetDir ? `${targetDir}/${fileName}` : fileName;
+      if (dragging === destPath) return;
     }
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = hasExternalFiles ? "copy" : "move";
     setDragOver(true);
-  }, [isDir, relativePath, dragState]);
+  }, [isDir, relativePath, parentPath, dragState]);
 
   const handleDragLeave = useCallback((e) => {
     e.stopPropagation();
@@ -192,10 +197,10 @@ function TreeNode({
     e.preventDefault();
     e.stopPropagation();
     setDragOver(false);
-    if (!isDir) return;
 
-    // 外部ファイルD&D（OSからのファイル）
+    // 外部ファイルD&D（OSからのファイル）はフォルダのみ受け付け
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      if (!isDir) return;
       const files = Array.from(e.dataTransfer.files);
       const results = await Promise.allSettled(
         files.map(async (file) => {
@@ -214,22 +219,23 @@ function TreeNode({
     // 内部D&D（ツリー内移動）
     const srcPath = e.dataTransfer.getData("text/plain");
     if (!srcPath) return;
-    // 自分自身や子へのドロップは無視
-    if (srcPath === relativePath || relativePath.startsWith(srcPath + "/")) return;
+    // ドロップ先ディレクトリ（ファイルノードなら親フォルダ）
+    const targetDir = isDir ? relativePath : (parentPath || "");
+    if (srcPath === targetDir || targetDir.startsWith(srcPath + "/")) return;
 
     const fileName = srcPath.split("/").pop();
-    const destPath = `${relativePath}/${fileName}`;
+    const destPath = targetDir ? `${targetDir}/${fileName}` : fileName;
     if (srcPath === destPath) return;
 
     try {
       await storage.renameFile(srcPath, destPath);
       onRefresh();
-    } catch (e) {
-      console.error("移動失敗:", e);
-      alert(`移動に失敗しました: ${e}`);
+    } catch (err) {
+      console.error("移動失敗:", err);
+      alert(`移動に失敗しました: ${err}`);
     }
     onDrop();
-  }, [isDir, relativePath, onRefresh, onDrop, onDropExternal]);
+  }, [isDir, relativePath, parentPath, onRefresh, onDrop, onDropExternal]);
 
   const handleDragEnd = useCallback(() => {
     onDrop();
@@ -388,6 +394,13 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
   const [externalDragOver, setExternalDragOver] = useState(false);
   const dragCounterRef = useRef(0);
 
+  // オートスクロール用
+  const scrollContainerRef = useRef(null);
+  const scrollRafRef = useRef(null);
+
+  // ヘッダードロップハイライト
+  const [headerDragOver, setHeaderDragOver] = useState(false);
+
   const loadRoot = useCallback(async () => {
     setLoading(true);
     try {
@@ -406,6 +419,37 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
   }, []);
 
   useEffect(() => { loadRoot(); }, [loadRoot]);
+
+  // ドラッグ中のオートスクロール（キャプチャーフェーズで stopPropagation を回避）
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const ZONE = 40, SPEED = 8;
+
+    const onDragOver = (e) => {
+      const rect = container.getBoundingClientRect();
+      cancelAnimationFrame(scrollRafRef.current);
+      if (e.clientY < rect.top + ZONE) {
+        const scroll = () => { container.scrollTop -= SPEED; scrollRafRef.current = requestAnimationFrame(scroll); };
+        scrollRafRef.current = requestAnimationFrame(scroll);
+      } else if (e.clientY > rect.bottom - ZONE) {
+        const scroll = () => { container.scrollTop += SPEED; scrollRafRef.current = requestAnimationFrame(scroll); };
+        scrollRafRef.current = requestAnimationFrame(scroll);
+      }
+    };
+    const stopScroll = () => cancelAnimationFrame(scrollRafRef.current);
+
+    container.addEventListener("dragover", onDragOver, { capture: true });
+    container.addEventListener("dragleave", stopScroll, { capture: true });
+    container.addEventListener("drop", stopScroll, { capture: true });
+    container.addEventListener("dragend", stopScroll, { capture: true });
+    return () => {
+      container.removeEventListener("dragover", onDragOver, { capture: true });
+      container.removeEventListener("dragleave", stopScroll, { capture: true });
+      container.removeEventListener("drop", stopScroll, { capture: true });
+      container.removeEventListener("dragend", stopScroll, { capture: true });
+    };
+  }, []);
 
   const handleRefresh = useCallback(() => {
     loadRoot();
@@ -429,6 +473,48 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
   const handleDrop = useCallback(() => {
     dragState.current = null;
   }, []);
+
+  // ヘッダーへのD&D（選択中フォルダへの移動）
+  const handleHeaderDragOver = useCallback((e) => {
+    if (e.dataTransfer.types.includes("Files")) return;
+    const dragging = dragState.current;
+    if (!dragging) return;
+    const targetDir = selectedFolder || "";
+    if (dragging === targetDir || targetDir.startsWith(dragging + "/")) return;
+    const fileName = dragging.split("/").pop();
+    const destPath = targetDir ? `${targetDir}/${fileName}` : fileName;
+    if (dragging === destPath) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    setHeaderDragOver(true);
+  }, [dragState, selectedFolder]);
+
+  const handleHeaderDragLeave = useCallback(() => {
+    setHeaderDragOver(false);
+  }, []);
+
+  const handleHeaderDrop = useCallback(async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setHeaderDragOver(false);
+    if (e.dataTransfer.types.includes("Files")) return;
+    const srcPath = e.dataTransfer.getData("text/plain");
+    if (!srcPath) return;
+    const targetDir = selectedFolder || "";
+    if (srcPath === targetDir || targetDir.startsWith(srcPath + "/")) return;
+    const fileName = srcPath.split("/").pop();
+    const destPath = targetDir ? `${targetDir}/${fileName}` : fileName;
+    if (srcPath === destPath) return;
+    try {
+      await storage.renameFile(srcPath, destPath);
+      handleRefresh();
+    } catch (err) {
+      console.error("移動失敗:", err);
+      alert(`移動に失敗しました: ${err}`);
+    }
+    handleDrop();
+  }, [selectedFolder, handleRefresh, handleDrop, dragState]);
 
   // 外部ファイルD&D完了通知（TreeNodeから）
   const handleDropExternal = useCallback((succeeded, failed) => {
@@ -544,8 +630,17 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
       onDragOver={handleAreaDragOver}
       onDrop={handleAreaDrop}
     >
-      {/* ヘッダー */}
-      <Box sx={{ display: "flex", alignItems: "center", px: 1, py: 0.5, borderBottom: 1, borderColor: "divider" }}>
+      {/* ヘッダー（D&Dで選択中フォルダへ移動可能） */}
+      <Box
+        sx={{
+          display: "flex", alignItems: "center", px: 1, py: 0.5,
+          borderBottom: 1, borderColor: "divider",
+          ...(headerDragOver && { bgcolor: "primary.dark", opacity: 0.85 }),
+        }}
+        onDragOver={handleHeaderDragOver}
+        onDragLeave={handleHeaderDragLeave}
+        onDrop={handleHeaderDrop}
+      >
         <Typography variant="subtitle2" sx={{ flex: 1, color: "text.secondary", fontSize: "0.75rem" }}>
           {selectedFolder ? selectedFolder + "/" : "/"}
         </Typography>
@@ -586,7 +681,7 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
       )}
 
       {/* ツリー */}
-      <Box sx={{ flex: 1, overflowY: "auto" }}>
+      <Box ref={scrollContainerRef} sx={{ flex: 1, overflowY: "auto" }}>
         {loading ? (
           <Typography variant="body2" sx={{ p: 2, color: "text.disabled" }}>読み込み中...</Typography>
         ) : rootEntries?.length === 0 ? (
