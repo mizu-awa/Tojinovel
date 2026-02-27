@@ -644,8 +644,13 @@ export default function useEventViewer({
             // イベント終了時にすべての変数を初期化(BGM除く)
             onComplete?.();
             setIndex(0);
-            setViewItemName(null);
-            
+            // イベント開始前にアイテムウィンドウが開いていた場合はそのまま維持する
+            if (itemClose) {
+                setViewItemName(null);
+            } else if (itemName) {
+                setViewItemName(itemName);
+            }
+
             setCharacterSlots([]);
             setCurrentLine(null);
             setCurrentOptions(null);
