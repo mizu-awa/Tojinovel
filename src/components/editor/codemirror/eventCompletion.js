@@ -147,6 +147,11 @@ const PATH_FIRST_CMDS = /^#(背景|bg|画像|image|BGM|SE|ファイルジャン�
 // 第2引数がパスのコマンド（シーン名, パス の形式）
 const PATH_SECOND_CMDS = /^#(シーン背景変更|sceneBg|アイテム背景変更|itemBg|タイマー|timer):/;
 
+// 第1引数がシーン名のコマンド
+const SCENE_FIRST_CMDS = /^#(シーン移動|moveScene|シーン背景変更|sceneBg|ステート変更|changeState|ステート一括変更|changeStateAll):/;
+// 第1引数がアイテム名のコマンド
+const ITEM_FIRST_CMDS = /^#(アイテム入手|getItem|アイテム破棄|discardItem|アイテム背景変更|itemBg|アイテムステート変更|changeItemState|アイテムステート一括変更|changeItemStateAll|アイテム画面|openItem):/;
+
 // コマンド種別に応じた拡張子フィルタを返す
 function getExtFilter(cmd) {
   if (cmd === "BGM" || cmd === "SE") return AUDIO_EXTS;
@@ -208,11 +213,41 @@ function createPathCompletionSource(fileListRef, ensureLoaded) {
   };
 }
 
+// シーン名・アイテム名補完ソース生成
+function createNameCompletionSource(listRef, cmdRegex) {
+  return (context) => {
+    if (!listRef?.current?.length) return null;
+
+    const line = context.state.doc.lineAt(context.pos);
+    const textBefore = line.text.slice(0, context.pos - line.from);
+
+    // 第1引数の位置にいるかチェック（カンマなし）: "#cmd: partial"
+    const m = textBefore.match(/^#([^\s:]+):\s+([^,]*)$/);
+    if (!m || !cmdRegex.test(`#${m[1]}:`)) return null;
+
+    const partial = m[2];
+    const lowerPartial = partial.toLowerCase();
+    const options = listRef.current
+      .filter(name => !lowerPartial || name.toLowerCase().includes(lowerPartial))
+      .map(name => ({ label: name, type: "text" }));
+
+    if (options.length === 0) return null;
+
+    return {
+      from: context.pos - partial.length,
+      options,
+      validFor: /^[^,\n]*$/,
+    };
+  };
+}
+
 // 補完拡張を作成（ファイルリストref付き）
-export function createEventCompletionExtension(fileListRef, ensureLoaded) {
+export function createEventCompletionExtension(fileListRef, ensureLoaded, sceneListRef, itemListRef) {
   const pathSource = createPathCompletionSource(fileListRef, ensureLoaded);
+  const sceneSource = createNameCompletionSource(sceneListRef, SCENE_FIRST_CMDS);
+  const itemSource = createNameCompletionSource(itemListRef, ITEM_FIRST_CMDS);
   return autocompletion({
-    override: [eventCompletions, pathSource],
+    override: [eventCompletions, pathSource, sceneSource, itemSource],
     activateOnTyping: true,
     maxRenderedOptions: 30,
   });

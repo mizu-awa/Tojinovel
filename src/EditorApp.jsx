@@ -867,6 +867,8 @@ export default function EditorApp() {
                     isMaximized={isScenarioEditorMaximized}
                     onToggleMaximize={toggleScenarioEditorMaximize}
                     onFocusChange={setIsCodeMirrorFocused}
+                    sceneList={sceneList}
+                    itemList={itemList}
                   />
                 </Panel>
               </>}

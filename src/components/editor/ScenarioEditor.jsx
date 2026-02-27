@@ -64,6 +64,8 @@ function ScenarioEditor({
   isMaximized,
   onToggleMaximize,
   onFocusChange,
+  sceneList,
+  itemList,
 }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -80,6 +82,12 @@ function ScenarioEditor({
   const { fileList, ensureLoaded } = useFileList();
   const fileListRef = useRef(fileList);
   useEffect(() => { fileListRef.current = fileList; }, [fileList]);
+
+  // シーン名・アイテム名補完用
+  const sceneListRef = useRef(sceneList);
+  useEffect(() => { sceneListRef.current = sceneList; }, [sceneList]);
+  const itemListRef = useRef(itemList);
+  useEffect(() => { itemListRef.current = itemList; }, [itemList]);
 
   // 手動入力用のローカルstate
   const [inputFilePath, setInputFilePath] = useState("");
@@ -155,7 +163,7 @@ function ScenarioEditor({
         historyCompartment.of(history()),
         keymap.of([indentWithTab, ...defaultKeymap, ...historyKeymap]),
         language,
-        createEventCompletionExtension(fileListRef, ensureLoaded),
+        createEventCompletionExtension(fileListRef, ensureLoaded, sceneListRef, itemListRef),
         closeBracketsExtension,
         updateListener,
         focusListener,
