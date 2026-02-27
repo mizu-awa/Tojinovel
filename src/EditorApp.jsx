@@ -382,10 +382,13 @@ export default function EditorApp() {
   useEffect(() => {
     if(loadFirst){
       loadFirst();
-      loadBufferFromIndexedDB();
+      loadBufferFromIndexedDB().then(() => {
+        const savedPath = sessionStorage.getItem("scenarioEditorFilePath");
+        if (savedPath) loadEventFile(savedPath);
+      });
       refreshFileList();
     }
-  },[loadFirst, loadBufferFromIndexedDB, refreshFileList])
+  },[loadFirst, loadBufferFromIndexedDB, loadEventFile, refreshFileList])
 
   // IndexedDB自動保存 フォーカス外れ等によるページリロード対策
   const timeoutRef = useRef(null);
@@ -624,7 +627,7 @@ export default function EditorApp() {
 
       {/* Main */}
       <Box sx={{ flex: 1, display: "flex", minHeight: 0 }}>
-        <PanelGroup direction="horizontal" style={{ flex: 1, minHeight: 0 }}>
+        <PanelGroup direction="horizontal" autoSaveId="editor-main" style={{ flex: 1, minHeight: 0 }}>
           {/* Left */}
           <Panel
             defaultSize={15}
@@ -638,7 +641,7 @@ export default function EditorApp() {
 
           {/* Center */}
           <Panel defaultSize={65}>
-            <PanelGroup direction="vertical">
+            <PanelGroup direction="vertical" autoSaveId="editor-center">
               <Panel defaultSize={100}>
                 {mainTab === "explorer" ?
                   // エクスプローラー: 画像プレビュー or プレースホルダー

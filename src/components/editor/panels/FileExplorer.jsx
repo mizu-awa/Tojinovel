@@ -386,8 +386,18 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
   // 選択中フォルダ（ファイル新規作成の対象）
   const [selectedFolder, setSelectedFolder] = useState("data/events");
 
-  // 展開状態管理（パス -> 展開フラグ）
-  const [expandedPaths, setExpandedPaths] = useState(new Set());
+  // 展開状態管理（パス -> 展開フラグ、sessionStorageで永続化）
+  const [expandedPaths, setExpandedPaths] = useState(() => {
+    try {
+      const v = sessionStorage.getItem("explorerExpandedPaths");
+      return v ? new Set(JSON.parse(v)) : new Set();
+    } catch { return new Set(); }
+  });
+
+  const setExpandedPathsPersist = useCallback((newSet) => {
+    setExpandedPaths(newSet);
+    sessionStorage.setItem("explorerExpandedPaths", JSON.stringify([...newSet]));
+  }, []);
 
   // ファイル作成ダイアログ
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -470,8 +480,8 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
   }, []);
 
   const handleExpandedPathsChange = useCallback((newExpandedPaths) => {
-    setExpandedPaths(newExpandedPaths);
-  }, []);
+    setExpandedPathsPersist(newExpandedPaths);
+  }, [setExpandedPathsPersist]);
 
   const handleDragStart = useCallback((path) => {
     dragState.current = path;

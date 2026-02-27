@@ -156,6 +156,7 @@ export default function useScenarioEditor({ setIsSaved }) {
     currentLabelRef.current = "";
     pendingContentRef.current = null;
     setCurrentFilePath(null);
+    sessionStorage.removeItem("scenarioEditorFilePath");
     setCurrentLabel("");
     setStatus(null);
     setFileNotFound(false);
@@ -194,6 +195,7 @@ export default function useScenarioEditor({ setIsSaved }) {
     setCurrentFilePath(normalizedPath);
     setCurrentLabel(label || "");
     setFileNotFound(false);
+    sessionStorage.setItem("scenarioEditorFilePath", normalizedPath);
 
     const existing = eventBufferRef.current.get(normalizedPath);
 
