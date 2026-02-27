@@ -448,7 +448,8 @@ export default function EditorApp() {
               : gameData.game.itemBox.position === "top" ? "column-reverse"
               : gameData.game.itemBox.position === "bottom" ? "column"
               : "row",
-      overflow: "clip"
+      overflow: "clip",
+      flexShrink: 0
     };
   }, [gameData?.game?.gameStyle, gameData?.game?.screenSize, gameData?.game?.itemBox?.position]);
 

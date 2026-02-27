@@ -692,6 +692,7 @@ export default function GameApp({ debug }) {
             : gameData.game.itemBox.position === "bottom" ? "column"
             : "row",
     overflow: "clip",
+    flexShrink: 0
   };
 
   // ゲームコンテンツ（共通）
