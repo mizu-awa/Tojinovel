@@ -43,6 +43,7 @@ export default function useEventViewer({
     // refs----------------------------------------------------------------------------------------------
     const ifSkip = useRef(false);
     const opSkip = useRef(false);
+    const lastClickSkip = useRef(true);
     
     // functions-----------------------------------------------------------------------------------------
     /* キャラクター表情更新時の処理 */
@@ -187,28 +188,40 @@ export default function useEventViewer({
                 audioManager.playVoice(nLine.sound, newGameData.game.sound.voice);
             }
             cLine = {...nLine, text: parseLineText(nLine.text)};
+
+            lastClickSkip.current = false;
             i++;
         }
         else if(nLine.type === "narration"){ // 地の文
             cLine = {...nLine, text: parseLineText(nLine.text)};
+
+            lastClickSkip.current = false;
             i++;
         }
         else if(nLine.type === "click"){ //クリック要素
+
+            lastClickSkip.current = true;
             i++;
         }
         else if(nLine.type === "startOption"){//選択肢開始
             cOptions = nLine.options;
             opSkip.current = false;
+
+            lastClickSkip.current = false;
             i++;
         }
         else if(nLine.type === "afterSO"){//選択肢開始の直後
             opSkip.current = true;// 選択肢出現前の文は無視
             // 次のセリフ・地の文を強制実行
             cLine = null;
+
+            lastClickSkip.current = true;
             i++;
         }
         else if(nLine.type === "input"){// 入力フォーム表示
             cInput = nLine.varName;
+
+            lastClickSkip.current = false;
             i++;
         }
         else if(nLine.type === "afterInput"){// inputの直後
@@ -225,6 +238,8 @@ export default function useEventViewer({
             cInput = null;
             // 次のセリフ・地の文を強制実行
             cLine = null;
+
+            lastClickSkip.current = true;
             i++;
         }
 
@@ -298,6 +313,7 @@ export default function useEventViewer({
                     }
                     // 表示する行として登録
                     cLine = {...line, text: parseLineText(line.text)};
+                    lastClickSkip.current = false;
                 }
                 else{
                     // 通常の行の場合は何もせずループ脱出（次のクリック時に処理するため）
@@ -308,6 +324,7 @@ export default function useEventViewer({
                 if(!cLine){// 最初の行対策
                     // 表示する行として登録
                     cLine = {...line, text: parseLineText(line.text)};
+                    lastClickSkip.current = false;
                 }
                 else{
                     // 通常の行の場合は何もせずループ脱出（次のクリック時に処理するため）
@@ -315,9 +332,16 @@ export default function useEventViewer({
                 }
             }
             else if(line.type === "click"){// クリック待ち
-                // クリック待ち
-                // 何もせずループ脱出（次のクリック時に処理するため）
-                break;
+                if( lines.isView && i >= (lines.lines.length - 1)){// isView イベント実行完了
+                    if( !lastClickSkip.current ){
+                        // クリックイベントが連続していない場合は、最後のクリックイベントを処理するためにループ脱出
+                        break;
+                    } 
+                }
+                else {
+                    // 何もせずループ脱出（次のクリック時に処理）
+                    break;
+                }
             }
             else if(line.type === "expression"){// 表情変化
                 // 立ち絵を再計算
@@ -716,6 +740,7 @@ export default function useEventViewer({
     // lines が更新されたら、最初の行を実行
     useEffect(() => {
         if (lines && lines?.lines?.length > 0 && index === 0 && !forEdit ) {
+            lastClickSkip.current = true;
             handleClick(lines);
         }
     }, [lines]);
