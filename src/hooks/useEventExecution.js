@@ -382,6 +382,11 @@ export default function useEventViewer({
                     itemName = item.name;
                     // アイテムを取得状態にする
                     newGameData.items[itemIndex].have = true;
+                    // 入手順を記録（未所持のときのみ更新してアイテムボックスの並び順に使う）
+                    if(!item.have){
+                        newGameData._itemAcquiredCount = (newGameData._itemAcquiredCount ?? 0) + 1;
+                        newGameData.items[itemIndex].acquiredOrder = newGameData._itemAcquiredCount;
+                    }
                 }
             }
             else if(line.type === "discardItem"){// アイテム破棄

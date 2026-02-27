@@ -46,8 +46,9 @@ function ItemBox({
                     ? ( ( screenSize[1] - itemBox.paginationSize - itemBox.space - itemBox.space ) / itemBox.size )
                     : ( ( screenSize[0] - itemBox.paginationSize - itemBox.space - itemBox.space ) / itemBox.size ) ) * itemBox.columnCount  ) * itemBox.columnCount;
 
-    // 所有しているアイテムに限定
-    const haveItems = items.filter(item => item.have);
+    // 所有しているアイテムに限定し、入手順でソート
+    const haveItems = items.filter(item => item.have)
+        .sort((a, b) => (a.acquiredOrder ?? 0) - (b.acquiredOrder ?? 0));
 
     // ページ数
     const maxPage = Math.max(1, Math.ceil(haveItems.length / pageFill));
