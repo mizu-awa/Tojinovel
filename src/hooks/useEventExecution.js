@@ -751,7 +751,10 @@ export default function useEventViewer({
     useEffect(() => {
         if (lines && lines?.lines?.length > 0 && index === 0 && !forEdit ) {
             lastClickSkip.current = true;
-            handleClick(lines);
+            // 最初の行がクリック待ちの場合は自動実行しない（ユーザーのクリックを待つ）
+            if (lines.lines[0].type !== "click") {
+                handleClick(lines);
+            }
         }
     }, [lines]);
 
