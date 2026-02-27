@@ -70,6 +70,13 @@ function TreeNode({
     }
   }, [relativePath]);
 
+  // 展開中にchildrenがnullにリセットされたとき（リフレッシュ後）に自動で再読み込み
+  useEffect(() => {
+    if (isDir && isOpen && children === null) {
+      loadChildren();
+    }
+  }, [isDir, isOpen, children, loadChildren]);
+
   const handleToggle = useCallback(async () => {
     if (!isDir) return;
     if (!isOpen && children === null) {
