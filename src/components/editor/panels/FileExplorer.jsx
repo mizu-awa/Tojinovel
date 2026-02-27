@@ -151,8 +151,20 @@ function TreeNode({
     e.stopPropagation();
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", relativePath);
+
+    // カスタムドラッグプレビュー（ブラウザデフォルトのゴースト画像を置換）
+    const el = document.createElement("div");
+    el.textContent = name;
+    el.style.cssText =
+      "position:fixed;top:-100px;left:-100px;" +
+      "padding:2px 8px;background:#424242;color:#fff;" +
+      "border-radius:4px;font-size:12px;pointer-events:none;";
+    document.body.appendChild(el);
+    e.dataTransfer.setDragImage(el, 0, 0);
+    setTimeout(() => document.body.removeChild(el), 0);
+
     onDragStart(relativePath);
-  }, [relativePath, onDragStart]);
+  }, [relativePath, name, onDragStart]);
 
   // ドラッグオーバー（フォルダのみ受け付け）
   const handleDragOver = useCallback((e) => {
