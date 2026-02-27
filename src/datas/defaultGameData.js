@@ -305,7 +305,8 @@ export const defaultGameData = {
       "style": {
         "fontSize": "16px",
         "gap": 10,
-        "fontWeight": 500
+        "fontWeight": 500,
+        "color": "rgba(255, 255, 255, 1)"
       }
     },
     "config": {

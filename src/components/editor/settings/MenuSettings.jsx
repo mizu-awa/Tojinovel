@@ -6,6 +6,7 @@ import { MenuItem, Select } from "@mui/material";
 import HoverSelector from "../HoverSelector";
 import StyledCheckbox from "../StyledCheckBox";
 import MyAccordion from "../MyAccordion";
+import RgbaColorInput from "../RgbaColorInput";
 
 const MenuSettings = ({
   gameMenu,
@@ -103,6 +104,14 @@ const MenuSettings = ({
             onChange={handleDatasetChange}
             inputProps={inputPropsFontWeight}
             data-path="game.menu.style.fontWeight"
+          />
+        </FormField>
+
+        <FormField label="文字色">
+          <RgbaColorInput
+            value={gameMenu.style.color}
+            onChange={handleDatasetChange}
+            data-path="game.menu.style.color"
           />
         </FormField>
 
