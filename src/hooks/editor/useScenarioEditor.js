@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { openDB } from "idb";
 import { storage } from "../../services/storageService";
+import { Transaction } from "@codemirror/state";
 
 // IndexedDB設定（useIndexedDBStorage.js と同じDB/ストアを共用）
 const DB_NAME = "TojinovelDB";
@@ -29,11 +30,12 @@ function getEditorContent(editorView) {
   return editorView.state.doc.toString();
 }
 
-// CodeMirror EditorViewにコンテンツを設定
+// CodeMirror EditorViewにコンテンツを設定（履歴に追加しない）
 function setEditorContent(editorView, content) {
   if (!editorView) return;
   editorView.dispatch({
     changes: { from: 0, to: editorView.state.doc.length, insert: content },
+    annotations: Transaction.addToHistory.of(false),
   });
 }
 
@@ -56,7 +58,7 @@ function scrollToLabel(editorView, label) {
   editorView.focus();
 }
 
-export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
+export default function useScenarioEditor({ setIsSaved }) {
   // ref-------------------------------------------------------------------------------------------
   // key: ファイルパス（"./events/room1.txt"）, value: { content: string, dirty: boolean }
   const eventBufferRef = useRef(new Map());
@@ -280,11 +282,6 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     const path = currentFilePathRef.current;
     if (!path || !editorViewRef.current) return;
 
-    // undo/redo用スナップショット（変更前の状態を保存）
-    if (onBeforeTextChange) {
-      onBeforeTextChange();
-    }
-
     const currentContent = getEditorContent(editorViewRef.current);
     eventBufferRef.current.set(path, { content: currentContent, dirty: true });
     setHasDirtyFiles(true);
@@ -293,7 +290,7 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
 
     // IndexedDBへのデバウンス保存をスケジュール
     scheduleIDBSave();
-  }, [setIsSaved, scheduleIDBSave, onBeforeTextChange]);
+  }, [setIsSaved, scheduleIDBSave]);
 
   // 全dirtyファイルをサーバーに保存
   const saveAllDirtyFiles = useCallback(async () => {
@@ -345,37 +342,6 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     }
   }, [updateHasDirtyFiles]);
 
-  // undo/redoからバッファを復元
-  const restoreEventBuffer = useCallback((serializedBuffer) => {
-    if (!serializedBuffer) return;
-
-    eventBufferRef.current = new Map(Object.entries(serializedBuffer));
-    updateHasDirtyFiles();
-
-    // 現在開いているファイルの内容をエディタに反映
-    const path = currentFilePathRef.current;
-    if (path) {
-      const entry = eventBufferRef.current.get(path);
-      if (entry) {
-        pendingContentRef.current = entry.content;
-        if (editorViewRef.current) {
-          setEditorContent(editorViewRef.current, entry.content);
-          pendingContentRef.current = null;
-        }
-        setStatus(entry.dirty ? "未保存" : null);
-        setFileNotFound(false);
-      } else {
-        // ファイルがバッファにない（削除された等）
-        pendingContentRef.current = "";
-        if (editorViewRef.current) {
-          setEditorContent(editorViewRef.current, "");
-          pendingContentRef.current = null;
-        }
-        setStatus(null);
-      }
-    }
-  }, [updateHasDirtyFiles]);
-
   return {
     currentFilePath,
     currentLabel,
@@ -390,8 +356,5 @@ export default function useScenarioEditor({ setIsSaved, onBeforeTextChange }) {
     createNewFile,
     closeFile,
     applyPendingContent,
-    // undo/redo用
-    eventBufferRef,
-    restoreEventBuffer,
   };
 }

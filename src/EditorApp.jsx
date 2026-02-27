@@ -108,9 +108,13 @@ export default function EditorApp() {
   const { ref, boxRef } = useResizeWindow({gameData});
 
   // scenario editor------------------------------------------------------
-  // 循環依存解決: onBeforeTextChangeはrefで後から設定
-  const onBeforeTextChangeRef = useRef(() => {});
-  const stableOnBeforeTextChange = useCallback(() => onBeforeTextChangeRef.current(), []);
+  // CodeMirrorフォーカス状態管理
+  const [isCodeMirrorFocused, setIsCodeMirrorFocused] = useState(false);
+  const isCodeMirrorFocusedRef = useRef(false);
+  useEffect(() => {
+    isCodeMirrorFocusedRef.current = isCodeMirrorFocused;
+  }, [isCodeMirrorFocused]);
+
   const {
     currentFilePath,
     currentLabel,
@@ -125,11 +129,8 @@ export default function EditorApp() {
     createNewFile,
     closeFile,
     applyPendingContent,
-    eventBufferRef,
-    restoreEventBuffer,
   } = useScenarioEditor({
     setIsSaved,
-    onBeforeTextChange: stableOnBeforeTextChange
   });
 
   // シナリオエディタ最大化状態
@@ -162,11 +163,7 @@ export default function EditorApp() {
   const { debouncedDoAction, undo, redo, canUndo, canRedo }
   = useUndoRedo({
     setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem,
-    eventBufferRef, restoreEventBuffer
   });
-
-  // debouncedDoActionをシナリオエディタに渡す
-  onBeforeTextChangeRef.current = debouncedDoAction;
 
   // handle change----------------------------------------------------------------------------------
   const { handleMainTabChange, handleNestedChange, handleAddArrayItem, handleDeleteKey, handleDatasetChange} = useHandleChange({setGameData, setMainTab, setIsSaved, debouncedDoAction});
@@ -293,12 +290,14 @@ export default function EditorApp() {
         e.preventDefault();
         saveAll();
       }
-      // アンドゥ/リドゥ: フォーム内外を問わず統一動作
+      // アンドゥ/リドゥ: CodeMirrorフォーカス中はCodeMirrorに任せる
       else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "z") {
+        if (isCodeMirrorFocusedRef.current) return;
         e.preventDefault();
         undo();
       }
       else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && e.key === "z"))) {
+        if (isCodeMirrorFocusedRef.current) return;
         e.preventDefault();
         redo();
       }
@@ -359,6 +358,18 @@ export default function EditorApp() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [undo, redo, copyBykey, pasteByKey, saveAll, deleteByKey, mainTab, selectedItem, selectedSubItem, selectedThirdItem, debouncedDoAction, setGameData]);
+
+  // CodeMirror外クリックでフォーカスを外す
+  useEffect(() => {
+    const handleMouseDown = (e) => {
+      const cmDom = editorViewRef.current?.dom;
+      if (cmDom && !cmDom.contains(e.target)) {
+        editorViewRef.current?.contentDOM.blur();
+      }
+    };
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
+  }, [editorViewRef]);
 
   // 最新 gameData を ref に保持
   useEffect(() => {
@@ -848,6 +859,7 @@ export default function EditorApp() {
                     applyPendingContent={applyPendingContent}
                     isMaximized={isScenarioEditorMaximized}
                     onToggleMaximize={toggleScenarioEditorMaximize}
+                    onFocusChange={setIsCodeMirrorFocused}
                   />
                 </Panel>
               </>}

@@ -5,8 +5,6 @@ const DEBOUNCE_MS = 500; // デバウンス時間
 
 export default function useUndoRedo({
     setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem,
-    // シナリオエディタ用（オプション）
-    eventBufferRef, restoreEventBuffer
 }){
     const historyRef = useRef([]);
     const futureRef = useRef([]);
@@ -59,10 +57,6 @@ export default function useUndoRedo({
         if (!isEditingRef.current) {
           const snapshot = {
             gameData: structuredClone(gameDataRef.current),
-            // eventBufferがある場合はそれも含める
-            eventBuffer: eventBufferRef?.current
-              ? Object.fromEntries(eventBufferRef.current)
-              : null
           };
           historyRef.current = [...historyRef.current, snapshot].slice(-MAX_HISTORY);
           futureRef.current = [];
@@ -76,7 +70,7 @@ export default function useUndoRedo({
         debounceRef.current = setTimeout(() => {
           isEditingRef.current = false;
         }, DEBOUNCE_MS);
-      }, [eventBufferRef]);
+      }, []);
 
       const undo = useCallback(() => {
         const history = historyRef.current;
@@ -95,9 +89,6 @@ export default function useUndoRedo({
         // 現在の状態を future に保存（※ clone 必須）
         const currentSnapshot = {
           gameData: structuredClone(gameDataRef.current),
-          eventBuffer: eventBufferRef?.current
-            ? Object.fromEntries(eventBufferRef.current)
-            : null
         };
         futureRef.current = [currentSnapshot, ...futureRef.current];
 
@@ -107,12 +98,7 @@ export default function useUndoRedo({
         // gameDataを復元
         checkSelected(previous.gameData);
         setGameData(previous.gameData);
-
-        // eventBufferを復元
-        if (restoreEventBuffer && previous.eventBuffer) {
-          restoreEventBuffer(previous.eventBuffer);
-        }
-      }, [checkSelected, setGameData, eventBufferRef, restoreEventBuffer]);
+      }, [checkSelected, setGameData]);
 
       const redo = useCallback(() => {
         const future = futureRef.current;
@@ -130,9 +116,6 @@ export default function useUndoRedo({
         // 現在の状態を history に保存（※ clone 必須）
         const currentSnapshot = {
           gameData: structuredClone(gameDataRef.current),
-          eventBuffer: eventBufferRef?.current
-            ? Object.fromEntries(eventBufferRef.current)
-            : null
         };
         historyRef.current = [...historyRef.current, currentSnapshot];
 
@@ -142,12 +125,7 @@ export default function useUndoRedo({
         // gameDataを復元
         checkSelected(next.gameData);
         setGameData(next.gameData);
-
-        // eventBufferを復元
-        if (restoreEventBuffer && next.eventBuffer) {
-          restoreEventBuffer(next.eventBuffer);
-        }
-      }, [checkSelected, setGameData, eventBufferRef, restoreEventBuffer]);
+      }, [checkSelected, setGameData]);
 
 
     return ({
