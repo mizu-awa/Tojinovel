@@ -272,6 +272,25 @@ func (f *FileService) ReadDirRecursive() ([]string, error) {
 	return files, nil
 }
 
+// CreateDir - ディレクトリを新規作成（既存の場合はエラー）
+func (f *FileService) CreateDir(relativePath string) error {
+	cleanPath := strings.TrimPrefix(relativePath, "./")
+	fullPath, err := f.validatePath(cleanPath)
+	if err != nil {
+		return err
+	}
+
+	// 既存チェック
+	if _, err := os.Stat(fullPath); err == nil {
+		return fmt.Errorf("同名のフォルダまたはファイルが既に存在します: %s", relativePath)
+	}
+
+	if err := os.MkdirAll(fullPath, 0755); err != nil {
+		return fmt.Errorf("フォルダ作成に失敗: %w", err)
+	}
+	return nil
+}
+
 // CreateFile - 空のファイルを新規作成（既存ファイルは上書きしない）
 func (f *FileService) CreateFile(relativePath string) error {
 	cleanPath := strings.TrimPrefix(relativePath, "./")

@@ -5,7 +5,7 @@ import {
   ListItemText, Menu, MenuItem, Snackbar, TextField, Typography
 } from "@mui/material";
 import {
-  AudioFile, ChevronRight, ContentCopy, Delete,
+  AudioFile, ChevronRight, ContentCopy, CreateNewFolder, Delete,
   DriveFileRenameOutline, ExpandMore, Folder,
   FolderOpen, FileUpload, Image, InsertDriveFile, NoteAdd, Refresh, TextSnippet
 } from "@mui/icons-material";
@@ -404,6 +404,11 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
   const [newFileName, setNewFileName] = useState("新規イベント.txt");
   const [createError, setCreateError] = useState("");
 
+  // フォルダ作成ダイアログ
+  const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [createFolderError, setCreateFolderError] = useState("");
+
   // D&D中のパスを追跡（refでリアルタイム参照）
   const dragState = useRef(null);
 
@@ -639,6 +644,38 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
     }
   }, [newFileName, selectedFolder, handleRefresh, onFileSelect]);
 
+  // フォルダ作成ダイアログを開く
+  const handleOpenCreateFolderDialog = useCallback(() => {
+    setNewFolderName("");
+    setCreateFolderError("");
+    setCreateFolderDialogOpen(true);
+  }, []);
+
+  // フォルダ作成実行
+  const handleCreateFolder = useCallback(async () => {
+    const fname = newFolderName.trim();
+    if (!fname) {
+      setCreateFolderError("フォルダ名を入力してください");
+      return;
+    }
+    // フォルダ名にスラッシュや不正な文字がないか
+    if (fname.includes("/") || fname.includes("\\")) {
+      setCreateFolderError("フォルダ名にスラッシュは使えません");
+      return;
+    }
+
+    const targetFolder = selectedFolder || "data";
+    const folderPath = `${targetFolder}/${fname}`;
+
+    try {
+      await storage.createDir(folderPath);
+      setCreateFolderDialogOpen(false);
+      handleRefresh();
+    } catch (e) {
+      setCreateFolderError(String(e));
+    }
+  }, [newFolderName, selectedFolder, handleRefresh]);
+
   return (
     <Box
       sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}
@@ -663,6 +700,9 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
         </Typography>
         <IconButton size="small" onClick={handleImportFile} title="ファイルをインポート（選択フォルダへコピー）">
           <FileUpload fontSize="small" />
+        </IconButton>
+        <IconButton size="small" onClick={handleOpenCreateFolderDialog} title="新規フォルダ作成">
+          <CreateNewFolder fontSize="small" />
         </IconButton>
         <IconButton size="small" onClick={handleOpenCreateDialog} title="新規txtファイル作成">
           <NoteAdd fontSize="small" />
@@ -761,6 +801,42 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
         <DialogActions>
           <Button onClick={() => setCreateDialogOpen(false)}>キャンセル</Button>
           <Button onClick={handleCreateFile} variant="contained">作成</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* フォルダ作成ダイアログ */}
+      <Dialog
+        open={createFolderDialogOpen}
+        onClose={() => setCreateFolderDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>新規フォルダ作成</DialogTitle>
+        <DialogContent>
+          <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1 }}>
+            作成場所: {selectedFolder || "data"}/
+          </Typography>
+          <TextField
+            autoFocus
+            fullWidth
+            size="small"
+            label="フォルダ名"
+            value={newFolderName}
+            onChange={(e) => {
+              setNewFolderName(e.target.value);
+              setCreateFolderError("");
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleCreateFolder();
+              if (e.key === "Escape") setCreateFolderDialogOpen(false);
+            }}
+            error={!!createFolderError}
+            helperText={createFolderError}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateFolderDialogOpen(false)}>キャンセル</Button>
+          <Button onClick={handleCreateFolder} variant="contained">作成</Button>
         </DialogActions>
       </Dialog>
 

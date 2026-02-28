@@ -15,6 +15,7 @@ import {
   deleteFileEntry,
   renameFileEntry,
   createFileEntry,
+  createDir as fsCreateDir,
   listDir,
   listAllFiles,
   requestPersistence,
@@ -210,6 +211,11 @@ async function adapterCreateFile(path) {
   await createFileEntry(currentProjectId, path);
 }
 
+async function adapterCreateDir(path) {
+  if (!currentProjectId) return;
+  await fsCreateDir(currentProjectId, path);
+}
+
 // プレイヤー書き出し（ブラウザ版では未サポート、Phase 5でZIPダウンロードとして実装予定）
 function exportPlayer() {
   return Promise.resolve(null);
@@ -295,6 +301,7 @@ export const browserAdapter = {
   deleteFile: adapterDeleteFile,
   renameFile: adapterRenameFile,
   createFile: adapterCreateFile,
+  createDir: adapterCreateDir,
 
   // プレイヤー書き出し
   exportPlayer,

@@ -296,6 +296,23 @@ export async function renameFileEntry(projectId, oldPath, newPath) {
   });
 }
 
+// ディレクトリ作成（.keepファイルでディレクトリを表現）
+export async function createDir(projectId, dirPath) {
+  dirPath = normalizePath(dirPath);
+  const keepPath = dirPath + "/.keep";
+
+  // 既存チェック（同名ファイルまたはディレクトリ配下にファイルがあるか）
+  const allFiles = await listAllFiles(projectId);
+  const exists = allFiles.some(
+    (f) => f.path === dirPath || f.path.startsWith(dirPath + "/")
+  );
+  if (exists) {
+    throw new Error("同名のフォルダまたはファイルが既に存在します: " + dirPath);
+  }
+
+  await writeFile(projectId, keepPath, "", "text/plain");
+}
+
 export async function createFileEntry(projectId, path) {
   path = normalizePath(path);
   // 既存チェック
