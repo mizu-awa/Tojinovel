@@ -7,7 +7,7 @@ const isBrowserBuild = process.env.VITE_BUILD_MODE === 'browser';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './',
+  base: isBrowserBuild ? '/Tojinovel/' : './',
   build: {
     outDir: isBrowserBuild ? 'dist-browser' : 'dist',
     rollupOptions: {

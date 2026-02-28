@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write   # tag / release / wiki push 用
+  pages: write      # GitHub Pages デプロイ用
+  id-token: write   # Pages OIDC トークン用
 
 jobs:
   # ----------------------------
@@ -195,3 +197,35 @@ jobs:
             git commit -m "Update wiki"
             git push
           fi
+
+  # ----------------------------
+  # ブラウザ版 GitHub Pages デプロイ
+  # ----------------------------
+  deploy-browser:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.core == 'True'
+    runs-on: ubuntu-latest
+    environment: github-pages
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build browser version
+        run: npm run build:browser
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist-browser/
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
