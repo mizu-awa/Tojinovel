@@ -115,6 +115,14 @@ const MenuSettings = ({
           />
         </FormField>
 
+        <FormField label="輪郭色">
+          <RgbaColorInput
+            value={gameMenu.style.textOutlineColor}
+            onChange={handleDatasetChange}
+            data-path="game.menu.style.textOutlineColor"
+          />
+        </FormField>
+
         <FormField label="ホバー時の見た目">
           <HoverSelector
             value={gameMenu.hover}

@@ -494,7 +494,7 @@
 ### 8.5.1 Style
 ``` jsonc
 {
-  "backgroundColor": "#rgba(255,255,255,1)",
+  "backgroundColor": "rgba(255,255,255,1)",
   "borderRadius": "0px"
 }
 ```
