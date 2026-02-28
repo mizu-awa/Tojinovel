@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { openDB } from "idb";
 import { storage } from "../../services/storageService";
 import { Transaction } from "@codemirror/state";
+import { detectIfElseViewMismatch } from "../useEventLines";
 
 // IndexedDB設定（useIndexedDBStorage.js と同じDB/ストアを共用）
 const DB_NAME = "TojinovelDB";
@@ -76,6 +77,7 @@ export default function useScenarioEditor({ setIsSaved }) {
   const [hasDirtyFiles, setHasDirtyFiles] = useState(false);
   const [status, setStatus] = useState(null);
   const [fileNotFound, setFileNotFound] = useState(false);
+  const [ifViewWarning, setIfViewWarning] = useState(false);
 
   // functions-------------------------------------------------------------------------------------
 
@@ -160,6 +162,7 @@ export default function useScenarioEditor({ setIsSaved }) {
     setCurrentLabel("");
     setStatus(null);
     setFileNotFound(false);
+    setIfViewWarning(false);
     if (editorViewRef.current) {
       setEditorContent(editorViewRef.current, "");
     }
@@ -213,6 +216,7 @@ export default function useScenarioEditor({ setIsSaved }) {
           scrollTimerRef.current = setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
         }
       }
+      setIfViewWarning(detectIfElseViewMismatch(existing.content));
       setStatus(existing.dirty ? "未保存" : null);
       return;
     }
@@ -240,10 +244,12 @@ export default function useScenarioEditor({ setIsSaved }) {
             scrollTimerRef.current = setTimeout(() => scrollToLabel(editorViewRef.current, label), 50);
           }
         }
+        setIfViewWarning(detectIfElseViewMismatch(text));
         setStatus(null);
       } else {
         // nullが返った → ファイルが存在しない
         setFileNotFound(true);
+        setIfViewWarning(false);
         setStatus("ファイルが存在しません");
         pendingContentRef.current = "";
         if (editorViewRef.current) setEditorContent(editorViewRef.current, "");
@@ -252,6 +258,7 @@ export default function useScenarioEditor({ setIsSaved }) {
       // エラー → ファイルが存在しない扱い
       if (currentFilePathRef.current !== normalizedPath) return;
       setFileNotFound(true);
+      setIfViewWarning(false);
       setStatus("ファイルが存在しません");
       pendingContentRef.current = "";
       if (editorViewRef.current) setEditorContent(editorViewRef.current, "");
@@ -286,6 +293,7 @@ export default function useScenarioEditor({ setIsSaved }) {
 
     const currentContent = getEditorContent(editorViewRef.current);
     eventBufferRef.current.set(path, { content: currentContent, dirty: true });
+    setIfViewWarning(detectIfElseViewMismatch(currentContent));
     setHasDirtyFiles(true);
     setIsSaved(false);
     setStatus("未保存");
@@ -358,5 +366,6 @@ export default function useScenarioEditor({ setIsSaved }) {
     createNewFile,
     closeFile,
     applyPendingContent,
+    ifViewWarning,
   };
 }

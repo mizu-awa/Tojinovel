@@ -2,7 +2,7 @@ import { memo, useState, useCallback, useEffect, useRef } from "react";
 import { Box, Typography, IconButton, TextField, Button } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import useFileList from "../../hooks/editor/useFileList";
-import { Description, FolderOpen, Close, NoteAdd, Fullscreen, FullscreenExit, Undo, Redo } from "@mui/icons-material";
+import { Description, FolderOpen, Close, NoteAdd, Fullscreen, FullscreenExit, Undo, Redo, Warning } from "@mui/icons-material";
 
 // CodeMirror
 import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from "@codemirror/view";
@@ -61,6 +61,7 @@ function ScenarioEditor({
   createNewFile,
   closeFile,
   applyPendingContent,
+  ifViewWarning,
   isMaximized,
   onToggleMaximize,
   onFocusChange,
@@ -351,6 +352,15 @@ function ScenarioEditor({
           {status && (
             <Typography variant="caption" sx={{ color: fileNotFound ? "error.main" : "text.disabled" }}>
               {status}
+            </Typography>
+          )}
+          {ifViewWarning && (
+            <Typography
+              variant="caption"
+              sx={{ color: "warning.main", display: "flex", alignItems: "center", gap: 0.25, whiteSpace: "nowrap" }}
+            >
+              <Warning sx={{ fontSize: 14 }} />
+              #if条件次第でフロント/バック混在
             </Typography>
           )}
           <IconButton

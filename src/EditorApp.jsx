@@ -129,6 +129,7 @@ export default function EditorApp() {
     createNewFile,
     closeFile,
     applyPendingContent,
+    ifViewWarning,
   } = useScenarioEditor({
     setIsSaved,
   });
@@ -864,6 +865,7 @@ export default function EditorApp() {
                     createNewFile={createNewFile}
                     closeFile={closeFile}
                     applyPendingContent={applyPendingContent}
+                    ifViewWarning={ifViewWarning}
                     isMaximized={isScenarioEditorMaximized}
                     onToggleMaximize={toggleScenarioEditorMaximize}
                     onFocusChange={setIsCodeMirrorFocused}
