@@ -19,7 +19,7 @@ export default function useEventViewer({
   index, setIndex,
   characterSlots, setCharacterSlots,
   currentLine, setCurrentLine,
-  setCurrentOptions,
+  currentOptions,setCurrentOptions,
   currentBack, setCurrentBack,
   currentImage, setCurrentImage,
   hiddenCharacter, hideCharacter,

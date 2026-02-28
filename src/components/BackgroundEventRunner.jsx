@@ -40,7 +40,7 @@ export default function BackgroundEventRunner({
     index, setIndex,
     characterSlots: [], setCharacterSlots: noop,
     currentLine: null, setCurrentLine: noop,
-    setCurrentOptions: noop,
+    currentOptions: null, setCurrentOptions: noop,
     currentBack: null, setCurrentBack: noop,
     currentImage: null, setCurrentImage: noop,
     hiddenCharacter: null, hideCharacter: noop,

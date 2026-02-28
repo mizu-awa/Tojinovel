@@ -53,7 +53,7 @@ function EventViewer({
         index, setIndex,
         characterSlots, setCharacterSlots,
         currentLine, setCurrentLine,
-        setCurrentOptions,
+        currentOptions,setCurrentOptions,
         currentBack, setCurrentBack,
         currentImage, setCurrentImage,
         hiddenCharacter, hideCharacter,
