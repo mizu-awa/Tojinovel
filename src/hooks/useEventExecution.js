@@ -44,6 +44,8 @@ export default function useEventViewer({
     const ifSkip = useRef(false);
     const opSkip = useRef(false);
     const lastClickSkip = useRef(true);
+    const animEndTimer = useRef(null); // アニメーション完了待ちタイマー
+    const viewItemNameRef = useRef(viewItemName);
     
     // functions-----------------------------------------------------------------------------------------
     /* キャラクター表情更新時の処理 */
@@ -649,30 +651,52 @@ export default function useEventViewer({
             if(ifDepth.current !== 0) console.warn(`[Tojinovel] #if終了 が ${ifDepth.current} 個不足しています`);
             // ゲームデータを更新（念のため）
             updateGameData(() => newGameData);
-            // イベント終了時にすべての変数を初期化(BGM除く)
-            onComplete?.();
-            setIndex(0);
-            // イベント開始前にアイテムウィンドウが開いていた場合はそのまま維持する
-            if (itemClose) {
-                setViewItemName(null);
-            } else if (itemName) {
-                setViewItemName(itemName);
+
+            // アニメーション付きコマンドが最後にある場合、アニメーション完了を待ってからイベントを終了する
+            // ※ 1000ms は index.css の背景アニメーション時間（1s）に合わせたハードコード値
+            const animDelay = cBack.animation ? 1000 : 0;
+
+            if (animDelay > 0) {
+                // アニメーション完了を待つ間、蓄積した変更を先に反映する
+                setCurrentBack(cBack);
+                setCurrentLine(cLine);
+                setCharacterSlots(slots);
+                setCurrentImage(cImage);
+                hideCharacter(hChar);
             }
 
-            setCharacterSlots([]);
-            setCurrentLine(null);
-            setCurrentOptions(null);
-            setCurrentBack({color:null, url:null, animation: null});
-            setCurrentImage(null);
-            hideCharacter(false);
-            setCurrentInput(null);
+            const finalize = () => {
+                // イベント終了時にすべての変数を初期化(BGM除く)
+                onComplete?.();
+                setIndex(0);
 
-            ifDepth.current = 0;
-            ifSkip.current = false;
-            ifMatched.current.clear();
-            opDepth.current = 0;
-            opSkip.current = false;
-            opLabel.current = null;
+                // イベント開始前にアイテムウィンドウが開いていた場合はそのまま維持する
+                if (viewItemNameRef.current === null || viewItemNameRef.current !== viewItemName) {
+                    setViewItemName(null);
+                }
+
+                setCharacterSlots([]);
+                setCurrentLine(null);
+                setCurrentOptions(null);
+                setCurrentBack({color:null, url:null, animation: null});
+                setCurrentImage(null);
+                hideCharacter(false);
+                setCurrentInput(null);
+
+                ifDepth.current = 0;
+                ifSkip.current = false;
+                ifMatched.current.clear();
+                opDepth.current = 0;
+                opSkip.current = false;
+                opLabel.current = null;
+            };
+
+            if (animDelay > 0) {
+                clearTimeout(animEndTimer.current);
+                animEndTimer.current = setTimeout(finalize, animDelay);
+            } else {
+                finalize();
+            }
         }
         else{
             if(lines.isView){
@@ -737,14 +761,28 @@ export default function useEventViewer({
             else if(!lines.isView && i >= lines.lines.length){ // バックグラウンドイベント実行完了
                 // #if終了 欠落チェック
                 if(ifDepth.current !== 0) console.warn(`[Tojinovel] #if終了 が ${ifDepth.current} 個不足しています`);
-                onComplete?.();
 
-                ifDepth.current = 0;
-                ifSkip.current = false;
-                ifMatched.current.clear();
-                opDepth.current = 0;
-                opSkip.current = false;
-                opLabel.current = null;
+                // アニメーション付きコマンドが最後にある場合、アニメーション完了を待ってからイベントを終了する
+                // ※ 1000ms は index.css の背景アニメーション時間（1s）に合わせたハードコード値
+                const animDelay = cBack.animation ? 1000 : 0;
+
+                const finalize = () => {
+                    onComplete?.();
+
+                    ifDepth.current = 0;
+                    ifSkip.current = false;
+                    ifMatched.current.clear();
+                    opDepth.current = 0;
+                    opSkip.current = false;
+                    opLabel.current = null;
+                };
+
+                if (animDelay > 0) {
+                    clearTimeout(animEndTimer.current);
+                    animEndTimer.current = setTimeout(finalize, animDelay);
+                } else {
+                    finalize();
+                }
             }
         }
     };
@@ -754,6 +792,7 @@ export default function useEventViewer({
     useEffect(() => {
         if (lines && lines?.lines?.length > 0 && index === 0 && !forEdit ) {
             lastClickSkip.current = true;
+            viewItemNameRef.current = viewItemName;
             // 最初の行がクリック待ちの場合は自動実行しない（ユーザーのクリックを待つ）
             if (lines.lines[0].type !== "click") {
                 handleClick(lines);
@@ -761,6 +800,10 @@ export default function useEventViewer({
         }
     }, [lines]);
 
+    // アンマウント時にアニメーション待ちタイマーをクリア
+    useEffect(() => {
+        return () => clearTimeout(animEndTimer.current);
+    }, []);
 
     return({
         inputValue,

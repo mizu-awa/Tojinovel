@@ -779,6 +779,7 @@ export default function EditorApp() {
                         lines={linesForEditor}
                         gameData={gameDataForEvent}
                         updateGameData={noop}
+                        viewItemName={null}
                         setViewItemName={noop}
                         fileJump={noop}
                         moveScene={noop}
