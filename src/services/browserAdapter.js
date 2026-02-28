@@ -147,6 +147,25 @@ async function adapterCreateProject(name) {
   await writeFile(project.id, "data/images/.keep", "");
   await writeFile(project.id, "data/sounds/.keep", "");
 
+  // systemファイルをpublic/system/からコピー（Wails版のcopyEmbedDirと同等）
+  const systemFiles = [
+    "character_image.png",
+    "scene_image.png",
+    "item_image.png",
+    "image.png",
+    "transparent.png",
+  ];
+  for (const filename of systemFiles) {
+    try {
+      const res = await fetch(`./system/${filename}`);
+      if (!res.ok) continue;
+      const blob = await res.blob();
+      await writeFile(project.id, `system/${filename}`, blob);
+    } catch (e) {
+      console.warn(`systemファイルコピー失敗: ${filename}`, e);
+    }
+  }
+
   // 作成したプロジェクトを開く
   currentProjectId = project.id;
   await setConfig("currentProjectId", project.id);

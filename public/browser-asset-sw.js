@@ -52,18 +52,19 @@ self.addEventListener("fetch", (event) => {
   // プロジェクト未選択なら通常のfetchにフォールバック
   if (!activeProjectId) return;
 
-  event.respondWith(handleAssetRequest(path));
+  event.respondWith(handleAssetRequest(path, event.request));
 });
 
 // IndexedDBからファイルを読み取りResponseを返す
-async function handleAssetRequest(path) {
+async function handleAssetRequest(path, request) {
   try {
     const db = await openDB();
     const file = await getFile(db, activeProjectId, path);
     db.close();
 
     if (!file) {
-      return new Response("Not found: " + path, { status: 404 });
+      // IndexedDBにない場合はネットワークにフォールバック（devモードやsystemファイル対応）
+      return fetch(request);
     }
 
     const headers = {
