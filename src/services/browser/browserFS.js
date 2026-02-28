@@ -323,6 +323,8 @@ export async function listDir(projectId, dirPath) {
 
     const slashIndex = rest.indexOf("/");
     if (slashIndex === -1) {
+      // .keepファイルは表示しない（ディレクトリプレースホルダー）
+      if (rest === ".keep") continue;
       // 直下のファイル
       entries.set(rest, { name: rest, isDir: false, size: file.size || 0 });
     } else {

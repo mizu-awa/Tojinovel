@@ -82,9 +82,9 @@ export const getDesignTokens = (mode) => ({
     },
     MuiTypography: {
       styleOverrides: {
-        root: {
-          color: "#333", // すべてのTypographyの基本色
-        },
+        root: ({ theme }) => ({
+          color: theme.palette.text.primary, // テーマに従う
+        }),
       },
     },
     MuiFormLabel: {
