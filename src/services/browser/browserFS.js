@@ -194,6 +194,11 @@ export async function writeFile(projectId, path, data, mimeType) {
     mimeType = getMimeType(path);
   }
 
+  // Blob/Fileでもテキスト系MIMEならstringに変換して保存
+  if (typeof data !== "string" && data instanceof Blob && mimeType?.startsWith("text/")) {
+    data = await data.text();
+  }
+
   const isText = typeof data === "string";
   const now = Date.now();
   const size = isText ? new Blob([data]).size : data.size;
