@@ -64,11 +64,12 @@ export async function importProjectFromZip(file) {
     // 空パスはスキップ
     if (!path) continue;
 
-    // テキストかバイナリかをMIME typeで判定
-    const ext = "." + path.split(".").pop().toLowerCase();
+    // テキストかバイナリかを拡張子で判定
+    const dotIndex = path.lastIndexOf(".");
+    const ext = dotIndex !== -1 ? path.slice(dotIndex).toLowerCase() : "";
     const textExts = [".json", ".txt", ".js", ".css", ".html", ".svg", ".xml", ".md"];
 
-    if (textExts.includes(ext)) {
+    if (ext && textExts.includes(ext)) {
       const content = await zipEntry.async("string");
       await writeFile(project.id, path, content);
     } else {
@@ -105,10 +106,11 @@ export async function importProjectFromFiles(fileList) {
     if (!path) continue;
 
     // テキストかバイナリか判定
-    const ext = "." + path.split(".").pop().toLowerCase();
+    const dotIndex = path.lastIndexOf(".");
+    const ext = dotIndex !== -1 ? path.slice(dotIndex).toLowerCase() : "";
     const textExts = [".json", ".txt", ".js", ".css", ".html", ".svg", ".xml", ".md"];
 
-    if (textExts.includes(ext)) {
+    if (ext && textExts.includes(ext)) {
       const content = await file.text();
       await writeFile(project.id, path, content);
     } else {

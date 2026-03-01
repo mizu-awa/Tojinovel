@@ -289,7 +289,7 @@ export default function EditorApp() {
       // 保存
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        saveAll();
+        saveAll().catch((err) => console.error("保存に失敗:", err));
       }
       // アンドゥ/リドゥ: CodeMirrorフォーカス中はCodeMirrorに任せる
       else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "z") {
@@ -386,13 +386,14 @@ export default function EditorApp() {
       loadBufferFromIndexedDB().then(() => {
         const savedPath = sessionStorage.getItem("scenarioEditorFilePath");
         if (savedPath) loadEventFile(savedPath);
-      });
+      }).catch((err) => console.error("バッファ読み込み失敗:", err));
       refreshFileList();
     }
   },[loadFirst, loadBufferFromIndexedDB, loadEventFile, refreshFileList])
 
   // IndexedDB自動保存 フォーカス外れ等によるページリロード対策
   const timeoutRef = useRef(null);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     if (!gameData) return;
@@ -401,7 +402,13 @@ export default function EditorApp() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     timeoutRef.current = setTimeout(async () => {
-      saveIndexedDB();
+      if (savingRef.current) return; // 前回の保存中はスキップ
+      savingRef.current = true;
+      try {
+        await saveIndexedDB();
+      } finally {
+        savingRef.current = false;
+      }
     }, 2000);
 
     // クリーンアップ

@@ -245,6 +245,7 @@ func (f *FileService) ReadDirRecursive() ([]string, error) {
 	var files []string
 	err := filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			fmt.Printf("[Tojinovel] ReadDirRecursive: エントリスキップ (%s): %v\n", path, err)
 			return nil // エラーのあるエントリはスキップ
 		}
 		// ドットファイル・ドットディレクトリはスキップ

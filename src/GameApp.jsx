@@ -843,6 +843,7 @@ export default function GameApp({ debug }) {
         onConsoleLog={addConsoleLog.current}
         currentSceneName={currentScene.name}
         viewItemName={viewItemName}
+        selectItem={selectItem}
       />
 
       {/* セーブロード画面 */}

@@ -156,15 +156,23 @@ async function adapterCreateProject(name) {
     "image.png",
     "transparent.png",
   ];
+  const failedFiles = [];
   for (const filename of systemFiles) {
     try {
       const res = await fetch(`./system/${filename}`);
-      if (!res.ok) continue;
+      if (!res.ok) {
+        failedFiles.push(filename);
+        continue;
+      }
       const blob = await res.blob();
       await writeFile(project.id, `system/${filename}`, blob);
     } catch (e) {
       console.warn(`systemファイルコピー失敗: ${filename}`, e);
+      failedFiles.push(filename);
     }
+  }
+  if (failedFiles.length > 0) {
+    console.warn(`以下のsystemファイルのコピーに失敗しました: ${failedFiles.join(", ")}`);
   }
 
   // 作成したプロジェクトを開く
@@ -269,6 +277,15 @@ async function adapterDeleteProject(id) {
   }
 }
 
+// 再帰的ファイル一覧（wailsAdapterと同じパス文字列の配列で返す）
+async function adapterReadDirRecursive() {
+  if (!currentProjectId) return [];
+  const files = await listAllFiles(currentProjectId);
+  return files
+    .filter((f) => !f.path.endsWith("/.keep"))
+    .map((f) => f.path);
+}
+
 // 全ファイル取得（ZIP出力用）
 async function getAllFiles(projectId) {
   return await listAllFiles(projectId || currentProjectId);
@@ -311,6 +328,9 @@ export const browserAdapter = {
 
   // ファイルD&Dインポート
   writeFileBlob,
+
+  // 再帰的ファイル一覧（wailsAdapterと同じパス文字列の配列で返す）
+  readDirRecursive: adapterReadDirRecursive,
 
   // ブラウザ版追加機能
   deleteProject: adapterDeleteProject,

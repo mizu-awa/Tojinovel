@@ -210,7 +210,7 @@ export default function useEditFunctions({
         if(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]){
 
         handleAddArrayItem(`items.${selectedItem}.hotspots.${selectedSubItem}.states`, gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]);
-        setSelectedThirdItem(gameDataRef.current.items[selectedItem].hotspots[selectedSubItem]);
+        setSelectedThirdItem(gameDataRef.current.items[selectedItem].hotspots[selectedSubItem].states.length);
         }
     },[handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
 

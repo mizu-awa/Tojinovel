@@ -18,6 +18,9 @@ export default function ProjectSelector({ onProjectReady }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 削除確認ダイアログ
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
   // 新規作成ダイアログ
   const [newDialogOpen, setNewDialogOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -125,6 +128,7 @@ export default function ProjectSelector({ onProjectReady }) {
         const { importProjectFromZip } = await import("../../services/zipService.js");
         const project = await importProjectFromZip(input.files[0]);
         await storage.openProject(project.id);
+        setLoading(false);
         onProjectReady(project.id);
       } catch (err) {
         setError("インポートに失敗: " + err.message);
@@ -149,6 +153,7 @@ export default function ProjectSelector({ onProjectReady }) {
       const { importProjectFromZip } = await import("../../services/zipService.js");
       const project = await importProjectFromZip(file);
       await storage.openProject(project.id);
+      setLoading(false);
       onProjectReady(project.id);
     } catch (err) {
       setError("インポートに失敗: " + err.message);
@@ -160,19 +165,24 @@ export default function ProjectSelector({ onProjectReady }) {
     e.preventDefault();
   }, []);
 
-  // プロジェクト削除（ブラウザ版のみ）
-  const handleDeleteProject = useCallback(async (e, projectPath) => {
+  // プロジェクト削除確認ダイアログを開く（ブラウザ版のみ）
+  const handleDeleteProject = useCallback((e, projectPath) => {
     e.stopPropagation();
-    if (!confirm("このプロジェクトを削除しますか？この操作は取り消せません。")) return;
+    setDeleteTarget(projectPath);
+  }, []);
+
+  // プロジェクト削除実行
+  const confirmDeleteProject = useCallback(async () => {
+    if (!deleteTarget) return;
     try {
-      // browserAdapterの追加機能を使用
       const adapter = (await import("../../services/browserAdapter.js")).browserAdapter;
-      await adapter.deleteProject(projectPath);
-      setRecentProjects((prev) => prev.filter((p) => p.path !== projectPath));
+      await adapter.deleteProject(deleteTarget);
+      setRecentProjects((prev) => prev.filter((p) => p.path !== deleteTarget));
     } catch (err) {
       setError("削除に失敗: " + err.message);
     }
-  }, []);
+    setDeleteTarget(null);
+  }, [deleteTarget]);
 
   if (loading) {
     return (
@@ -368,6 +378,20 @@ export default function ProjectSelector({ onProjectReady }) {
             disabled={!newProjectName.trim() || (!isBrowser && !newProjectParent)}
           >
             作成
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 削除確認ダイアログ */}
+      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
+        <DialogTitle>プロジェクト削除</DialogTitle>
+        <DialogContent>
+          <Typography>このプロジェクトを削除しますか？この操作は取り消せません。</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTarget(null)}>キャンセル</Button>
+          <Button onClick={confirmDeleteProject} variant="contained" color="error">
+            削除
           </Button>
         </DialogActions>
       </Dialog>

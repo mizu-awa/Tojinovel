@@ -239,7 +239,7 @@ function TreeNode({
       onRefresh();
     } catch (err) {
       console.error("移動失敗:", err);
-      alert(`移動に失敗しました: ${err}`);
+      alert(`移動に失敗しました: ${err.message || err}`);
     }
     onDrop();
   }, [isDir, relativePath, parentPath, onRefresh, onDrop, onDropExternal]);
@@ -533,7 +533,7 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
       handleRefresh();
     } catch (err) {
       console.error("移動失敗:", err);
-      alert(`移動に失敗しました: ${err}`);
+      alert(`移動に失敗しました: ${err.message || err}`);
     }
     handleDrop();
   }, [selectedFolder, handleRefresh, handleDrop, dragState]);

@@ -14,6 +14,7 @@ export default function useFileList() {
     } catch (e) {
       console.error("ファイルリスト取得失敗:", e);
       setFileList([]);
+      loadedRef.current = true; // 無限リトライを防止
     }
   }, []);
 

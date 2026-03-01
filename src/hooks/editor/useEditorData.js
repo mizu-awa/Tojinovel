@@ -50,10 +50,12 @@ export default function useEditorData(){
         const a = document.createElement("a");
         a.href = url;
         a.download = "gamedata.json"; // ダウンロードされるファイル名
-        a.click();
-
-        // 一時URLを破棄してメモリを解放
-        URL.revokeObjectURL(url);
+        try {
+          a.click();
+        } finally {
+          // 一時URLを破棄してメモリを解放
+          URL.revokeObjectURL(url);
+        }
       },[]);
 
       const { saveGameDB, loadGameDB } = useIndexedDBSaves();
@@ -118,7 +120,7 @@ export default function useEditorData(){
         }
         catch (error){
           console.error("保存エラー:", error);
-          console.log("保存に失敗したため、ゲームデータをダウンロードします。");
+          alert("保存に失敗しました。代わりにJSONファイルをダウンロードします。");
           downloadJSON();
         }
       },[]);

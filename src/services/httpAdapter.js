@@ -6,7 +6,7 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 export const httpAdapter = {
   // ゲームデータ
   loadGameData: async () => {
-    const res = await fetch("./data/gamedata.json");
+    const res = await fetch("data/gamedata.json");
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   },

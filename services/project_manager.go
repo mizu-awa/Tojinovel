@@ -61,7 +61,14 @@ func (p *ProjectManager) ListRecentProjects() ([]RecentProject, error) {
 	if err != nil {
 		return []RecentProject{}, nil
 	}
-	return config.RecentProjects, nil
+	// 存在しないパスをフィルタ
+	valid := make([]RecentProject, 0, len(config.RecentProjects))
+	for _, rp := range config.RecentProjects {
+		if _, err := os.Stat(rp.Path); err == nil {
+			valid = append(valid, rp)
+		}
+	}
+	return valid, nil
 }
 
 // OpenProject - プロジェクトを開く
@@ -334,7 +341,12 @@ func (p *ProjectManager) saveConfig(config *appConfig) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(p.configPath, data, 0644)
+	// アトミック書き込み: 一時ファイルに書き込み後リネーム
+	tmpPath := p.configPath + ".tmp"
+	if err := os.WriteFile(tmpPath, data, 0644); err != nil {
+		return err
+	}
+	return os.Rename(tmpPath, p.configPath)
 }
 
 // addToRecent - 最近のプロジェクトに追加

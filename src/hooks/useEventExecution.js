@@ -741,6 +741,7 @@ export default function useEventViewer({
 
             // ファイルジャンプ
             if(fj){
+                clearTimeout(animEndTimer.current); // 前のアニメーションタイマーをクリア
                 fileJump(fj.file, fj.label);// ファイルジャンプ
 
                 setCurrentOptions(null);// 選択肢抜ける

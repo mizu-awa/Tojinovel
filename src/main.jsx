@@ -26,6 +26,7 @@ const isDebug = params.has('debug');
 function RootApp() {
   // ブラウザ版は非同期初期化が必要
   const [adapterReady, setAdapterReady] = useState(!isBrowserMode);
+  const [initError, setInitError] = useState(null);
   // セッション継続中（デバッグから戻った場合など）はプロジェクト選択不要
   const [projectReady, setProjectReady] = useState(!!sessionStorage.getItem("sessionRunning"));
 
@@ -33,10 +34,15 @@ function RootApp() {
   useEffect(() => {
     if (!isBrowserMode) return;
     (async () => {
-      const { browserAdapter } = await import('./services/browserAdapter.js');
-      await browserAdapter.init();
-      setAdapter(browserAdapter);
-      setAdapterReady(true);
+      try {
+        const { browserAdapter } = await import('./services/browserAdapter.js');
+        await browserAdapter.init();
+        setAdapter(browserAdapter);
+        setAdapterReady(true);
+      } catch (err) {
+        console.error("ブラウザ版初期化エラー:", err);
+        setInitError(err.message || "初期化に失敗しました");
+      }
     })();
   }, []);
 
@@ -49,6 +55,19 @@ function RootApp() {
     }
     setProjectReady(true);
   }, []);
+
+  // アダプタ初期化エラー
+  if (initError) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh", color: "#c00", gap: 8 }}>
+        <div style={{ fontSize: 18 }}>初期化に失敗しました</div>
+        <div style={{ fontSize: 14, color: "#666" }}>{initError}</div>
+        <div style={{ fontSize: 12, color: "#999", marginTop: 8 }}>
+          プライベートブラウジングモードではIndexedDBが使用できない場合があります。
+        </div>
+      </div>
+    );
+  }
 
   // アダプタ初期化中
   if (!adapterReady) {

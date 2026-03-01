@@ -43,3 +43,6 @@ jobs:
       - name: Build
         shell: pwsh
         run: ./scripts/build-all.ps1
+
+      - name: Build Browser Edition
+        run: npm run build:browser

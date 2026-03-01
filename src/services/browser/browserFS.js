@@ -195,7 +195,7 @@ export async function writeFile(projectId, path, data, mimeType) {
   }
 
   // Blob/Fileでもテキスト系MIMEならstringに変換して保存
-  if (typeof data !== "string" && data instanceof Blob && mimeType?.startsWith("text/")) {
+  if (typeof data !== "string" && data instanceof Blob && isTextMime(mimeType)) {
     data = await data.text();
   }
 
@@ -375,10 +375,15 @@ export async function listAllFiles(projectId) {
   });
 }
 
-// パス正規化（先頭の ./ を除去）
+// パス正規化（先頭の ./ を除去、../ を排除）
 function normalizePath(path) {
   if (!path) return "";
-  return path.replace(/^\.\//, "").replace(/\\/g, "/");
+  const normalized = path.replace(/^\.\//, "").replace(/\\/g, "/");
+  // パストラバーサル防止
+  if (normalized.includes("../")) {
+    return normalized.split("/").filter((s) => s !== "..").join("/");
+  }
+  return normalized;
 }
 
 // ストレージ使用量取得

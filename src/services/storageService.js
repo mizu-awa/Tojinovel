@@ -11,13 +11,19 @@ export function getAdapter() {
   return adapter;
 }
 
+// アダプター未設定時のガード
+function ensureAdapter() {
+  if (!adapter) throw new Error("ストレージアダプターが未設定です");
+  return adapter;
+}
+
 // 各hookから呼び出す便利オブジェクト
 export const storage = {
-  loadGameData: (...args) => adapter.loadGameData(...args),
-  saveGameData: (...args) => adapter.saveGameData(...args),
-  loadEventFile: (...args) => adapter.loadEventFile(...args),
-  saveEventFile: (...args) => adapter.saveEventFile(...args),
-  resolveAssetUrl: (...args) => adapter.resolveAssetUrl(...args),
+  loadGameData: (...args) => ensureAdapter().loadGameData(...args),
+  saveGameData: (...args) => ensureAdapter().saveGameData(...args),
+  loadEventFile: (...args) => ensureAdapter().loadEventFile(...args),
+  saveEventFile: (...args) => ensureAdapter().saveEventFile(...args),
+  resolveAssetUrl: (...args) => ensureAdapter().resolveAssetUrl(...args),
 
   // プロジェクト管理
   listProjects: (...args) => adapter.listProjects?.(...args) ?? Promise.resolve(null),

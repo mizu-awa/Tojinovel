@@ -60,7 +60,6 @@ async function handleAssetRequest(path, request) {
   try {
     const db = await openDB();
     const file = await getFile(db, activeProjectId, path);
-    db.close();
 
     if (!file) {
       // IndexedDBにない場合はネットワークにフォールバック（devモードやsystemファイル対応）
