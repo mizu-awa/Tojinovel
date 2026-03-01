@@ -861,6 +861,7 @@ export default function GameApp({ debug }) {
       <Config
         visible={viewConfig}
         config={gameData.game.config}
+        closeBtnStyle={gameData.game.save.closeBtnStyle}
         close={closeConfig}
         bgm={gameData.game.sound.bgm}
         se={gameData.game.sound.se}

@@ -31,7 +31,7 @@ const containerStyle = {
   boxSizing: "border-box"
 };
 
-function Config({ visible, config, close, bgm, se, voice, speed, autoEnabled, autoSpeed, updateGameData }) {
+function Config({ visible, config, closeBtnStyle, close, bgm, se, voice, speed, autoEnabled, autoSpeed, updateGameData }) {
   // 🔹 ローカルstate（操作中だけ即時反映）
   const [tempBGM, setTempBGM] = useState(bgm);
   const [tempSE, setTempSE] = useState(se);
@@ -84,12 +84,16 @@ function Config({ visible, config, close, bgm, se, voice, speed, autoEnabled, au
   useDebouncedUpdate(tempAutoSpeed, "autoSpeed");
 
   const centralFontSize = parseInt(config?.containerStyle?.fontSize) || 16;
+  const closeBtnSize = closeBtnStyle?.size || 24;
 
   if (!visible) return null;
 
   return (
-    <div style={{ ...config.backStyle, ...backStyle }}>
-      <div style={{ ...containerStyle, ...config.containerStyle, boxShadow: `0 4px 12px ${config.containerStyle.shadowColor}`, }}>
+    <div style={{ ...config.backStyle, ...backStyle }} onClick={close}>
+      <div
+        style={{ ...containerStyle, ...config.containerStyle, boxShadow: `0 4px 12px ${config.containerStyle.shadowColor}`, }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {config.visibleBGM && (
           <div style={rowStyle}>
             <label>{config.bgmText}</label>
@@ -186,10 +190,18 @@ function Config({ visible, config, close, bgm, se, voice, speed, autoEnabled, au
       </div>
 
       <div
-        style={{ position: "absolute", top: 10, right: 10 }}
+        className={closeBtnStyle?.hover}
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          padding: `${closeBtnSize / 2}px`,
+          cursor: "pointer",
+          color: closeBtnStyle?.color
+        }}
         onClick={close}
       >
-        <X />
+        <X size={closeBtnSize} />
       </div>
     </div>
   );
