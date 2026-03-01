@@ -1,4 +1,4 @@
-import { FileDownload, FolderOpen, PlayArrow, Redo, Save, Undo } from "@mui/icons-material";
+import { Download, FileDownload, FolderOpen, PlayArrow, Redo, Save, Undo } from "@mui/icons-material";
 import { AppBar, Box, Divider, IconButton, Snackbar, Toolbar, Typography } from "@mui/material"
 import { memo, useCallback, useState } from "react";
 import { storage } from "../../services/storageService";
@@ -32,6 +32,20 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo, onBackToPro
     }
   }, [save]);
 
+  // ZIPエクスポート（ブラウザ版）: 先に全保存してからエクスポート
+  const handleExportZip = useCallback(async () => {
+    try {
+      await save();
+      const { exportProjectAsZip } = await import("../../services/zipService.js");
+      const projectPath = storage.getCurrentProjectPath();
+      const projectName = await storage.getCurrentProjectName() || "project";
+      await exportProjectAsZip(projectPath, projectName);
+      setSnack({ open: true, message: "ZIPファイルをエクスポートしました" });
+    } catch (e) {
+      setSnack({ open: true, message: `ZIPエクスポート失敗: ${e}` });
+    }
+  }, [save]);
+
   return(
     <AppBar position="static" color="secondary">
       <Toolbar>
@@ -61,6 +75,14 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo, onBackToPro
               <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: "rgba(255,255,255,0.3)" }} />
               <IconButton onClick={handleExport} title="プレイヤー書き出し（index.html + assets/）" sx={{color: "primary.contrastText"}}>
                 <FileDownload />
+              </IconButton>
+            </>
+          )}
+          {!isWails && (
+            <>
+              <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: "rgba(255,255,255,0.3)" }} />
+              <IconButton onClick={handleExportZip} title="ZIPエクスポート" sx={{color: "primary.contrastText"}}>
+                <Download />
               </IconButton>
             </>
           )}

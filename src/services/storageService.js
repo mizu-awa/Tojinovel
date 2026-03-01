@@ -32,6 +32,7 @@ export const storage = {
   selectProjectDialog: (...args) => adapter.selectProjectDialog?.(...args) ?? Promise.resolve(null),
   selectNewProjectParentDialog: (...args) => adapter.selectNewProjectParentDialog?.(...args) ?? Promise.resolve(null),
   getCurrentProjectName: (...args) => adapter.getCurrentProjectName?.(...args) ?? Promise.resolve(""),
+  getCurrentProjectPath: () => adapter.getCurrentProjectPath?.() ?? "",
 
   // ファイルツリー
   readDir: (...args) => adapter.readDir?.(...args) ?? Promise.resolve(null),

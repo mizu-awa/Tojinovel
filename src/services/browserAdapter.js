@@ -198,6 +198,10 @@ async function getCurrentProjectName() {
   return project?.name || "";
 }
 
+function getCurrentProjectPath() {
+  return currentProjectId || "";
+}
+
 // ファイルツリー-----
 async function adapterReadDir(path) {
   if (!currentProjectId) return [];
@@ -312,6 +316,7 @@ export const browserAdapter = {
   selectProjectDialog,
   selectNewProjectParentDialog,
   getCurrentProjectName,
+  getCurrentProjectPath,
 
   // ファイルツリー
   readDir: adapterReadDir,

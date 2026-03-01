@@ -178,6 +178,11 @@ export default function ProjectSelector({ onProjectReady }) {
       const adapter = (await import("../../services/browserAdapter.js")).browserAdapter;
       await adapter.deleteProject(deleteTarget);
       setRecentProjects((prev) => prev.filter((p) => p.path !== deleteTarget));
+      // ストレージ使用量を再取得
+      if (navigator.storage?.estimate) {
+        const estimate = await navigator.storage.estimate();
+        setStorageInfo(estimate);
+      }
     } catch (err) {
       setError("削除に失敗: " + err.message);
     }
