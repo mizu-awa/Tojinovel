@@ -1,9 +1,9 @@
-import { FileDownload, PlayArrow, Redo, Save, Undo } from "@mui/icons-material";
+import { FileDownload, FolderOpen, PlayArrow, Redo, Save, Undo } from "@mui/icons-material";
 import { AppBar, Box, Divider, IconButton, Snackbar, Toolbar, Typography } from "@mui/material"
 import { memo, useCallback, useState } from "react";
 import { storage } from "../../services/storageService";
 
-const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo}) => {
+const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo, onBackToProjectSelect}) => {
   const isWails = !!window?.go;
 
   // エクスポート通知
@@ -14,6 +14,12 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo}) => {
     await save();
     window.location.search = "?debug";
   }, [save]);
+
+  // プロジェクト選択画面に戻る: 保存してから戻る
+  const handleBackToProjectSelect = useCallback(async () => {
+    await save();
+    onBackToProjectSelect();
+  }, [save, onBackToProjectSelect]);
 
   // プレイヤー書き出し: 先に全保存してからエクスポート
   const handleExport = useCallback(async () => {
@@ -58,6 +64,10 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo}) => {
               </IconButton>
             </>
           )}
+          <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: "rgba(255,255,255,0.3)" }} />
+          <IconButton onClick={handleBackToProjectSelect} title="プロジェクト選択に戻る" sx={{color: "primary.contrastText"}}>
+            <FolderOpen />
+          </IconButton>
         </Box>
       </Toolbar>
 

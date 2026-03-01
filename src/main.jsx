@@ -56,6 +56,12 @@ function RootApp() {
     setProjectReady(true);
   }, []);
 
+  // プロジェクト選択画面に戻る
+  const handleBackToProjectSelect = useCallback(() => {
+    sessionStorage.clear();
+    setProjectReady(false);
+  }, []);
+
   // アダプタ初期化エラー
   if (initError) {
     return (
@@ -106,7 +112,7 @@ function RootApp() {
     return <ProjectSelector onProjectReady={handleProjectReady} />;
   }
 
-  return <EditorApp />;
+  return <EditorApp onBackToProjectSelect={handleBackToProjectSelect} />;
 }
 
 createRoot(document.getElementById('root')).render(

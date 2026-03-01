@@ -77,7 +77,7 @@ const deselectOverlayStyle = { position: "absolute", width: "100%", height: "100
 
 const itemsDataforEditor = Array.from({ length: 16 }, (_, i) => ({ ...defaultItemData, name: defaultItemData.name + i }));
 
-export default function EditorApp() {
+export default function EditorApp({ onBackToProjectSelect }) {
   // edit data
   const {
         mainTab, setMainTab,
@@ -628,6 +628,7 @@ export default function EditorApp() {
         redo={redo}
         canUndo={canUndo}
         canRedo={canRedo}
+        onBackToProjectSelect={onBackToProjectSelect}
       />
 
       {/* Main Tabs */}
