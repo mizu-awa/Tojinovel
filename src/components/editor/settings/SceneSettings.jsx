@@ -1,6 +1,7 @@
 import { memo, useMemo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
+import FilePathInput from "../FilePathInput";
 import SectionDivider from "../SectionDivider";
 import RgbaColorInput from "../RgbaColorInput";
 import TextAlignSelector from "../TextAlignSelector";
@@ -32,7 +33,9 @@ const SceneSettings = ({
   state,
   states,
   handleDatasetChange,
-  loadEventFile
+  loadEventFile,
+  fileList,
+  ensureFileListLoaded
 }) => {
   // 固定値（フックはearly returnの前に配置）
   const sceneListFix = useMemo(() => sceneList || [], [sceneList?.join("") || ""]);
@@ -65,7 +68,9 @@ const SceneSettings = ({
       </FormField>
 
       <FormField label="背景画像">
-        <StyledInput
+        <FilePathInput
+          options={fileList}
+          onFocus={ensureFileListLoaded}
           value={scene.background?.replace(/^\.\/(.*)$/, "$1") || ""}
           onChange={handleDatasetChange}
           data-path={`${scenePath}.background`}
@@ -77,7 +82,9 @@ const SceneSettings = ({
 
       <FormField label="シーン訪問イベント ファイル名">
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-          <StyledInput
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={scene.visitEvent.file?.replace(/^\.\/(.*)$/, "$1") || ""}
             onChange={handleDatasetChange}
             data-path={`${scenePath}.visitEvent.file`}
@@ -272,7 +279,9 @@ const SceneSettings = ({
 
         <MyAccordion title="見た目" defaultOpen={false}>
           <FormField label="画像">
-            <StyledInput
+            <FilePathInput
+              options={fileList}
+              onFocus={ensureFileListLoaded}
               value={state.background?.replace(/^\.\/(.*)$/, "$1") || ""}
               onChange={handleDatasetChange}
               data-path={`${statePath}.background`}
@@ -453,7 +462,9 @@ const SceneSettings = ({
             <>
               <FormField label="ドラッグ完了イベント ファイル">
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-                  <StyledInput
+                  <FilePathInput
+                    options={fileList}
+                    onFocus={ensureFileListLoaded}
                     value={state.onDragEnd?.file?.replace(/^\.\/(.*)$/, "$1") || ""}
                     onChange={handleDatasetChange}
                     data-path={`${statePath}.onDragEnd.file`}
@@ -485,7 +496,9 @@ const SceneSettings = ({
         <MyAccordion title="イベント" defaultOpen={false}>
           <FormField label="クリックイベント ファイル">
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-              <StyledInput
+              <FilePathInput
+                options={fileList}
+                onFocus={ensureFileListLoaded}
                 value={state.onClick.file?.replace(/^\.\/(.*)$/, "$1") || ""}
                 onChange={handleDatasetChange}
                 data-path={`${statePath}.onClick.file`}
@@ -521,6 +534,8 @@ const SceneSettings = ({
             deleteUsedItem = {deleteUsedItem}
             statePath={statePath}
             loadEventFile={loadEventFile}
+            fileList={fileList}
+            ensureFileListLoaded={ensureFileListLoaded}
           />
 
           <Box sx={{textAlign: "right"}}>
@@ -543,7 +558,9 @@ const UsedItemFormSet = memo(({
   handleDatasetChange,
   deleteUsedItem,
   statePath,
-  loadEventFile
+  loadEventFile,
+  fileList,
+  ensureFileListLoaded
 }) => {
   return(
     usedItems.map((u, index) => {
@@ -564,7 +581,9 @@ const UsedItemFormSet = memo(({
 
           <FormField label="アイテム使用イベント ファイル">
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-              <StyledInput
+              <FilePathInput
+                options={fileList}
+                onFocus={ensureFileListLoaded}
                 value={u.file?.replace(/^\.\/(.*)$/, "$1") || ""}
                 onChange={handleDatasetChange}
                 data-path={`${indexPath}.file`}

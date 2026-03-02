@@ -8,10 +8,23 @@ function Menu({
 }){
     if(menu.position === "none") return null;
     
+    // textOutlineColorからtext-shadow（16方向、2px固定）を生成
+    const { textOutlineColor, ...restStyle } = menu.style;
+    const c = textOutlineColor;
+    const textShadow = c && c !== "rgba(0, 0, 0, 0)"
+        ? [
+            `0 -2px 0 ${c}`, `0 2px 0 ${c}`, `-2px 0 0 ${c}`, `2px 0 0 ${c}`,
+            `-1px -2px 0 ${c}`, `1px -2px 0 ${c}`, `-1px 2px 0 ${c}`, `1px 2px 0 ${c}`,
+            `-2px -1px 0 ${c}`, `2px -1px 0 ${c}`, `-2px 1px 0 ${c}`, `2px 1px 0 ${c}`,
+            `-1px -1px 0 ${c}`, `1px -1px 0 ${c}`, `-1px 1px 0 ${c}`, `1px 1px 0 ${c}`,
+        ].join(", ")
+        : undefined;
+
     return(
         <div
             style={{
-                ...menu.style,
+                ...restStyle,
+                textShadow,
                 zIndex: 3000,
                 position: "absolute",
                 top: menu.position.includes("top") ? 0 : "auto",

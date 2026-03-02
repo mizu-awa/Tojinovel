@@ -3,13 +3,16 @@ import FormField from "../FormField"
 import BorderStyleSelect from "../BorderStyleSelect"
 import RgbaColorInput from "../RgbaColorInput"
 import { StyledInput } from "../StyledInput"
+import FilePathInput from "../FilePathInput"
 import { inputPropsDefaultNum } from "./inputProps";
 import HoverSelector from "../HoverSelector"
 import MyAccordion from "../MyAccordion";
 
 const ItemBoxSettings = ({
   gameItemBox,
-  handleDatasetChange
+  handleDatasetChange,
+  fileList,
+  ensureFileListLoaded
 }) => {
 
   return(
@@ -56,8 +59,9 @@ const ItemBoxSettings = ({
         </FormField>
 
         <FormField label="背景画像">
-          <StyledInput
-            type="text"
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={gameItemBox.boxStyle.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
             onChange={handleDatasetChange}
             data-path="game.itemBox.boxStyle.backgroundImage"

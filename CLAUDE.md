@@ -1,42 +1,24 @@
 # CLAUDE.md - Tojinovel
 
-## 概要
+脱出ゲーム・ノベルゲーム制作ツール。React + Go(Wails v2)構成。
+詳細は `README.md`,`docs/wiki/` 参照。
 
-ブラウザベースの脱出ゲーム・ノベルゲーム制作ツール。React + Go構成。dist/がゲーム制作者に配布される。
+## アーキテクチャ要点
 
-- **プレイヤー**: `index.html` → `src/main.jsx` → `src/GameApp.jsx`
-- **エディタ**: `editor.html` → `src/editor.jsx` → `src/EditorApp.jsx`
-- **デバッグ**: `debug.html` → `src/debug.jsx` → `src/GameApp.jsx`（debug prop付き）
-- **サーバー**: `server/server.go`（ポート42736）
-- **データ**: `public/data/gamedata.json`、セーブは IndexedDB
+- **Wails版**: デスクトップアプリ。`editor.html`→EditorApp / `?debug`→GameApp
+- **ブラウザ版**: `VITE_BUILD_MODE=browser`。IndexedDB仮想FS + Service Worker
+- **ストレージ抽象化**: Adapter Pattern（`src/services/storageService.js`）で Wails/ブラウザ/http切替
 
 ## コマンド
 
 ```bash
-npm run dev          # Vite開発サーバー
-npm run build        # プロダクションビルド
-npm run lint         # ESLint
-npm run test:run     # Vitest一回実行
-```
-```powershell
-./server/dev.ps1              # Go開発サーバー
-./server/build-all.ps1        # クロスコンパイル
-./scripts/dev-test.ps1 event_test  # サンプルデータでテスト起動
-./scripts/use-sample.ps1 event_test  # サンプルデータコピーのみ
-```
-
-## 主要ディレクトリ
-
-```
-src/
-├── GameApp.jsx / EditorApp.jsx    # ルートコンポーネント
-├── components/                     # UI（SceneWrap, Hotspots, EventViewer, ItemBox, ItemDrawer, Menu, SaveLoad）
-│   └── editor/                     # エディタUI（panels/, settings/, codemirror/）
-├── hooks/                          # useGameData, useEventExecution, useEventLines, useMerge, useIndexedDBStorage, audioManager
-│   ├── eventExecutionUtils.js      # イベント実行ユーティリティ（テスト対象）
-│   └── editor/                     # useEditorData, useUndoRedo, useHandleChange, useSnap, useScenarioEditor
-├── datas/defaultGameData.js        # デフォルトスキーマ
-└── theme/Theme.jsx                 # MUIテーマ
+npm run build          # Wails版フロントエンドビルド（dist/）
+npm run build:browser  # ブラウザ版ビルド（dist-browser/）
+npm run dev:browser    # ブラウザ版開発サーバー
+npm run lint           # ESLint
+npm run test:run       # Vitest一回実行
+wails dev              # Wails開発サーバー（推奨）
+wails build            # Wailsアプリビルド
 ```
 
 ## コーディング規約
@@ -45,66 +27,16 @@ src/
 - **React 19 + Vite 7 + MUI 7 + Emotion**、ES Modules
 - **関数コンポーネントのみ**、PascalCaseファイル名、`use`プレフィックスフック
 - **Redux/Context不使用**。Propsバケツリレー。`useState`でUI状態、`useRef`で内部状態
-- パフォーマンス要のコンポーネントは `React.memo`
+- パフォーマンス要は `React.memo`
 - export: `export default function Name()` または `export default memo(Name)`
-- スタイル: MUI + Emotion メイン、動的はインラインオブジェクト、`src/index.css`にホバー用ユーティリティクラス
+- スタイル: MUI + Emotion メイン、動的はインラインオブジェクト
 - **コメントは日本語**
-- ESLint: `no-unused-vars`は大文字/`_`始まり許可、`react-hooks/recommended`適用
 - セクション区切り: `// state-----`, `// ref-----`, `// functions-----`
 - Undo/Redo: `structuredClone`スナップショット（gameData + eventBuffer、最大50件）
 
-## ゲームデータ構造
-
-```javascript
-{ game: { title, screenSize, startScene, ... },
-  variables: [{ name, value }],          // フラグ（値はすべて文字列）
-  characters: [{ name, expressions }],
-  scenes: [{ name, background, hotspots, directions, visitEvent }],
-  items: [{ name, image, have, hotspots }] }
-```
-
-## イベントファイル（.txt）
-
-`【ラベル名】`でセクション分割、`//`コメント、`#`コマンド、`名前（表情）「セリフ」`でダイアログ。
-テキスト中`[変数名]`で値展開。
-
-### 主要コマンド
-```
-#フラグ: name = value          // 演算子: =, +, -, *, /, %
-#if: var == value              // 比較: ==, !=, <, >, <=, >=, ><（重なり判定）
-#else if: var == other          // 論理: かつ/&&, または/||（ANDがOR優先）
-#else / #if終了
-#ステート変更: シーン名, ホットスポット名, ステート名
-#ステート一括変更: シーン名, ステート名
-#アイテム入手: name / #アイテム破棄: name
-#シーン移動: シーン名
-#クリック待ち
-#コンソール: メッセージ          // デバッグ出力
-```
-
-### ホットスポット
-- `state`（現在）+ `states[]`（定義配列）。ステートごとに見た目・イベント定義
-- `inputMode`+`inputVariable`: テキスト入力欄化
-- `draggable`: ドラッグ移動可、`onDragEnd`でイベント発火、`><`で重なり判定
-- `usedItems[]`: アイテム使用時イベント
-
-### 共通部品
-game設定で共通シーンを指定→そのホットスポットが全シーンに表示（z-index 1000+）。背景・方向移動・訪問イベントは無視。
-
-### z-index階層
-通常シーン500-600 / 共通シーン1000-1100 / 方向ボタン1500 / EventViewer2000+ / Menu3000+
-
-## シナリオエディタ
-
-CodeMirror 6使用（`src/components/editor/codemirror/`）。`useScenarioEditor.js`でバッファ管理（Map、IndexedDB 2秒デバウンスバックアップ）。Undo/Redoと統合。
-
 ## テスト
 
-Vitest。テストファイルは`src/**/*.test.js`。主なテスト対象: `eventExecutionUtils.js`。
-
-## データマイグレーション
-
-`useMerge.js`の`mergeDefault`: デフォルト値補完 + 古い形式の自動変換（`defaultGameData.js`基準）。新→旧は非サポート。
+Vitest。`src/**/*.test.js`。主な対象: `eventExecutionUtils.js`
 
 ## ルール
 

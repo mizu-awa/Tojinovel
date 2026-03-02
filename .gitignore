@@ -9,12 +9,19 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-browser
 dist-ssr
+public/player-dist
 *.local
 
 server/build
 release
 build
+
+# Wails自動生成
+frontend/
+wailsjs/
+*.md5
 
 .env.local
 

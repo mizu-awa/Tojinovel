@@ -8,9 +8,9 @@ function collectSnapLines(otherHotspots, screenSize) {
   const vLines = []; // 垂直線（x座標）
   const hLines = []; // 水平線（y座標）
 
-  // シーン中央
-  vLines.push(screenSize[0] / 2);
-  hLines.push(screenSize[1] / 2);
+  // シーン端・中央
+  vLines.push(0, screenSize[0] / 2, screenSize[0]);
+  hLines.push(0, screenSize[1] / 2, screenSize[1]);
 
   // 各ホットスポットの辺・中心
   for (const hs of otherHotspots) {

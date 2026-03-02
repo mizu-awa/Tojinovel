@@ -15,6 +15,7 @@ function MainTabs({ value, onChange }) {
         <Tab label="キャラクター" value="characters" />
         <Tab label="シーン" value="scenes" />
         <Tab label="アイテム" value="items" />
+        <Tab label="エクスプローラー" value="explorer" />
     </Tabs>
   );
 }

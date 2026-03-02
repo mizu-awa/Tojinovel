@@ -1,6 +1,11 @@
 // イベントファイル用のコマンド自動補完
 import { autocompletion } from "@codemirror/autocomplete";
 
+// 拡張子フィルタ
+const IMAGE_EXTS = /\.(jpe?g|png|gif|webp|svg)$/i;
+const AUDIO_EXTS = /\.(mp3|ogg|wav|m4a)$/i;
+const TEXT_EXTS = /\.txt$/i;
+
 // コマンド一覧（wiki/05-event-reference.md ベース）
 // 各コマンドに日本語版と英語エイリアス版の両方を登録
 const commands = [
@@ -136,7 +141,119 @@ function eventCompletions(context) {
   };
 }
 
-// 補完拡張を作成
+// パスを引数に取るコマンド定義
+// 第1引数がパスのコマンド
+const PATH_FIRST_CMDS = /^#(背景|bg|画像|image|BGM|SE|ファイルジャンプ|fileJump):/;
+// 第2引数がパスのコマンド（シーン名, パス の形式）
+const PATH_SECOND_CMDS = /^#(シーン背景変更|sceneBg|アイテム背景変更|itemBg|タイマー|timer):/;
+
+// 第1引数がシーン名のコマンド
+const SCENE_FIRST_CMDS = /^#(シーン移動|moveScene|シーン背景変更|sceneBg|ステート変更|changeState|ステート一括変更|changeStateAll):/;
+// 第1引数がアイテム名のコマンド
+const ITEM_FIRST_CMDS = /^#(アイテム入手|getItem|アイテム破棄|discardItem|アイテム背景変更|itemBg|アイテムステート変更|changeItemState|アイテムステート一括変更|changeItemStateAll|アイテム画面|openItem):/;
+
+// コマンド種別に応じた拡張子フィルタを返す
+function getExtFilter(cmd) {
+  if (cmd === "BGM" || cmd === "SE") return AUDIO_EXTS;
+  if (cmd === "ファイルジャンプ" || cmd === "fileJump") return TEXT_EXTS;
+  if (cmd === "タイマー" || cmd === "timer") return TEXT_EXTS;
+  return IMAGE_EXTS;
+}
+
+// ファイルパス補完ソース（fileListRef経由でファイル一覧を参照）
+function createPathCompletionSource(fileListRef, ensureLoaded) {
+  return (context) => {
+    const line = context.state.doc.lineAt(context.pos);
+    const textBefore = line.text.slice(0, context.pos - line.from);
+
+    let cmd = null;
+    let partial = "";
+
+    // 第1引数がパス: "#cmd: partial"
+    const m1 = textBefore.match(/^#([^\s:]+):\s+(.*)$/);
+    if (m1 && PATH_FIRST_CMDS.test(`#${m1[1]}:`)) {
+      cmd = m1[1];
+      partial = m1[2];
+    }
+
+    // 第2引数がパス: "#cmd: arg1, partial"
+    if (!cmd) {
+      const m2 = textBefore.match(/^#([^\s:]+):\s+[^,]+,\s+(.*)$/);
+      if (m2 && PATH_SECOND_CMDS.test(`#${m2[1]}:`)) {
+        cmd = m2[1];
+        partial = m2[2];
+      }
+    }
+
+    if (!cmd) return null;
+
+    // ファイルリストを遅延ロード
+    ensureLoaded();
+
+    const fileList = fileListRef.current;
+    if (!fileList || fileList.length === 0) return null;
+
+    const extFilter = getExtFilter(cmd);
+    // partial の先頭 ./ を除いて部分一致検索
+    const normalizedPartial = partial.replace(/^\.\//, "").toLowerCase();
+
+    const options = fileList
+      .filter(f => extFilter.test(f))
+      .filter(f => !normalizedPartial || f.toLowerCase().includes(normalizedPartial))
+      .slice(0, 50)
+      .map(f => ({ label: "./" + f, type: "text" }));
+
+    if (options.length === 0) return null;
+
+    return {
+      from: context.pos - partial.length,
+      options,
+      validFor: /^[^,\n]*$/,
+    };
+  };
+}
+
+// シーン名・アイテム名補完ソース生成
+function createNameCompletionSource(listRef, cmdRegex) {
+  return (context) => {
+    if (!listRef?.current?.length) return null;
+
+    const line = context.state.doc.lineAt(context.pos);
+    const textBefore = line.text.slice(0, context.pos - line.from);
+
+    // 第1引数の位置にいるかチェック（カンマなし）: "#cmd: partial"
+    const m = textBefore.match(/^#([^\s:]+):\s+([^,]*)$/);
+    if (!m || !cmdRegex.test(`#${m[1]}:`)) return null;
+
+    const partial = m[2];
+    const lowerPartial = partial.toLowerCase();
+    const options = listRef.current
+      .filter(name => !lowerPartial || name.toLowerCase().includes(lowerPartial))
+      .map(name => ({ label: name, type: "text" }));
+
+    if (options.length === 0) return null;
+
+    return {
+      from: context.pos - partial.length,
+      options,
+      validFor: /^[^,\n]*$/,
+    };
+  };
+}
+
+// 補完拡張を作成（ファイルリストref付き）
+export function createEventCompletionExtension(fileListRef, ensureLoaded, sceneListRef, itemListRef) {
+  const pathSource = createPathCompletionSource(fileListRef, ensureLoaded);
+  const sceneSource = createNameCompletionSource(sceneListRef, SCENE_FIRST_CMDS);
+  const itemSource = createNameCompletionSource(itemListRef, ITEM_FIRST_CMDS);
+  return autocompletion({
+    override: [eventCompletions, pathSource, sceneSource, itemSource],
+    activateOnTyping: true,
+    maxRenderedOptions: 30,
+  });
+}
+
+// コマンド補完のみの静的版（後方互換）
 export const eventCompletionExtension = autocompletion({
   override: [eventCompletions],
   activateOnTyping: true,

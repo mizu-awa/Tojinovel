@@ -1,6 +1,7 @@
 import { memo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
+import FilePathInput from "../FilePathInput";
 import RgbaColorInput from "../RgbaColorInput";
 import BorderStyleSelect from "../BorderStyleSelect";
 import TextAlignSelector from "../TextAlignSelector";
@@ -10,7 +11,9 @@ import MyAccordion from "../MyAccordion";
 
 const OptionSettings = ({
   gameOption,
-  handleDatasetChange
+  handleDatasetChange,
+  fileList,
+  ensureFileListLoaded
 }) => {
 
   return(
@@ -77,8 +80,9 @@ const OptionSettings = ({
         </FormField>
 
         <FormField label="背景画像">
-          <StyledInput
-            type="text"
+          <FilePathInput
+            options={fileList}
+            onFocus={ensureFileListLoaded}
             value={gameOption.style.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
             onChange={handleDatasetChange}
             data-path="game.option.style.backgroundImage"

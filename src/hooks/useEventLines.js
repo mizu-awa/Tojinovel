@@ -557,3 +557,104 @@ function parseEventText(text, label, characters) {
   // イベントがない場合はnullを返す（イベントを実行しない）
   return null;
 }
+
+/**
+ * #if~#else ブロックでフロント/バック混在が起きうるかを検出する。
+ * 片方のブランチにだけ表示コマンドがある場合に true を返す。
+ */
+export function detectIfElseViewMismatch(text) {
+  if (!text) return false;
+
+  const lines = text.split("\n");
+
+  // stack: [{branches: boolean[], hasMultiple: boolean}]
+  // branches[i] = そのブランチに表示コマンドがあるか
+  const stack = [];
+  let inBuffer = false; // 複数行セリフ中フラグ
+
+  // 表示コマンドのセット（正規化後）
+  const viewCommandSet = new Set([
+    "クリック待ち", "選択肢", "選択肢:", "背景クリア", "画像クリア",
+    "キャラ非表示", "キャラ非表示解除", "キャラクリア", "テキストクリア",
+  ]);
+  const viewPrefixes = ["背景:", "画像:", "入力:"];
+
+  function isViewCommand(cmd) {
+    if (viewCommandSet.has(cmd)) return true;
+    for (const p of viewPrefixes) {
+      if (cmd.startsWith(p)) return true;
+    }
+    return false;
+  }
+
+  // 全フレームの現在ブランチを true にマーク
+  function markCurrentBranches() {
+    for (const frame of stack) {
+      frame.branches[frame.branches.length - 1] = true;
+    }
+  }
+
+  for (let line of lines) {
+    line = line.trim();
+
+    // 空行・コメントはスキップ
+    if (!line || line.startsWith("//")) continue;
+
+    // ラベル行はスキップ
+    if (line.match(/^【(.*?)】$/)) continue;
+
+    // 複数行セリフ中
+    if (inBuffer) {
+      markCurrentBranches();
+      if (line.includes("」")) {
+        inBuffer = false;
+      }
+      continue;
+    }
+
+    // コマンド行
+    if (line.startsWith("#")) {
+      const command = normalizeCommand(line.slice(1));
+
+      if (command.startsWith("if:")) {
+        stack.push({ branches: [false], hasMultiple: false });
+      } else if (command.startsWith("else if:") || command === "else") {
+        if (stack.length > 0) {
+          const top = stack[stack.length - 1];
+          top.branches.push(false);
+          top.hasMultiple = true;
+        }
+      } else if (command === "if終了") {
+        if (stack.length > 0) {
+          const frame = stack.pop();
+          if (frame.hasMultiple) {
+            const someView = frame.branches.some(b => b);
+            const someNoView = frame.branches.some(b => !b);
+            if (someView && someNoView) return true;
+          }
+        }
+      } else if (isViewCommand(command)) {
+        markCurrentBranches();
+      }
+      // 非表示コマンドは何もしない
+      continue;
+    }
+
+    // 選択肢項目はスキップ
+    if (line.startsWith("・")) continue;
+
+    // 非コマンド行（セリフ・地の文・表情など）
+    if (line.includes("「")) {
+      markCurrentBranches();
+      // 同じ行に」がなければ複数行セリフ開始
+      if (!line.includes("」")) {
+        inBuffer = true;
+      }
+    } else {
+      // 地の文・表情など
+      markCurrentBranches();
+    }
+  }
+
+  return false;
+}

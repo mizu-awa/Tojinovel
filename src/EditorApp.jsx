@@ -50,12 +50,23 @@ import useUndoRedo from "./hooks/editor/useUndoRedo";
 import useHandleChange from "./hooks/editor/useHandleChange";
 import useMoveHotspot from "./hooks/editor/useMoveHotSpot";
 import useEditFunctions from "./hooks/editor/useEditFunctions";
+import useFileList from "./hooks/editor/useFileList";
 import ItemSettings from "./components/editor/settings/ItemSettings";
 import ConfigSettings from "./components/editor/settings/ConfigSettings";
 import Config from "./components/Config";
 import ScenarioEditor from "./components/editor/ScenarioEditor";
 import useScenarioEditor from "./hooks/editor/useScenarioEditor";
 import SnapOverlay from "./components/editor/SnapOverlay";
+import FileExplorer from "./components/editor/panels/FileExplorer";
+import ImagePreview from "./components/editor/ImagePreview";
+
+// 画像拡張子判定
+const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp"]);
+const isImageFile = (path) => {
+  const ext = path.split(".").pop()?.toLowerCase();
+  return IMAGE_EXTENSIONS.has(ext);
+};
+const isTextFile = (path) => path.split(".").pop()?.toLowerCase() === "txt";
 
 // 空の定義
 const noop = () => {};
@@ -66,7 +77,7 @@ const deselectOverlayStyle = { position: "absolute", width: "100%", height: "100
 
 const itemsDataforEditor = Array.from({ length: 16 }, (_, i) => ({ ...defaultItemData, name: defaultItemData.name + i }));
 
-export default function EditorApp() {
+export default function EditorApp({ onBackToProjectSelect }) {
   // edit data
   const {
         mainTab, setMainTab,
@@ -97,9 +108,13 @@ export default function EditorApp() {
   const { ref, boxRef } = useResizeWindow({gameData});
 
   // scenario editor------------------------------------------------------
-  // 循環依存解決: onBeforeTextChangeはrefで後から設定
-  const onBeforeTextChangeRef = useRef(() => {});
-  const stableOnBeforeTextChange = useCallback(() => onBeforeTextChangeRef.current(), []);
+  // CodeMirrorフォーカス状態管理
+  const [isCodeMirrorFocused, setIsCodeMirrorFocused] = useState(false);
+  const isCodeMirrorFocusedRef = useRef(false);
+  useEffect(() => {
+    isCodeMirrorFocusedRef.current = isCodeMirrorFocused;
+  }, [isCodeMirrorFocused]);
+
   const {
     currentFilePath,
     currentLabel,
@@ -114,11 +129,9 @@ export default function EditorApp() {
     createNewFile,
     closeFile,
     applyPendingContent,
-    eventBufferRef,
-    restoreEventBuffer,
+    ifViewWarning,
   } = useScenarioEditor({
     setIsSaved,
-    onBeforeTextChange: stableOnBeforeTextChange
   });
 
   // シナリオエディタ最大化状態
@@ -127,15 +140,31 @@ export default function EditorApp() {
     setIsScenarioEditorMaximized(prev => !prev);
   }, []);
 
+  // エクスプローラーで選択中のファイル（画像プレビュー用）
+  const [explorerSelectedImage, setExplorerSelectedImage] = useState(null);
+
+  // タブ切替時にエクスプローラー状態をリセット
+  useEffect(() => {
+    if (mainTab !== "explorer") {
+      setExplorerSelectedImage(null);
+    }
+  }, [mainTab]);
+
+  // エクスプローラーでファイルクリック時のハンドラ
+  const handleExplorerFileSelect = useCallback((filePath) => {
+    if (isTextFile(filePath)) {
+      setExplorerSelectedImage(null);
+      loadEventFile(filePath);
+    } else if (isImageFile(filePath)) {
+      setExplorerSelectedImage(filePath);
+    }
+  }, [loadEventFile]);
+
   // undo redo--------------------------------------------------------
   const { debouncedDoAction, undo, redo, canUndo, canRedo }
   = useUndoRedo({
     setGameData, gameDataRef, mainTab, selectedItem, setSelectedItem, selectedSubItem, setSelectedSubItem, selectedThirdItem, setSelectedThirdItem,
-    eventBufferRef, restoreEventBuffer
   });
-
-  // debouncedDoActionをシナリオエディタに渡す
-  onBeforeTextChangeRef.current = debouncedDoAction;
 
   // handle change----------------------------------------------------------------------------------
   const { handleMainTabChange, handleNestedChange, handleAddArrayItem, handleDeleteKey, handleDatasetChange} = useHandleChange({setGameData, setMainTab, setIsSaved, debouncedDoAction});
@@ -182,13 +211,16 @@ export default function EditorApp() {
     mainTab
 });
 
+  // ファイルリスト（オートコンプリート用）
+  const { fileList, refreshFileList, ensureLoaded: ensureFileListLoaded } = useFileList();
+
   // 保存処理を統合（gamedata.json + イベントファイル）
   const saveAll = useCallback(async () => {
     const result = await saveAllDirtyFiles();
     if (!result.ok) {
       console.error("イベントファイル保存エラー:", result.errors);
     }
-    saveFile();
+    await saveFile();
   }, [saveAllDirtyFiles, saveFile]);
 
   // Google Fontsの自動ロード
@@ -257,14 +289,16 @@ export default function EditorApp() {
       // 保存
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        saveAll();
+        saveAll().catch((err) => console.error("保存に失敗:", err));
       }
-      // アンドゥ/リドゥ: フォーム内外を問わず統一動作
+      // アンドゥ/リドゥ: CodeMirrorフォーカス中はCodeMirrorに任せる
       else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "z") {
+        if (isCodeMirrorFocusedRef.current) return;
         e.preventDefault();
         undo();
       }
       else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && e.key === "z"))) {
+        if (isCodeMirrorFocusedRef.current) return;
         e.preventDefault();
         redo();
       }
@@ -326,6 +360,18 @@ export default function EditorApp() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [undo, redo, copyBykey, pasteByKey, saveAll, deleteByKey, mainTab, selectedItem, selectedSubItem, selectedThirdItem, debouncedDoAction, setGameData]);
 
+  // CodeMirror外クリックでフォーカスを外す
+  useEffect(() => {
+    const handleMouseDown = (e) => {
+      const cmDom = editorViewRef.current?.dom;
+      if (cmDom && !cmDom.contains(e.target)) {
+        editorViewRef.current?.contentDOM.blur();
+      }
+    };
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
+  }, [editorViewRef]);
+
   // 最新 gameData を ref に保持
   useEffect(() => {
     if(gameData && gameDataRef){
@@ -337,12 +383,17 @@ export default function EditorApp() {
   useEffect(() => {
     if(loadFirst){
       loadFirst();
-      loadBufferFromIndexedDB();
+      loadBufferFromIndexedDB().then(() => {
+        const savedPath = sessionStorage.getItem("scenarioEditorFilePath");
+        if (savedPath) loadEventFile(savedPath);
+      }).catch((err) => console.error("バッファ読み込み失敗:", err));
+      refreshFileList();
     }
-  },[loadFirst, loadBufferFromIndexedDB])
+  },[loadFirst, loadBufferFromIndexedDB, loadEventFile, refreshFileList])
 
   // IndexedDB自動保存 フォーカス外れ等によるページリロード対策
   const timeoutRef = useRef(null);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     if (!gameData) return;
@@ -351,7 +402,13 @@ export default function EditorApp() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     timeoutRef.current = setTimeout(async () => {
-      saveIndexedDB();
+      if (savingRef.current) return; // 前回の保存中はスキップ
+      savingRef.current = true;
+      try {
+        await saveIndexedDB();
+      } finally {
+        savingRef.current = false;
+      }
     }, 2000);
 
     // クリーンアップ
@@ -402,7 +459,11 @@ export default function EditorApp() {
               : gameData.game.itemBox.position === "top" ? "column-reverse"
               : gameData.game.itemBox.position === "bottom" ? "column"
               : "row",
-      overflow: "clip"
+      overflow: "clip",
+      flexShrink: 0,
+      backgroundImage: 
+        "linear-gradient(to right, rgba(125, 125, 125, 0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(125, 125, 125, 0.5) 1px, transparent 1px)",
+      backgroundSize: "40px 40px",
     };
   }, [gameData?.game?.gameStyle, gameData?.game?.screenSize, gameData?.game?.itemBox?.position]);
 
@@ -419,17 +480,17 @@ export default function EditorApp() {
   const renderGameSetting = () => {
     switch(selectedItem) {
       case "ゲーム情報": return <GameInfoSettings game={gameData.game} scenes={gameData.scenes} handleDatasetChange={handleDatasetChange} />;
-      case "ゲーム画面": return <ScreenSettings game={gameData.game} handleDatasetChange={handleDatasetChange} />;
-      case "アイテムボックス": return <ItemBoxSettings gameItemBox={gameData.game.itemBox} handleDatasetChange={handleDatasetChange} />;
-      case "アイテムドロワー": return <ItemDrawerSettings gameItemDrawer={gameData.game.itemDrawer} handleDatasetChange={handleDatasetChange} />;
-      case "テキストボックス": return <TextBoxSettings gameTextBox={gameData.game.textBox} handleDatasetChange={handleDatasetChange} />;
-      case "方向移動": return <DirectionSettings gameDirection={gameData.game.direction} handleDatasetChange={handleDatasetChange} />;
-      case "選択肢": return <OptionSettings gameOption={gameData.game.option} handleDatasetChange={handleDatasetChange} />;
-      case "画像表示": return <EventImageSettings gameImage={gameData.game.image} handleDatasetChange={handleDatasetChange} />;
-      case "入力フォーム": return <FormSettings gameInput={gameData.game.input} handleDatasetChange={handleDatasetChange}/>;
+      case "ゲーム画面": return <ScreenSettings game={gameData.game} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "アイテムボックス": return <ItemBoxSettings gameItemBox={gameData.game.itemBox} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "アイテムドロワー": return <ItemDrawerSettings gameItemDrawer={gameData.game.itemDrawer} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "テキストボックス": return <TextBoxSettings gameTextBox={gameData.game.textBox} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "方向移動": return <DirectionSettings gameDirection={gameData.game.direction} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "選択肢": return <OptionSettings gameOption={gameData.game.option} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "画像表示": return <EventImageSettings gameImage={gameData.game.image} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "入力フォーム": return <FormSettings gameInput={gameData.game.input} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
       case "ゲームメニュー": return <MenuSettings gameMenu={gameData.game.menu} handleDatasetChange={handleDatasetChange}/>;
-      case "セーブ・ロード": return <SaveLoadSettings gameSave={gameData.game.save} handleDatasetChange={handleDatasetChange} />;
-      case "コンフィグ": return <ConfigSettings gameConfig={gameData.game.config} handleDatasetChange={handleDatasetChange} />;
+      case "セーブ・ロード": return <SaveLoadSettings gameSave={gameData.game.save} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
+      case "コンフィグ": return <ConfigSettings gameConfig={gameData.game.config} handleDatasetChange={handleDatasetChange} fileList={fileList} ensureFileListLoaded={ensureFileListLoaded} />;
       case "キャラクター表示": return <GameCharacterSettings gameCharacter={gameData.game.character} handleDatasetChange={handleDatasetChange} />;
       default: return null;
     }
@@ -446,6 +507,8 @@ export default function EditorApp() {
           index={selectedItem}
           subIndex={selectedSubItem}
           handleDatasetChange={handleDatasetChange}
+          fileList={fileList}
+          ensureFileListLoaded={ensureFileListLoaded}
         />
       );
       case "scenes": return (
@@ -464,6 +527,8 @@ export default function EditorApp() {
           states={stateList}
           handleDatasetChange={handleDatasetChange}
           loadEventFile={loadEventFile}
+          fileList={fileList}
+          ensureFileListLoaded={ensureFileListLoaded}
         />
       );
       case "items": return (
@@ -482,6 +547,8 @@ export default function EditorApp() {
           states={stateList}
           handleDatasetChange={handleDatasetChange}
           loadEventFile={loadEventFile}
+          fileList={fileList}
+          ensureFileListLoaded={ensureFileListLoaded}
         />
       );
       default: return null;
@@ -545,6 +612,7 @@ export default function EditorApp() {
           paste={paste}
         />
       );
+      case "explorer": return <FileExplorer onFileSelect={handleExplorerFileSelect} onFileChange={refreshFileList} />;
       default: return null;
     }
   };
@@ -560,6 +628,7 @@ export default function EditorApp() {
         redo={redo}
         canUndo={canUndo}
         canRedo={canRedo}
+        onBackToProjectSelect={onBackToProjectSelect}
       />
 
       {/* Main Tabs */}
@@ -570,7 +639,7 @@ export default function EditorApp() {
 
       {/* Main */}
       <Box sx={{ flex: 1, display: "flex", minHeight: 0 }}>
-        <PanelGroup direction="horizontal" style={{ flex: 1, minHeight: 0 }}>
+        <PanelGroup direction="horizontal" autoSaveId="editor-main" style={{ flex: 1, minHeight: 0 }}>
           {/* Left */}
           <Panel
             defaultSize={15}
@@ -584,9 +653,21 @@ export default function EditorApp() {
 
           {/* Center */}
           <Panel defaultSize={65}>
-            <PanelGroup direction="vertical">
+            <PanelGroup direction="vertical" autoSaveId="editor-center">
               <Panel defaultSize={100}>
-                {selectedItem !== "変数" ? 
+                {mainTab === "explorer" ?
+                  // エクスプローラー: 画像プレビュー or プレースホルダー
+                  (explorerSelectedImage ? (
+                    <ImagePreview filePath={explorerSelectedImage} />
+                  ) : !currentFilePath ? (
+                    <Box sx={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Typography variant="body2" color="text.disabled">
+                        ファイルを選択してください
+                      </Typography>
+                    </Box>
+                  ) : null)
+
+                : selectedItem !== "変数" ?
                   // ゲーム画面表示
                   <div
                     ref={boxRef}
@@ -706,6 +787,7 @@ export default function EditorApp() {
                         lines={linesForEditor}
                         gameData={gameDataForEvent}
                         updateGameData={noop}
+                        viewItemName={null}
                         setViewItemName={noop}
                         fileJump={noop}
                         moveScene={noop}
@@ -777,8 +859,8 @@ export default function EditorApp() {
                 }
               </Panel>
 
-              {/* シナリオエディタ: シーン/アイテムタブでのみ表示 */}
-              {(mainTab === "scenes" || mainTab === "items") && <>
+              {/* シナリオエディタ: シーン/アイテム/エクスプローラータブで表示 */}
+              {(mainTab === "scenes" || mainTab === "items" || (mainTab === "explorer" && !explorerSelectedImage && currentFilePath)) && <>
                 <PanelResizeHandle style={handleStyleVertical} />
                 <Panel defaultSize={35} minSize={0}>
                   <ScenarioEditor
@@ -792,8 +874,12 @@ export default function EditorApp() {
                     createNewFile={createNewFile}
                     closeFile={closeFile}
                     applyPendingContent={applyPendingContent}
+                    ifViewWarning={ifViewWarning}
                     isMaximized={isScenarioEditorMaximized}
                     onToggleMaximize={toggleScenarioEditorMaximize}
+                    onFocusChange={setIsCodeMirrorFocused}
+                    sceneList={sceneList}
+                    itemList={itemList}
                   />
                 </Panel>
               </>}

@@ -119,8 +119,8 @@ export default function useEditFunctions({
             if (data && data.nativeEvent) {
                 data = defaultHotspotData;
             }
-    
-            handleAddArrayItem(`scenes.${selectedItem}.hotspots`, data);
+
+            handleAddArrayItem(`scenes.${selectedItem}.hotspots`, structuredClone(data));
             setSelectedSubItem(gameDataRef.current.scenes[selectedItem].hotspots.length);
         }
     }, [handleAddArrayItem, setSelectedSubItem, selectedItem])
@@ -146,8 +146,8 @@ export default function useEditFunctions({
             if (data && data.nativeEvent) {
                 data = defaultStateData;
             }
-    
-            handleAddArrayItem(`scenes.${selectedItem}.hotspots.${selectedSubItem}.states`, data);
+
+            handleAddArrayItem(`scenes.${selectedItem}.hotspots.${selectedSubItem}.states`, structuredClone(data));
             setSelectedThirdItem(gameDataRef.current.scenes[selectedItem].hotspots[selectedSubItem].states.length);
         }
     },[handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem])
@@ -173,8 +173,8 @@ export default function useEditFunctions({
             if (data && data.nativeEvent) {
                 data = defaultHotspotData;
             }
-    
-            handleAddArrayItem(`items.${selectedItem}.hotspots`, data);
+
+            handleAddArrayItem(`items.${selectedItem}.hotspots`, structuredClone(data));
             setSelectedSubItem(gameDataRef.current.items[selectedItem].hotspots.length);
         }
     }, [handleAddArrayItem, setSelectedSubItem, selectedItem])
@@ -200,8 +200,8 @@ export default function useEditFunctions({
             if (data && data.nativeEvent) {
                 data = defaultStateData;
             }
-    
-            handleAddArrayItem(`items.${selectedItem}.hotspots.${selectedSubItem}.states`, data);
+
+            handleAddArrayItem(`items.${selectedItem}.hotspots.${selectedSubItem}.states`, structuredClone(data));
             setSelectedThirdItem(gameDataRef.current.items[selectedItem].hotspots[selectedSubItem].states.length);
         }
     },[handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem])
@@ -210,7 +210,7 @@ export default function useEditFunctions({
         if(gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]){
 
         handleAddArrayItem(`items.${selectedItem}.hotspots.${selectedSubItem}.states`, gameDataRef.current.items[selectedItem]?.hotspots[selectedSubItem]?.states[selectedThirdItem]);
-        setSelectedThirdItem(gameDataRef.current.items[selectedItem].hotspots[selectedSubItem]);
+        setSelectedThirdItem(gameDataRef.current.items[selectedItem].hotspots[selectedSubItem].states.length);
         }
     },[handleAddArrayItem, setSelectedThirdItem, selectedItem, selectedSubItem, selectedThirdItem])
 

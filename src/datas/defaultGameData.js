@@ -175,7 +175,7 @@ export const defaultGameData = {
     "itemDrawer":{
       "size": [320, 240],
       "style": {
-        "backgroundColor": "#rgba(255,255,255,1)",
+        "backgroundColor": "rgba(255,255,255,1)",
         "borderRadius": "0px"
       },
       "backStyle": {
@@ -305,7 +305,9 @@ export const defaultGameData = {
       "style": {
         "fontSize": "16px",
         "gap": 10,
-        "fontWeight": 500
+        "fontWeight": 500,
+        "color": "rgba(0, 0, 0, 1)",
+        "textOutlineColor": "rgba(0, 0, 0, 0)"
       }
     },
     "config": {

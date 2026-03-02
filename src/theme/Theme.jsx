@@ -82,9 +82,9 @@ export const getDesignTokens = (mode) => ({
     },
     MuiTypography: {
       styleOverrides: {
-        root: {
-          color: "#333", // すべてのTypographyの基本色
-        },
+        root: ({ theme }) => ({
+          color: theme.palette.text.primary, // テーマに従う
+        }),
       },
     },
     MuiFormLabel: {
@@ -112,13 +112,32 @@ export const getDesignTokens = (mode) => ({
     },
     MuiListItemButton: {
       styleOverrides: {
-        root: {
+        root: ({ theme }) => ({
           height: 32,        // デフォルトは48px
           paddingTop: 4,
           paddingBottom: 4,
           paddingLeft: 8,
-          paddingRight: 8
-        },
+          paddingRight: 8,
+          color: theme.palette.text.primary,
+          '&:hover': {
+            backgroundColor: theme.palette.action.hover,
+          }
+        }),
+      },
+    },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.palette.text.primary,
+          minWidth: 24,
+        }),
+      },
+    },
+    MuiListItemText: {
+      styleOverrides: {
+        primary: ({ theme }) => ({
+          color: theme.palette.text.primary,
+        }),
       },
     },
     MuiAutocomplete: {

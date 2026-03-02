@@ -442,7 +442,7 @@ export default function GameApp({ debug }) {
     loadGameData,
     loading,
     error
-  } = useGameData("./data/gamedata.json", visitScene);
+  } = useGameData(visitScene);
   
 
   // effects-----------------------------------------------------------------------------------------
@@ -692,6 +692,7 @@ export default function GameApp({ debug }) {
             : gameData.game.itemBox.position === "bottom" ? "column"
             : "row",
     overflow: "clip",
+    flexShrink: 0
   };
 
   // ゲームコンテンツ（共通）
@@ -810,6 +811,7 @@ export default function GameApp({ debug }) {
         configVisible={viewConfig}
         currentSceneName={currentScene.name}
         viewItemName={viewItemName}
+        selectItem={selectItem}
       />
 
       {/* イベント表示(バックグラウンド) */}
@@ -841,6 +843,7 @@ export default function GameApp({ debug }) {
         onConsoleLog={addConsoleLog.current}
         currentSceneName={currentScene.name}
         viewItemName={viewItemName}
+        selectItem={selectItem}
       />
 
       {/* セーブロード画面 */}
@@ -851,12 +854,14 @@ export default function GameApp({ debug }) {
         loadClick={loadGame}
         closeSaveLoad={closeSaveLoad}
         screenSize={gameData.game.screenSize}
+        debug={debug}
       />
 
       {/* 設定画面 */}
       <Config
         visible={viewConfig}
         config={gameData.game.config}
+        closeBtnStyle={gameData.game.save.closeBtnStyle}
         close={closeConfig}
         bgm={gameData.game.sound.bgm}
         se={gameData.game.sound.se}

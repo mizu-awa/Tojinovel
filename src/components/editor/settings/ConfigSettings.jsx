@@ -1,13 +1,14 @@
 import { memo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
+import FilePathInput from "../FilePathInput";
 import StyledCheckbox from "../StyledCheckBox";
 import { inputPropsDefaultNum } from "./inputProps";
 import RgbaColorInput from "../RgbaColorInput";
 import BorderStyleSelect from "../BorderStyleSelect";
 import MyAccordion from "../MyAccordion";
 
-function ConfigSetting({gameConfig, handleDatasetChange}) {
+function ConfigSetting({gameConfig, handleDatasetChange, fileList, ensureFileListLoaded}) {
     return(
         <>
             <MyAccordion title="表示設定">
@@ -104,8 +105,9 @@ function ConfigSetting({gameConfig, handleDatasetChange}) {
                 </FormField>
 
                 <FormField label="背景画像">
-                    <StyledInput
-                        type="text"
+                    <FilePathInput
+                        options={fileList}
+                        onFocus={ensureFileListLoaded}
                         value={gameConfig.backStyle.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
                         onChange={handleDatasetChange}
                         data-path="game.config.backStyle.backgroundImage"
@@ -145,8 +147,9 @@ function ConfigSetting({gameConfig, handleDatasetChange}) {
                     </FormField>
 
                     <FormField label="背景画像">
-                        <StyledInput
-                            type="text"
+                        <FilePathInput
+                            options={fileList}
+                            onFocus={ensureFileListLoaded}
                             value={gameConfig.containerStyle.backgroundImage?.replace(/^url\(\.\/(.*)\)$/, "$1") || ""}
                             onChange={handleDatasetChange}
                             data-path="game.config.containerStyle.backgroundImage"

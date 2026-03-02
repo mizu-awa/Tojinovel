@@ -3,8 +3,17 @@ import { useTheme } from "@mui/material/styles";
 import { ChevronRight } from "@mui/icons-material";
 
 export default function MyAccordion({ title, children, defaultOpen = true }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(() => {
+    const v = sessionStorage.getItem(`accordion:${title}`);
+    return v === null ? defaultOpen : v === "1";
+  });
   const theme = useTheme();
+
+  const handleToggle = () => {
+    const next = !open;
+    setOpen(next);
+    sessionStorage.setItem(`accordion:${title}`, next ? "1" : "0");
+  };
 
   const textColor = theme.palette.text.primary;
   const borderColor = theme.palette.divider;
@@ -13,7 +22,7 @@ export default function MyAccordion({ title, children, defaultOpen = true }) {
     <div style={{ borderBottom: `1px solid ${borderColor}` }}>
       {/* タイトル部分 */}
       <button
-        onClick={() => setOpen(!open)}
+        onClick={handleToggle}
         style={{
           width: "100%",
           textAlign: "left",

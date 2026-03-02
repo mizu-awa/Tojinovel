@@ -19,7 +19,7 @@ export default function useEventViewer({
   index, setIndex,
   characterSlots, setCharacterSlots,
   currentLine, setCurrentLine,
-  setCurrentOptions,
+  currentOptions,setCurrentOptions,
   currentBack, setCurrentBack,
   currentImage, setCurrentImage,
   hiddenCharacter, hideCharacter,
@@ -34,7 +34,8 @@ export default function useEventViewer({
   setVisibleCount,
   onConsoleLog,
   currentSceneName,
-  viewItemName
+  viewItemName,
+  selectItem
 }){
     // states------------------------------------------------------------------------------------------
     const [inputValue, setInputValue] = useState("");
@@ -42,6 +43,9 @@ export default function useEventViewer({
     // refs----------------------------------------------------------------------------------------------
     const ifSkip = useRef(false);
     const opSkip = useRef(false);
+    const lastClickSkip = useRef(true);
+    const animEndTimer = useRef(null); // アニメーション完了待ちタイマー
+    const viewItemNameRef = useRef(viewItemName);
     
     // functions-----------------------------------------------------------------------------------------
     /* キャラクター表情更新時の処理 */
@@ -162,6 +166,9 @@ export default function useEventViewer({
 
     // クリック時処理
     const handleClick = (lines) => {
+        // 選択肢表示中は choiceOption 経由（opLabel セット済み）以外の呼び出しを無視
+        if (currentOptions && opLabel.current === null) return;
+
         let newGameData = { ...gameData }; // 親に渡す更新データ
         const nLine = expandVarsShallow(lines.lines[index], newGameData.variables); // クリック待ちのために停止した行
         let cLine = currentLine; // 今表示している行の内容かつ、次に表示する行の内容。何もなければ表示に変化なし
@@ -186,28 +193,40 @@ export default function useEventViewer({
                 audioManager.playVoice(nLine.sound, newGameData.game.sound.voice);
             }
             cLine = {...nLine, text: parseLineText(nLine.text)};
+
+            lastClickSkip.current = false;
             i++;
         }
         else if(nLine.type === "narration"){ // 地の文
             cLine = {...nLine, text: parseLineText(nLine.text)};
+
+            lastClickSkip.current = false;
             i++;
         }
         else if(nLine.type === "click"){ //クリック要素
+
+            lastClickSkip.current = true;
             i++;
         }
         else if(nLine.type === "startOption"){//選択肢開始
             cOptions = nLine.options;
             opSkip.current = false;
+
+            lastClickSkip.current = false;
             i++;
         }
         else if(nLine.type === "afterSO"){//選択肢開始の直後
             opSkip.current = true;// 選択肢出現前の文は無視
             // 次のセリフ・地の文を強制実行
             cLine = null;
+
+            lastClickSkip.current = true;
             i++;
         }
         else if(nLine.type === "input"){// 入力フォーム表示
             cInput = nLine.varName;
+
+            lastClickSkip.current = false;
             i++;
         }
         else if(nLine.type === "afterInput"){// inputの直後
@@ -224,6 +243,8 @@ export default function useEventViewer({
             cInput = null;
             // 次のセリフ・地の文を強制実行
             cLine = null;
+
+            lastClickSkip.current = true;
             i++;
         }
 
@@ -297,6 +318,7 @@ export default function useEventViewer({
                     }
                     // 表示する行として登録
                     cLine = {...line, text: parseLineText(line.text)};
+                    lastClickSkip.current = false;
                 }
                 else{
                     // 通常の行の場合は何もせずループ脱出（次のクリック時に処理するため）
@@ -307,6 +329,7 @@ export default function useEventViewer({
                 if(!cLine){// 最初の行対策
                     // 表示する行として登録
                     cLine = {...line, text: parseLineText(line.text)};
+                    lastClickSkip.current = false;
                 }
                 else{
                     // 通常の行の場合は何もせずループ脱出（次のクリック時に処理するため）
@@ -314,9 +337,16 @@ export default function useEventViewer({
                 }
             }
             else if(line.type === "click"){// クリック待ち
-                // クリック待ち
-                // 何もせずループ脱出（次のクリック時に処理するため）
-                break;
+                if( lines.isView && i >= (lines.lines.length - 1)){// isView イベント実行完了
+                    if( !lastClickSkip.current ){
+                        // クリックイベントが連続していない場合は、最後のクリックイベントを処理するためにループ脱出
+                        break;
+                    } 
+                }
+                else {
+                    // 何もせずループ脱出（次のクリック時に処理）
+                    break;
+                }
             }
             else if(line.type === "expression"){// 表情変化
                 // 立ち絵を再計算
@@ -357,6 +387,11 @@ export default function useEventViewer({
                     itemName = item.name;
                     // アイテムを取得状態にする
                     newGameData.items[itemIndex].have = true;
+                    // 入手順を記録（未所持のときのみ更新してアイテムボックスの並び順に使う）
+                    if(!item.have){
+                        newGameData._itemAcquiredCount = (newGameData._itemAcquiredCount ?? 0) + 1;
+                        newGameData.items[itemIndex].acquiredOrder = newGameData._itemAcquiredCount;
+                    }
                 }
             }
             else if(line.type === "discardItem"){// アイテム破棄
@@ -364,8 +399,10 @@ export default function useEventViewer({
                 const itemIndex = newGameData.items.findIndex((i) => i.name === line.itemName);
                 // 存在している場合のみ処理
                 if(itemIndex !== -1){
-                // アイテムを破棄状態にする
+                    // アイテムを破棄状態にする
                     newGameData.items[itemIndex].have = false;
+                    // 破棄したアイテムが選択中だった場合、選択を解除する
+                    selectItem?.(prev => prev === line.itemName ? null : prev);
                 }
             }
             else if(line.type === "changeState"){// ステート変更
@@ -614,25 +651,52 @@ export default function useEventViewer({
             if(ifDepth.current !== 0) console.warn(`[Tojinovel] #if終了 が ${ifDepth.current} 個不足しています`);
             // ゲームデータを更新（念のため）
             updateGameData(() => newGameData);
-            // イベント終了時にすべての変数を初期化(BGM除く)
-            onComplete?.();
-            setIndex(0);
-            setViewItemName(null);
-            
-            setCharacterSlots([]);
-            setCurrentLine(null);
-            setCurrentOptions(null);
-            setCurrentBack({color:null, url:null, animation: null});
-            setCurrentImage(null);
-            hideCharacter(false);
-            setCurrentInput(null);
 
-            ifDepth.current = 0;
-            ifSkip.current = false;
-            ifMatched.current.clear();
-            opDepth.current = 0;
-            opSkip.current = false;
-            opLabel.current = null;
+            // アニメーション付きコマンドが最後にある場合、アニメーション完了を待ってからイベントを終了する
+            // ※ 1000ms は index.css の背景アニメーション時間（1s）に合わせたハードコード値
+            const animDelay = cBack.animation ? 1000 : 0;
+
+            if (animDelay > 0) {
+                // アニメーション完了を待つ間、蓄積した変更を先に反映する
+                setCurrentBack(cBack);
+                setCurrentLine(cLine);
+                setCharacterSlots(slots);
+                setCurrentImage(cImage);
+                hideCharacter(hChar);
+            }
+
+            const finalize = () => {
+                // イベント終了時にすべての変数を初期化(BGM除く)
+                onComplete?.();
+                setIndex(0);
+
+                // イベント開始前にアイテムウィンドウが開いていた場合はそのまま維持する
+                if (viewItemNameRef.current === null || viewItemNameRef.current !== viewItemName) {
+                    setViewItemName(null);
+                }
+
+                setCharacterSlots([]);
+                setCurrentLine(null);
+                setCurrentOptions(null);
+                setCurrentBack({color:null, url:null, animation: null});
+                setCurrentImage(null);
+                hideCharacter(false);
+                setCurrentInput(null);
+
+                ifDepth.current = 0;
+                ifSkip.current = false;
+                ifMatched.current.clear();
+                opDepth.current = 0;
+                opSkip.current = false;
+                opLabel.current = null;
+            };
+
+            if (animDelay > 0) {
+                clearTimeout(animEndTimer.current);
+                animEndTimer.current = setTimeout(finalize, animDelay);
+            } else {
+                finalize();
+            }
         }
         else{
             if(lines.isView){
@@ -677,6 +741,7 @@ export default function useEventViewer({
 
             // ファイルジャンプ
             if(fj){
+                clearTimeout(animEndTimer.current); // 前のアニメーションタイマーをクリア
                 fileJump(fj.file, fj.label);// ファイルジャンプ
 
                 setCurrentOptions(null);// 選択肢抜ける
@@ -688,18 +753,37 @@ export default function useEventViewer({
                 opDepth.current = 0;
                 opSkip.current = false;
                 opLabel.current = null;
+
+                // バックグラウンドイベントからのジャンプは完了扱い（isBackEventRunningをリセット）
+                if(!lines.isView){
+                    onComplete?.();
+                }
             }
             else if(!lines.isView && i >= lines.lines.length){ // バックグラウンドイベント実行完了
                 // #if終了 欠落チェック
                 if(ifDepth.current !== 0) console.warn(`[Tojinovel] #if終了 が ${ifDepth.current} 個不足しています`);
-                onComplete?.();
 
-                ifDepth.current = 0;
-                ifSkip.current = false;
-                ifMatched.current.clear();
-                opDepth.current = 0;
-                opSkip.current = false;
-                opLabel.current = null;
+                // アニメーション付きコマンドが最後にある場合、アニメーション完了を待ってからイベントを終了する
+                // ※ 1000ms は index.css の背景アニメーション時間（1s）に合わせたハードコード値
+                const animDelay = cBack.animation ? 1000 : 0;
+
+                const finalize = () => {
+                    onComplete?.();
+
+                    ifDepth.current = 0;
+                    ifSkip.current = false;
+                    ifMatched.current.clear();
+                    opDepth.current = 0;
+                    opSkip.current = false;
+                    opLabel.current = null;
+                };
+
+                if (animDelay > 0) {
+                    clearTimeout(animEndTimer.current);
+                    animEndTimer.current = setTimeout(finalize, animDelay);
+                } else {
+                    finalize();
+                }
             }
         }
     };
@@ -708,10 +792,19 @@ export default function useEventViewer({
     // lines が更新されたら、最初の行を実行
     useEffect(() => {
         if (lines && lines?.lines?.length > 0 && index === 0 && !forEdit ) {
-            handleClick(lines);
+            lastClickSkip.current = true;
+            viewItemNameRef.current = viewItemName;
+            // 最初の行がクリック待ちの場合は自動実行しない（ユーザーのクリックを待つ）
+            if (lines.lines[0].type !== "click") {
+                handleClick(lines);
+            }
         }
     }, [lines]);
 
+    // アンマウント時にアニメーション待ちタイマーをクリア
+    useEffect(() => {
+        return () => clearTimeout(animEndTimer.current);
+    }, []);
 
     return({
         inputValue,

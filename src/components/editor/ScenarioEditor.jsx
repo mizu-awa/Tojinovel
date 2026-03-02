@@ -1,15 +1,16 @@
 import { memo, useState, useCallback, useEffect, useRef } from "react";
 import { Box, Typography, IconButton, TextField, Button } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
-import { Description, FolderOpen, Close, NoteAdd, Fullscreen, FullscreenExit } from "@mui/icons-material";
+import useFileList from "../../hooks/editor/useFileList";
+import { Description, FolderOpen, Close, NoteAdd, Fullscreen, FullscreenExit, Undo, Redo, Warning } from "@mui/icons-material";
 
 // CodeMirror
 import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from "@codemirror/view";
-import { EditorState } from "@codemirror/state";
-import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
+import { EditorState, Compartment } from "@codemirror/state";
+import { defaultKeymap, history, historyKeymap, indentWithTab, undo as cmUndo, redo as cmRedo, undoDepth, redoDepth } from "@codemirror/commands";
 import { LanguageSupport } from "@codemirror/language";
 import eventLanguage from "./codemirror/eventLanguage";
-import { eventCompletionExtension } from "./codemirror/eventCompletion";
+import { createEventCompletionExtension } from "./codemirror/eventCompletion";
 import { lightExtensions, darkExtensions } from "./codemirror/eventTheme";
 import { closeBracketsExtension } from "./codemirror/eventBrackets";
 
@@ -60,8 +61,12 @@ function ScenarioEditor({
   createNewFile,
   closeFile,
   applyPendingContent,
+  ifViewWarning,
   isMaximized,
   onToggleMaximize,
+  onFocusChange,
+  sceneList,
+  itemList,
 }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -70,25 +75,48 @@ function ScenarioEditor({
   const handleTextChangeRef = useRef(handleTextChange);
   const editorViewRefStable = useRef(editorViewRef);
   const applyPendingContentRef = useRef(applyPendingContent);
+  const onFocusChangeRef = useRef(onFocusChange);
+  // history用Compartment（ファイル切替時にリセット）
+  const historyCompartmentRef = useRef(new Compartment());
+
+  // ファイルパス補完用
+  const { fileList, ensureLoaded } = useFileList();
+  const fileListRef = useRef(fileList);
+  useEffect(() => { fileListRef.current = fileList; }, [fileList]);
+
+  // シーン名・アイテム名補完用
+  const sceneListRef = useRef(sceneList);
+  useEffect(() => { sceneListRef.current = sceneList; }, [sceneList]);
+  const itemListRef = useRef(itemList);
+  useEffect(() => { itemListRef.current = itemList; }, [itemList]);
 
   // 手動入力用のローカルstate
   const [inputFilePath, setInputFilePath] = useState("");
   const [inputLabel, setInputLabel] = useState("");
 
-  // handleTextChangeの最新値をrefに保持
+  // CodeMirrorフォーカス状態
+  const [isFocused, setIsFocused] = useState(false);
+
+  // CMのUndo/Redo可否
+  const [cmCanUndo, setCmCanUndo] = useState(false);
+  const [cmCanRedo, setCmCanRedo] = useState(false);
+
+  // refを最新値に同期
   useEffect(() => {
     handleTextChangeRef.current = handleTextChange;
   }, [handleTextChange]);
 
-  // editorViewRefの最新値をrefに保持
   useEffect(() => {
     editorViewRefStable.current = editorViewRef;
   }, [editorViewRef]);
 
-  // applyPendingContentの最新値をrefに保持
   useEffect(() => {
     applyPendingContentRef.current = applyPendingContent;
   }, [applyPendingContent]);
+
+  useEffect(() => {
+    onFocusChangeRef.current = onFocusChange;
+  }, [onFocusChange]);
 
   // CodeMirror エディタの初期化
   useEffect(() => {
@@ -99,11 +127,28 @@ function ScenarioEditor({
       viewRef.current.destroy();
     }
 
-    // テキスト変更時のコールバック（refを使って最新のhandleTextChangeを呼び出す）
+    const historyCompartment = historyCompartmentRef.current;
+
+    // テキスト変更時・undo/redo後のコールバック
     const updateListener = EditorView.updateListener.of((update) => {
       if (update.docChanged) {
         handleTextChangeRef.current();
       }
+      // CMのundo/redo可否を更新
+      setCmCanUndo(undoDepth(update.state) > 0);
+      setCmCanRedo(redoDepth(update.state) > 0);
+    });
+
+    // フォーカス/ブラー検出
+    const focusListener = EditorView.domEventHandlers({
+      focus: () => {
+        setIsFocused(true);
+        onFocusChangeRef.current?.(true);
+      },
+      blur: () => {
+        setIsFocused(false);
+        onFocusChangeRef.current?.(false);
+      },
     });
 
     // 言語サポート
@@ -116,12 +161,13 @@ function ScenarioEditor({
         lineNumbers(),
         highlightActiveLine(),
         highlightActiveLineGutter(),
-        history(),
+        historyCompartment.of(history()),
         keymap.of([indentWithTab, ...defaultKeymap, ...historyKeymap]),
         language,
-        eventCompletionExtension,
+        createEventCompletionExtension(fileListRef, ensureLoaded, sceneListRef, itemListRef),
         closeBracketsExtension,
         updateListener,
+        focusListener,
         ...(isDark ? darkExtensions : lightExtensions),
         EditorView.lineWrapping,
       ],
@@ -153,12 +199,32 @@ function ScenarioEditor({
     };
   }, [isDark]); // テーマ変更時に再作成
 
+  // ファイルが変わったらCMの履歴をリセット
+  useEffect(() => {
+    if (viewRef.current && currentFilePath) {
+      viewRef.current.dispatch({
+        effects: historyCompartmentRef.current.reconfigure(history()),
+      });
+      setCmCanUndo(false);
+      setCmCanRedo(false);
+    }
+  }, [currentFilePath]);
+
   // currentLabelが変わったらスクロール
   useEffect(() => {
     if (viewRef.current && currentLabel) {
       setTimeout(() => scrollToLabel(viewRef.current, currentLabel), 50);
     }
   }, [currentLabel, currentFilePath]);
+
+  // CMのUndo/Redoボタンハンドラ
+  const handleCmUndo = useCallback(() => {
+    if (viewRef.current) cmUndo(viewRef.current);
+  }, []);
+
+  const handleCmRedo = useCallback(() => {
+    if (viewRef.current) cmRedo(viewRef.current);
+  }, []);
 
   // ファイルを開く
   const handleOpen = useCallback(() => {
@@ -189,6 +255,15 @@ function ScenarioEditor({
       zIndex: isMaximized ? 1300 : "auto",
       backgroundColor: theme.palette.background.paper,
     }}>
+      {/* フォーカス時のアウトライン（CodeMirrorのスタッキングコンテキストより上に描画するため絶対配置） */}
+      <Box sx={{
+        position: "absolute",
+        inset: 0,
+        border: isFocused ? `2px solid ${theme.palette.primary.main}` : "2px solid transparent",
+        pointerEvents: "none",
+        zIndex: 9999,
+        transition: "border-color 0.15s",
+      }} />
       {/* 手動入力フォーム */}
       <Box sx={{
         display: "flex",
@@ -217,6 +292,25 @@ function ScenarioEditor({
           onKeyDown={handleKeyDown}
           sx={{ width: 80 }}
         />
+        {/* テキストUndo/Redoボタン */}
+        <IconButton
+          size="small"
+          onClick={handleCmUndo}
+          disabled={!cmCanUndo}
+          title="テキストを元に戻す (Ctrl+Z)"
+          sx={{ p: 0.5 }}
+        >
+          <Undo sx={{ fontSize: 18 }} />
+        </IconButton>
+        <IconButton
+          size="small"
+          onClick={handleCmRedo}
+          disabled={!cmCanRedo}
+          title="テキストをやり直し (Ctrl+Y)"
+          sx={{ p: 0.5 }}
+        >
+          <Redo sx={{ fontSize: 18 }} />
+        </IconButton>
         <IconButton
           size="small"
           onClick={handleOpen}
@@ -258,6 +352,15 @@ function ScenarioEditor({
           {status && (
             <Typography variant="caption" sx={{ color: fileNotFound ? "error.main" : "text.disabled" }}>
               {status}
+            </Typography>
+          )}
+          {ifViewWarning && (
+            <Typography
+              variant="caption"
+              sx={{ color: "warning.main", display: "flex", alignItems: "center", gap: 0.25, whiteSpace: "nowrap" }}
+            >
+              <Warning sx={{ fontSize: 14 }} />
+              #if条件次第でフロント/バック混在
             </Typography>
           )}
           <IconButton

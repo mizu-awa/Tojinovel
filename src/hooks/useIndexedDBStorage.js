@@ -4,7 +4,11 @@ import { useCallback } from 'react';
 const DB_NAME = 'TojinovelDB';
 const STORE_NAME = 'gameSaveStore';
 const DB_VERSION = 1;
-const STORAGE_KEY_BASE = `editorState:${location.origin + location.pathname}`;
+// プロジェクト別のキーにするため関数化（プロジェクト切り替え時のセーブデータ混在を防ぐ）
+function getStorageKeyBase() {
+  const projectPath = sessionStorage.getItem("currentProjectPath");
+  return `editorState:${projectPath || (location.origin + location.pathname)}`;
+}
 
 async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
@@ -21,7 +25,7 @@ export function useIndexedDBSaves() {
   const saveGameDB = useCallback(async (slot, data) => {
     try {
       const db = await getDB();
-      const key = `${STORAGE_KEY_BASE}_${slot}`;
+      const key = `${getStorageKeyBase()}_${slot}`;
       await db.put(STORE_NAME, data, key);
     } catch (e) {
       console.error('IndexedDB セーブエラー:', e);
@@ -32,7 +36,7 @@ export function useIndexedDBSaves() {
   const loadGameDB = useCallback(async (slot) => {
     try {
       const db = await getDB();
-      const key = `${STORAGE_KEY_BASE}_${slot}`;
+      const key = `${getStorageKeyBase()}_${slot}`;
       const data = await db.get(STORE_NAME, key);
       return data || null;
     } catch (e) {
@@ -48,12 +52,12 @@ export function useIndexedDBSaves() {
       const results = [];
       if(auto){
         // autoの取得
-        const autoData = await db.get(STORE_NAME, `${STORAGE_KEY_BASE}_auto`);
+        const autoData = await db.get(STORE_NAME, `${getStorageKeyBase()}_auto`);
         results.push(autoData || null);
       }
       // 数値の取得
       for (let i = 0; i < maxSlots; i++) {
-        const key = `${STORAGE_KEY_BASE}_${i}`;
+        const key = `${getStorageKeyBase()}_${i}`;
         const data = await db.get(STORE_NAME, key);
         results.push(data || null);
       }

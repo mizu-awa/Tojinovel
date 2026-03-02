@@ -1,6 +1,7 @@
 import { memo, useMemo } from "react";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
+import FilePathInput from "../FilePathInput";
 import SectionDivider from "../SectionDivider";
 import RgbaColorInput from "../RgbaColorInput";
 import TextAlignSelector from "../TextAlignSelector";
@@ -31,7 +32,9 @@ const ItemSettings = ({
   state,
   states,
   handleDatasetChange,
-  loadEventFile
+  loadEventFile,
+  fileList,
+  ensureFileListLoaded
 }) => {
   // 固定値（フックはearly returnの前に配置）
   const stateListFix = useMemo(() => states || [], [states?.join("") || ""]);
@@ -62,7 +65,9 @@ const ItemSettings = ({
       </FormField>
 
       <FormField label="画像">
-        <StyledInput
+        <FilePathInput
+          options={fileList}
+          onFocus={ensureFileListLoaded}
           value={item.image?.replace(/^\.\/(.*)$/, "$1") || ""}
           onChange={handleDatasetChange}
           data-path={`${itemPath}.image`}
@@ -208,7 +213,9 @@ const ItemSettings = ({
 
         <MyAccordion title="見た目" defaultOpen={false}>
           <FormField label="画像">
-            <StyledInput
+            <FilePathInput
+              options={fileList}
+              onFocus={ensureFileListLoaded}
               value={state.background?.replace(/^\.\/(.*)$/, "$1") || ""}
               onChange={handleDatasetChange}
               data-path={`${statePath}.background`}
@@ -389,7 +396,9 @@ const ItemSettings = ({
             <>
               <FormField label="ドラッグ完了イベント ファイル">
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-                  <StyledInput
+                  <FilePathInput
+                    options={fileList}
+                    onFocus={ensureFileListLoaded}
                     value={state.onDragEnd?.file?.replace(/^\.\/(.*)$/, "$1") || ""}
                     onChange={handleDatasetChange}
                     data-path={`${statePath}.onDragEnd.file`}
@@ -421,7 +430,9 @@ const ItemSettings = ({
         <MyAccordion title="イベント" defaultOpen={false}>
           <FormField label="クリックイベント ファイル">
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-              <StyledInput
+              <FilePathInput
+                options={fileList}
+                onFocus={ensureFileListLoaded}
                 value={state.onClick.file?.replace(/^\.\/(.*)$/, "$1") || ""}
                 onChange={handleDatasetChange}
                 data-path={`${statePath}.onClick.file`}
@@ -454,6 +465,8 @@ const ItemSettings = ({
             deleteUsedItem = {deleteUsedItem}
             statePath={statePath}
             loadEventFile={loadEventFile}
+            fileList={fileList}
+            ensureFileListLoaded={ensureFileListLoaded}
           />
 
           <Box sx={{textAlign: "right"}}>
@@ -476,7 +489,9 @@ const UsedItemFormSet = memo(({
   handleDatasetChange,
   deleteUsedItem,
   statePath,
-  loadEventFile
+  loadEventFile,
+  fileList,
+  ensureFileListLoaded
 }) => {
   return(
     usedItems.map((u, index) => {
@@ -495,7 +510,9 @@ const UsedItemFormSet = memo(({
 
           <FormField label="アイテム使用イベント ファイル">
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-              <StyledInput
+              <FilePathInput
+                options={fileList}
+                onFocus={ensureFileListLoaded}
                 value={u.file?.replace(/^\.\/(.*)$/, "$1") || ""}
                 onChange={handleDatasetChange}
                 data-path={`${indexPath}.file`}
