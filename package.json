@@ -12,8 +12,9 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
+    "build:player": "node scripts/build-player-dist.js",
     "dev:browser": "cross-env VITE_BUILD_MODE=browser vite",
-    "build:browser": "cross-env VITE_BUILD_MODE=browser vite build"
+    "build:browser": "npm run build:player && cross-env VITE_BUILD_MODE=browser vite build"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.0",

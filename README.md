@@ -17,6 +17,7 @@
 - ゲームデータ（JSON）・イベントファイル（テキスト）の保存・読み込み
 - 複数プロジェクトの管理
 - プレイヤー書き出し（`index.html` + `assets/` を出力）
+- ゲーム出力（HTML）— Wails版: フォルダ直接書き出し / ブラウザ版: ZIPダウンロード
 - Windows / macOS / Linux 対応（Wails版）
 - ブラウザ版: データはIndexedDBに保存。ZIPでエクスポート/インポート可能
 
@@ -133,6 +134,7 @@ npm run test:run
 │       ├─ browserAdapter.js    # ブラウザ版アダプター
 │       ├─ browser/browserFS.js # IndexedDB仮想FS
 │       ├─ zipService.js        # ZIPエクスポート/インポート
+│       ├─ playerExportService.js # ブラウザ版ゲーム出力
 │       └─ httpAdapter.js       # フォールバック用
 ├─ index.html           # エントリポイント（エディタ）
 ├─ public/
@@ -184,6 +186,14 @@ npm run build:browser
 ```
 出力先: `dist-browser/`（静的ファイル一式）。GitHub Pages / Netlify / Vercel 等にデプロイ可能。**HTTPS必須**（Service Worker の制約）。
 
+`build:browser` は内部で `build:player`（ゲーム再生用ランタイムの事前ビルド）を自動実行します。
+
+### ゲーム再生用ランタイムのみビルド
+```bash
+npm run build:player
+```
+出力先: `public/player-dist/`。ブラウザ版の「ゲーム出力 (HTML)」機能で使用するplayerランタイムを事前ビルドします。`npm run dev:browser` でゲーム出力をテストする場合は、事前に一度実行してください。
+
 ---
 
 ## 📘 使い方（ユーザ向け）
@@ -202,7 +212,8 @@ npm run build:browser
 1. ブラウザでデプロイ先URLを開く
 2. 「新規プロジェクト」を作成、またはZIPファイルをドラッグ＆ドロップでインポート
 3. エディタ画面でゲームを制作・編集・保存（データはブラウザのIndexedDBに保存）
-4. プロジェクト選択画面の「ZIPエクスポート」でバックアップ
-5. 書き出し後、ZIPに含まれる `index.html` + `data/` + `assets/` をサーバーにアップロードして公開
+4. アプリバーの「エクスポート」ボタンから出力形式を選択：
+   - **ゲーム出力 (HTML)** — `index.html` + `assets/` + `data/` をZIPでダウンロード。解凍してサーバーにアップロードすればゲームを公開できます
+   - **プロジェクトZIP** — プロジェクトデータのバックアップ用
 
 > ⚠️ ブラウザ版のデータはブラウザ内に保存されます。キャッシュクリアやブラウザのストレージ解放でデータが消える場合があります。定期的にZIPエクスポートでバックアップしてください。

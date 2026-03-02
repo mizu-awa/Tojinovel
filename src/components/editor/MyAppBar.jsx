@@ -1,5 +1,5 @@
-import { Download, FileDownload, FolderOpen, PlayArrow, Redo, Save, Undo } from "@mui/icons-material";
-import { AppBar, Box, Divider, IconButton, Snackbar, Toolbar, Typography } from "@mui/material"
+import { Download, FileDownload, FolderOpen, Html, PlayArrow, Redo, Save, Undo } from "@mui/icons-material";
+import { AppBar, Box, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Snackbar, Toolbar, Typography } from "@mui/material"
 import { memo, useCallback, useState } from "react";
 import { storage } from "../../services/storageService";
 
@@ -8,6 +8,9 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo, onBackToPro
 
   // エクスポート通知
   const [snack, setSnack] = useState({ open: false, message: "" });
+
+  // エクスポートメニュー
+  const [exportAnchor, setExportAnchor] = useState(null);
 
   // デバッグプレイ: gamedata.json + イベントファイルを全保存してからデバッグモードに遷移
   const handleDebugPlay = useCallback(async () => {
@@ -21,8 +24,9 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo, onBackToPro
     onBackToProjectSelect();
   }, [save, onBackToProjectSelect]);
 
-  // プレイヤー書き出し: 先に全保存してからエクスポート
-  const handleExport = useCallback(async () => {
+  // ゲーム出力 (HTML) — Wails版: フォルダに直接書き出し
+  const handleExportPlayerWails = useCallback(async () => {
+    setExportAnchor(null);
     try {
       await save();
       await storage.exportPlayer();
@@ -32,8 +36,24 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo, onBackToPro
     }
   }, [save]);
 
-  // ZIPエクスポート（ブラウザ版）: 先に全保存してからエクスポート
+  // ゲーム出力 (HTML) — ブラウザ版: ZIPダウンロード
+  const handleExportPlayerBrowser = useCallback(async () => {
+    setExportAnchor(null);
+    try {
+      await save();
+      const { exportPlayerAsZip } = await import("../../services/playerExportService.js");
+      const projectPath = storage.getCurrentProjectPath();
+      const projectName = await storage.getCurrentProjectName() || "game";
+      await exportPlayerAsZip(projectPath, projectName);
+      setSnack({ open: true, message: "ゲームをZIPで出力しました" });
+    } catch (e) {
+      setSnack({ open: true, message: `ゲーム出力失敗: ${e}` });
+    }
+  }, [save]);
+
+  // プロジェクトZIPエクスポート（ブラウザ版のみ）
   const handleExportZip = useCallback(async () => {
+    setExportAnchor(null);
     try {
       await save();
       const { exportProjectAsZip } = await import("../../services/zipService.js");
@@ -70,22 +90,29 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo, onBackToPro
           <IconButton onClick={handleDebugPlay} title="デバッグプレイ" sx={{color: "primary.contrastText"}}>
             <PlayArrow />
           </IconButton>
-          {isWails && (
-            <>
-              <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: "rgba(255,255,255,0.3)" }} />
-              <IconButton onClick={handleExport} title="プレイヤー書き出し（index.html + assets/）" sx={{color: "primary.contrastText"}}>
-                <FileDownload />
-              </IconButton>
-            </>
-          )}
-          {!isWails && (
-            <>
-              <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: "rgba(255,255,255,0.3)" }} />
-              <IconButton onClick={handleExportZip} title="ZIPエクスポート" sx={{color: "primary.contrastText"}}>
-                <Download />
-              </IconButton>
-            </>
-          )}
+          <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: "rgba(255,255,255,0.3)" }} />
+          <IconButton onClick={(e) => setExportAnchor(e.currentTarget)} title="エクスポート" sx={{color: "primary.contrastText"}}>
+            <FileDownload />
+          </IconButton>
+          <Menu anchorEl={exportAnchor} open={!!exportAnchor} onClose={() => setExportAnchor(null)}>
+            {isWails ? (
+              <MenuItem onClick={handleExportPlayerWails}>
+                <ListItemIcon><Html fontSize="small" /></ListItemIcon>
+                <ListItemText>ゲーム出力 (HTML)</ListItemText>
+              </MenuItem>
+            ) : (
+              [
+                <MenuItem key="player" onClick={handleExportPlayerBrowser}>
+                  <ListItemIcon><Html fontSize="small" /></ListItemIcon>
+                  <ListItemText>ゲーム出力 (HTML)</ListItemText>
+                </MenuItem>,
+                <MenuItem key="zip" onClick={handleExportZip}>
+                  <ListItemIcon><Download fontSize="small" /></ListItemIcon>
+                  <ListItemText>プロジェクトZIP</ListItemText>
+                </MenuItem>,
+              ]
+            )}
+          </Menu>
           <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: "rgba(255,255,255,0.3)" }} />
           <IconButton onClick={handleBackToProjectSelect} title="プロジェクト選択に戻る" sx={{color: "primary.contrastText"}}>
             <FolderOpen />
