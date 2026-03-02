@@ -455,6 +455,7 @@ function Options({options, config, choiceOption}){
           position: "absolute",
           left: config.position[0],
           top: config.position[1],
+          transform: config.anchor === "middle" ? "translateY(-50%)" : undefined,
           display: "flex",
           flexDirection: "column",
           gap: config.gap

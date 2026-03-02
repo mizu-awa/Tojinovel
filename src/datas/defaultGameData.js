@@ -237,6 +237,7 @@ export const defaultGameData = {
     },
     "option": {
       "position": [50, 50],
+      "anchor": "top",
       "size": 180,
       "gap": 20,
       "hover": "none",

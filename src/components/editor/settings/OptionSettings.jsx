@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { Select, MenuItem } from "@mui/material";
 import FormField from "../FormField";
 import { StyledInput } from "../StyledInput";
 import FilePathInput from "../FilePathInput";
@@ -37,6 +38,24 @@ const OptionSettings = ({
             inputProps={inputPropsDefaultNum}
             data-path="game.option.position.1"
           />
+        </FormField>
+
+        <FormField label="縦位置の基準点">
+          <Select
+            size="small"
+            value={gameOption.anchor || "top"}
+            onChange={(e) => {
+              handleDatasetChange({
+                target: {
+                  value: e.target.value,
+                  dataset: { path: "game.option.anchor" }
+                }
+              });
+            }}
+          >
+            <MenuItem value="top">上端</MenuItem>
+            <MenuItem value="middle">中央</MenuItem>
+          </Select>
         </FormField>
 
         <FormField label="幅">
