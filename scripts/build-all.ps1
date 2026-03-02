@@ -9,7 +9,11 @@ Set-Location $projectRoot
 
 # Wails ビルド
 Write-Host "=== Wails ビルド ===" -ForegroundColor Cyan
-wails build
+if ($IsLinux) {
+    wails build -tags webkit2_41
+} else {
+    wails build
+}
 if ($LASTEXITCODE -ne 0) {
     Write-Host "エラー: wails build が失敗しました" -ForegroundColor Red
     exit 1
