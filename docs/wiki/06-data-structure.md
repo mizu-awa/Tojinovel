@@ -204,7 +204,8 @@
   "borderRadius": 0,
   "textVAlign": "center",
   "textPadding": "0px",
-  "rotate": 0
+  "rotate": 0,
+  "fontFamily": ""
 }
 ```
 | Key        | 型                | 説明               |
@@ -221,6 +222,7 @@
 |textVAlign	|string	|テキストの上下揃え（CSSのalignItemsに準拠）
 |textPadding	|string	|テキスト部の余白（CSSのpaddingに準拠）
 |rotate |number |回転角度（deg）
+|fontFamily |string |フォント（空文字でgameStyle.fontFamilyを継承）
 
 ### 6.2 UsedItem
 ```jsonc
@@ -321,7 +323,8 @@
   "borderWidth": 1,
   "borderStyle": "none",
   "shadowColor": "rgba(0, 0, 0, 0.3)",
-  "color": "rgba(0,0,0,1)"
+  "color": "rgba(0,0,0,1)",
+  "fontFamily": "system-ui"
 }
 ```
 
@@ -332,6 +335,7 @@
 |borderStyle | string | 枠線スタイル |
 |shadowColor | string | 影の色    |
 |color       | string | 文字色    |
+|fontFamily  | string | ゲーム全体のフォント（CSS の font-family に準拠） |
 
 
 ### 8.3 Save
@@ -346,7 +350,10 @@
   "noDataText": "No Data",
   "autoText": "Auto",
   "hover": "none",
+  "gap": 10,
   "backStyle": {...},
+  "titleStyle": {...},
+  "closeBtnStyle": {...},
   "buttonStyle": {...}
 }
 ```
@@ -360,7 +367,10 @@
 |noDataText |string |データがないことを示す表示文字列
 |autoText |string |オートセーブを示す
 |hover |string | ボタンのマウスホバー時に適用するスタイル名
+|gap |number | スロット間の余白
 |backStyle |object |背景のスタイル
+|titleStyle |object |画面タイトルのスタイル
+|closeBtnStyle |object |×ボタンのスタイル
 |buttonStyle |object |セーブ・ロードボタンのスタイル
 
 #### 8.3.1 BackStyle
@@ -404,6 +414,38 @@
 |borderWidth |string |ボタンのボーダー太さ
 |borderColor |string |ボタンのボーダー色
 |borderRadius |string |ボタンの角丸サイズ
+
+#### 8.3.3 TitleStyle
+```jsonc
+{
+  "fontSize": "24px",
+  "color": "rgba(0,0,0,1)",
+  "backgroundColor": "transparent",
+  "padding": "0px"
+}
+```
+
+| Key        | 型                | 説明               |
+|------------|--------------------|--------------------|
+|fontSize |string |タイトルのフォントサイズ
+|color |string |タイトルの文字色
+|backgroundColor |string |タイトルの背景色
+|padding |string |タイトルの余白
+
+#### 8.3.4 CloseBtnStyle
+```jsonc
+{
+  "size": 24,
+  "color": "rgba(0,0,0,1)",
+  "hover": "hoverOp"
+}
+```
+
+| Key        | 型                | 説明               |
+|------------|--------------------|--------------------|
+|size |number |×ボタンのアイコンサイズ
+|color |string |×ボタンの色
+|hover |string |ホバー時のスタイル名
 
 
 ### 8.4 ItemBox
@@ -584,13 +626,31 @@
 ```jsonc
 {
   "backgroundColor": "rgba(0,0,0,0.6)",
-  "backgroundImage": ""
+  "backgroundImage": "",
+  "color": "rgba(255,255,255,1)",
+  "fontSize": "16px",
+  "padding": 12,
+  "minWidth": 120,
+  "distance": 0,
+  "borderWidth": "0px",
+  "borderStyle": "solid",
+  "borderColor": "rgba(0,0,0,0)",
+  "borderRadius": "0px"
 }
 ```
 | Key                                | 型      | 説明    |
 | ---------------------------------- | ------ | ----- |
 | backgroundColor      | string | 背景色     |
 | backgroundImage      | string | 背景画像    |
+| color                | string | 文字色 |
+| fontSize             | string | フォントサイズ |
+| padding              | number | 内側余白 |
+| minWidth             | number | 最小幅 |
+| distance             | number | テキストボックス上端からの距離（px）|
+| borderWidth          | string | 枠線の太さ |
+| borderStyle          | string | 枠線の種類 |
+| borderColor          | string | 枠線の色 |
+| borderRadius         | string | 角丸 |
 
 #### 8.6.4 Indicator
 ```jsonc
@@ -609,7 +669,13 @@
   "size": 40,
   "useDefaultArrow": true,
   "hover": "none",
-  "style": {...}
+  "style": {...},
+  "images": {
+    "top": "",
+    "right": "",
+    "bottom": "",
+    "left": ""
+  }
 }
 ```
 | Key                       | 型       | 説明         |
@@ -618,6 +684,7 @@
 | useDefaultArrow | boolean | 既定矢印を使用するか（現在無効） |
 | hover           | string  | ホバー時のスタイル名 |
 | style           | object  | スタイル       |
+| images          | object  | 各方向のカスタム画像URL（上/右/下/左）空文字でデフォルト矢印を使用 |
 
 
 #### 8.7.1 Style
@@ -829,14 +896,18 @@
 {
   "fontSize": "16px",
   "gap": 10,
-  "fontWeight": 500
+  "fontWeight": 500,
+  "color": "rgba(0,0,0,1)",
+  "textOutlineColor": "rgba(0,0,0,0)"
 }
 ```
 | Key                   | 型      | 説明      |
 | --------------------- | ------ | ------- |
-| fontSize   | string | フォントサイズ |
-| gap        | number | 項目間隔    |
-| fontWeight | number | 文字太さ      |
+| fontSize        | string | フォントサイズ |
+| gap             | number | 項目間隔    |
+| fontWeight      | number | 文字太さ      |
+| color           | string | 文字色 |
+| textOutlineColor | string | テキストアウトライン色 |
 
 ### 8.12 Config
 コンフィグ画面の設定
