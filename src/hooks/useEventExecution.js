@@ -5,8 +5,10 @@ import {
     calcFlag,
     random,
     expandVarsShallow,
-    parseLineText
+    parseLineText,
+    parseOperand
 } from "./eventExecutionUtils.js";
+import { executeExternalFunc } from "../services/externalFuncService.js";
 
 export default function useEventViewer({
   lines,
@@ -45,6 +47,7 @@ export default function useEventViewer({
     const opSkip = useRef(false);
     const lastClickSkip = useRef(true);
     const animEndTimer = useRef(null); // アニメーション完了待ちタイマー
+    const pendingAsyncResult = useRef(null); // 非同期外部関数の結果待ち: { returnVar, value }
     const viewItemNameRef = useRef(viewItemName);
     
     // functions-----------------------------------------------------------------------------------------
@@ -170,6 +173,18 @@ export default function useEventViewer({
         if (currentOptions && opLabel.current === null) return;
 
         let newGameData = { ...gameData }; // 親に渡す更新データ
+
+        // 非同期外部関数の結果を適用（再開時）
+        if (pendingAsyncResult.current !== null) {
+            const { returnVar, value } = pendingAsyncResult.current;
+            pendingAsyncResult.current = null;
+            if (returnVar) {
+                const vi = newGameData.variables.findIndex(v => v.name === returnVar);
+                if (vi !== -1) newGameData.variables[vi].value = value;
+                else newGameData.variables.push({ name: returnVar, value });
+            }
+        }
+
         const nLine = expandVarsShallow(lines.lines[index], newGameData.variables); // クリック待ちのために停止した行
         let cLine = currentLine; // 今表示している行の内容かつ、次に表示する行の内容。何もなければ表示に変化なし
         let i = index; // 処理する行数を示すインデックス
@@ -641,7 +656,27 @@ export default function useEventViewer({
                 // デバッグコンソールにログを送信
                 onConsoleLog?.(line.command);
             }
-            
+            else if(line.type === "externalFunc"){// 外部関数実行
+                const resolvedArgs = line.args.map(a => parseOperand(a, newGameData.variables));
+                const ret = executeExternalFunc(line.file, line.func, resolvedArgs);
+                if (ret instanceof Promise) {
+                    // 非同期: 次の行を指すようにしてからbreak、Promise完了後に再開
+                    i++;
+                    ret.then(value => {
+                        pendingAsyncResult.current = { returnVar: line.returnVar, value: value ?? "" };
+                        handleClick(lines);
+                    });
+                    break;
+                } else {
+                    // 同期: 即座に変数格納してループ続行
+                    if (line.returnVar) {
+                        const vi = newGameData.variables.findIndex(v => v.name === line.returnVar);
+                        if (vi !== -1) newGameData.variables[vi].value = ret ?? "";
+                        else newGameData.variables.push({ name: line.returnVar, value: ret ?? "" });
+                    }
+                }
+            }
+
             i++;
         }
 
