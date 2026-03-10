@@ -24,6 +24,18 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo, onBackToPro
     onBackToProjectSelect();
   }, [save, onBackToProjectSelect]);
 
+  // プロジェクトZIPエクスポート（Wails版）: 保存ダイアログ → Go側でZIP作成
+  const handleExportZipWails = useCallback(async () => {
+    setExportAnchor(null);
+    try {
+      await save();
+      await storage.exportProjectAsZip();
+      setSnack({ open: true, message: "ZIPファイルを書き出しました" });
+    } catch (e) {
+      setSnack({ open: true, message: `ZIPエクスポート失敗: ${e}` });
+    }
+  }, [save]);
+
   // ゲーム出力 (HTML) — Wails版: フォルダに直接書き出し
   const handleExportPlayerWails = useCallback(async () => {
     setExportAnchor(null);
@@ -96,10 +108,16 @@ const MyAppBar = memo(({save, isSaved, undo, redo, canUndo, canRedo, onBackToPro
           </IconButton>
           <Menu anchorEl={exportAnchor} open={!!exportAnchor} onClose={() => setExportAnchor(null)}>
             {isWails ? (
-              <MenuItem onClick={handleExportPlayerWails}>
-                <ListItemIcon><Html fontSize="small" /></ListItemIcon>
-                <ListItemText>ゲーム出力 (HTML)</ListItemText>
-              </MenuItem>
+              [
+                <MenuItem key="player" onClick={handleExportPlayerWails}>
+                  <ListItemIcon><Html fontSize="small" /></ListItemIcon>
+                  <ListItemText>ゲーム出力 (HTML)</ListItemText>
+                </MenuItem>,
+                <MenuItem key="zip" onClick={handleExportZipWails}>
+                  <ListItemIcon><Download fontSize="small" /></ListItemIcon>
+                  <ListItemText>プロジェクトZIP</ListItemText>
+                </MenuItem>,
+              ]
             ) : (
               [
                 <MenuItem key="player" onClick={handleExportPlayerBrowser}>

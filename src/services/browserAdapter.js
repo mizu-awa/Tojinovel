@@ -72,7 +72,15 @@ async function registerServiceWorker() {
 }
 
 async function notifyServiceWorker(projectId) {
-  if (!navigator.serviceWorker?.controller) return;
+  if (!("serviceWorker" in navigator)) return;
+  // controllerがnullの場合（初回SW制御取得前）はcontrollerchangeを待つ
+  if (!navigator.serviceWorker.controller) {
+    await new Promise((resolve) => {
+      navigator.serviceWorker.addEventListener("controllerchange", resolve, {
+        once: true,
+      });
+    });
+  }
   navigator.serviceWorker.controller.postMessage({
     type: "SET_PROJECT",
     projectId,

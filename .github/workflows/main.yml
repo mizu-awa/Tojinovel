@@ -202,7 +202,7 @@ jobs:
   # ブラウザ版 GitHub Pages デプロイ
   # ----------------------------
   deploy-browser:
-    needs: detect-changes
+    needs: [detect-changes, generate-version]
     if: needs.detect-changes.outputs.core == 'True'
     runs-on: ubuntu-latest
     environment: github-pages
@@ -218,6 +218,9 @@ jobs:
 
       - name: Install npm dependencies
         run: npm ci
+
+      - name: Write version file
+        run: echo "VITE_RELEASE_VERSION=${{ needs.generate-version.outputs.version }}" > .env.local
 
       - name: Build browser version
         run: npm run build:browser

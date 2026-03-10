@@ -1,6 +1,7 @@
 package services
 
 import (
+	"archive/zip"
 	"context"
 	"embed"
 	"encoding/json"
@@ -271,6 +272,101 @@ func (p *ProjectManager) ImportFile(destDir string) (string, error) {
 	// フロントエンドに返す相対パス（./ + destDir/ファイル名）
 	relPath := "./" + filepath.ToSlash(filepath.Join(destRelClean, fileName))
 	return relPath, nil
+}
+
+// ExportProjectAsZip - プロジェクト全体をZIPファイルとして書き出す（ブラウザ版移行用）
+func (p *ProjectManager) ExportProjectAsZip() error {
+	if p.ctx == nil {
+		return fmt.Errorf("コンテキストが未設定です")
+	}
+
+	projectPath := p.fileService.GetProjectPath()
+	if projectPath == "" {
+		return fmt.Errorf("プロジェクトが選択されていません")
+	}
+
+	projectName := filepath.Base(projectPath)
+
+	// 保存先ダイアログ
+	savePath, err := wailsRuntime.SaveFileDialog(p.ctx, wailsRuntime.SaveDialogOptions{
+		Title:           "ZIPファイルの保存先を選択",
+		DefaultFilename: projectName + ".zip",
+		Filters: []wailsRuntime.FileFilter{
+			{DisplayName: "ZIPファイル (*.zip)", Pattern: "*.zip"},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("ダイアログエラー: %w", err)
+	}
+	// キャンセルされた場合
+	if savePath == "" {
+		return nil
+	}
+
+	// .zip 拡張子がない場合は追加
+	if !strings.HasSuffix(strings.ToLower(savePath), ".zip") {
+		savePath += ".zip"
+	}
+
+	// ZIPファイルを作成
+	zipFile, err := os.Create(savePath)
+	if err != nil {
+		return fmt.Errorf("ZIPファイルの作成に失敗: %w", err)
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+
+	// プロジェクトフォルダを再帰的にZIPに追加
+	parentDir := filepath.Dir(projectPath)
+	walkErr := filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+
+		// ZIP内の相対パス（projectName/data/... 形式）
+		relPath, err := filepath.Rel(parentDir, path)
+		if err != nil {
+			return err
+		}
+		relPath = filepath.ToSlash(relPath)
+
+		// ドットファイルをスキップ（.git など）
+		for _, part := range strings.Split(relPath, "/") {
+			if strings.HasPrefix(part, ".") {
+				return nil
+			}
+		}
+
+		w, err := zipWriter.Create(relPath)
+		if err != nil {
+			return err
+		}
+
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		_, err = w.Write(data)
+		return err
+	})
+
+	// Close を先に呼んでから walkErr を評価
+	if err := zipWriter.Close(); err != nil && walkErr == nil {
+		walkErr = err
+	}
+
+	if walkErr != nil {
+		zipFile.Close()
+		os.Remove(savePath)
+		return fmt.Errorf("ZIPの作成に失敗: %w", walkErr)
+	}
+
+	return nil
 }
 
 // GetCurrentProjectName - 現在のプロジェクト名を取得

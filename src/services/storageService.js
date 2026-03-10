@@ -45,6 +45,9 @@ export const storage = {
   // プレイヤー書き出し
   exportPlayer: (...args) => adapter.exportPlayer?.(...args) ?? Promise.resolve(null),
 
+  // プロジェクトZIPエクスポート
+  exportProjectAsZip: (...args) => adapter.exportProjectAsZip?.(...args) ?? Promise.resolve(null),
+
   // ファイルインポート（ダイアログ経由）
   importFile: (...args) => adapter.importFile?.(...args) ?? Promise.resolve(null),
 
