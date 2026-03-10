@@ -52,7 +52,7 @@ const eventLanguage = StreamLanguage.define({
       return "controlKeyword";
     }
 
-    // コマンド: # で始まる行
+    // コマンド: # で始まる行（#外部関数:/#externalFunc: も含む）
     if (stream.match(/#[^:\s]+:/)) {
       return "keyword";
     }
