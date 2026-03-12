@@ -765,10 +765,10 @@ export default function useEventViewer({
                 opSkip.current = false;
                 opLabel.current = null;
 
-                // バックグラウンドイベントからのジャンプは完了扱い（isBackEventRunningをリセット）
-                if(!lines.isView){
-                    onComplete?.();
-                }
+                // バックグラウンドイベントからのジャンプ:
+                // fileJumpはjump=trueでexecuteEventを呼ぶため、キューをバイパスして直接実行される。
+                // ここでonComplete(finishBackEvent)を呼ぶと、キューから次のイベントが取り出されて
+                // fileJumpの結果と競合するため、呼ばない。ジャンプ先の実行完了時にキューが進む。
             }
             else if(!lines.isView && i >= lines.lines.length){ // バックグラウンドイベント実行完了
                 // #if終了 欠落チェック
