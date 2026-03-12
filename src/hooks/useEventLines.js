@@ -3,21 +3,27 @@ const charAnimationAliases = {
   // 登場系
   "フェードイン": "fadeIn",
   "fadeIn": "fadeIn",
-  "左スライドイン": "slideInLeft",
-  "slideInLeft": "slideInLeft",
-  "右スライドイン": "slideInRight",
-  "slideInRight": "slideInRight",
-  "下スライドイン": "slideInDown",
-  "slideInDown": "slideInDown",
+  "左スライドイン": "slideInL",
+  "slideInL": "slideInL",
+  "slideInLeft": "slideInL",   // 旧名互換
+  "右スライドイン": "slideInR",
+  "slideInR": "slideInR",
+  "slideInRight": "slideInR",  // 旧名互換
+  "下スライドイン": "slideInD",
+  "slideInD": "slideInD",
+  "slideInDown": "slideInD",   // 旧名互換
   // 退場系
   "フェードアウト": "fadeOut",
   "fadeOut": "fadeOut",
-  "左スライドアウト": "slideOutLeft",
-  "slideOutLeft": "slideOutLeft",
-  "右スライドアウト": "slideOutRight",
-  "slideOutRight": "slideOutRight",
-  "下スライドアウト": "slideOutDown",
-  "slideOutDown": "slideOutDown",
+  "左スライドアウト": "slideOutL",
+  "slideOutL": "slideOutL",
+  "slideOutLeft": "slideOutL",   // 旧名互換
+  "右スライドアウト": "slideOutR",
+  "slideOutR": "slideOutR",
+  "slideOutRight": "slideOutR",  // 旧名互換
+  "下スライドアウト": "slideOutD",
+  "slideOutD": "slideOutD",
+  "slideOutDown": "slideOutD",   // 旧名互換
   // 感情系
   "振動": "shake",
   "shake": "shake",
@@ -34,7 +40,7 @@ const charAnimationAliases = {
 };
 
 // 退場系アニメーション判定
-export const exitAnimations = new Set(["fadeOut", "slideOutLeft", "slideOutRight", "slideOutDown"]);
+export const exitAnimations = new Set(["fadeOut", "slideOutL", "slideOutR", "slideOutD"]);
 
 // 括弧内テキストから表情とアニメーションを分離する
 function parseExpressionAndAnimation(text) {
