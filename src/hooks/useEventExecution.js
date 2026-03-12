@@ -7,6 +7,7 @@ import {
     expandVarsShallow,
     parseLineText
 } from "./eventExecutionUtils.js";
+import { exitAnimations } from "./useEventLines.js";
 
 export default function useEventViewer({
   lines,
@@ -80,11 +81,15 @@ export default function useEventViewer({
         const characterSlotsBuf = [...slots]; // 現在のスロットを退避
         const fi = characterSlotsBuf.findIndex(s => s.name === line.char); // 発言中のキャラクターのスロット番号
 
+        // アニメーション情報（あれば付与、なければnull）
+        const anim = line.animation || null;
+        const animKey = anim ? Date.now() : undefined;
+
         // すでに登場している場合
         if (fi !== -1) {
             const character = characterSlotsBuf[fi];
             // 表情を更新
-            characterSlotsBuf[fi] = {...character, nowImage: updateImage(character), lastSpoken: now};
+            characterSlotsBuf[fi] = {...character, nowImage: updateImage(character), lastSpoken: now, animation: anim, animationKey: animKey};
         }
         // 空きスロットがあれば追加する
         else if (characterSlotsBuf.length < gameData.game.character.slots) {
@@ -92,8 +97,8 @@ export default function useEventViewer({
             const character = gameData.characters.find(c => c.name === line.char);
             if(character){
                 // 配列に追加する形で追加
-                characterSlotsBuf.push({ ...character, lastSpoken: now, nowImage: updateImage(character) });
-            } 
+                characterSlotsBuf.push({ ...character, lastSpoken: now, nowImage: updateImage(character), animation: anim, animationKey: animKey });
+            }
         }
         // 空きがなければ最も古いキャラを探して置き換え
         else{
@@ -108,7 +113,7 @@ export default function useEventViewer({
                     }
                 }
                 // キャラクターを新規キャラクターで上書き
-                characterSlotsBuf[oldestIndex] = ({ ...character, lastSpoken: now, nowImage: updateImage(character) });
+                characterSlotsBuf[oldestIndex] = ({ ...character, lastSpoken: now, nowImage: updateImage(character), animation: anim, animationKey: animKey });
             }
         }
 
@@ -133,7 +138,13 @@ export default function useEventViewer({
 
         // 登場している場合
         if (fi !== -1) {
-            characterSlotsBuf.splice(fi, 1); // 削除
+            // 退場アニメーションがある場合はアニメーション付きでスロットに残す（EventViewerのonAnimationEndで削除）
+            if (line.animation && exitAnimations.has(line.animation)) {
+                const character = characterSlotsBuf[fi];
+                characterSlotsBuf[fi] = {...character, animation: line.animation, animationKey: Date.now(), exiting: true};
+                return characterSlotsBuf;
+            }
+            characterSlotsBuf.splice(fi, 1); // 即削除
             return characterSlotsBuf;
         }
         return slots;
@@ -754,10 +765,10 @@ export default function useEventViewer({
                 opSkip.current = false;
                 opLabel.current = null;
 
-                // バックグラウンドイベントからのジャンプは完了扱い（isBackEventRunningをリセット）
-                if(!lines.isView){
-                    onComplete?.();
-                }
+                // バックグラウンドイベントからのジャンプ:
+                // fileJumpはjump=trueでexecuteEventを呼ぶため、キューをバイパスして直接実行される。
+                // ここでonComplete(finishBackEvent)を呼ぶと、キューから次のイベントが取り出されて
+                // fileJumpの結果と競合するため、呼ばない。ジャンプ先の実行完了時にキューが進む。
             }
             else if(!lines.isView && i >= lines.lines.length){ // バックグラウンドイベント実行完了
                 // #if終了 欠落チェック

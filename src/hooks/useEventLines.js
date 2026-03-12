@@ -1,3 +1,57 @@
+// キャラクターアニメーション名マッピング（日本語→内部名）
+const charAnimationAliases = {
+  // 登場系
+  "フェードイン": "fadeIn",
+  "fadeIn": "fadeIn",
+  "左スライドイン": "slideInL",
+  "slideInL": "slideInL",
+  "slideInLeft": "slideInL",   // 旧名互換
+  "右スライドイン": "slideInR",
+  "slideInR": "slideInR",
+  "slideInRight": "slideInR",  // 旧名互換
+  "下スライドイン": "slideInD",
+  "slideInD": "slideInD",
+  "slideInDown": "slideInD",   // 旧名互換
+  // 退場系
+  "フェードアウト": "fadeOut",
+  "fadeOut": "fadeOut",
+  "左スライドアウト": "slideOutL",
+  "slideOutL": "slideOutL",
+  "slideOutLeft": "slideOutL",   // 旧名互換
+  "右スライドアウト": "slideOutR",
+  "slideOutR": "slideOutR",
+  "slideOutRight": "slideOutR",  // 旧名互換
+  "下スライドアウト": "slideOutD",
+  "slideOutD": "slideOutD",
+  "slideOutDown": "slideOutD",   // 旧名互換
+  // 感情系
+  "振動": "shake",
+  "shake": "shake",
+  "ジャンプ": "jump",
+  "jump": "jump",
+  "うなずき": "nod",
+  "nod": "nod",
+  "バウンス": "bounce",
+  "bounce": "bounce",
+  "フラッシュ": "flash",
+  "flash": "flash",
+  "揺れ": "sway",
+  "sway": "sway",
+};
+
+// 退場系アニメーション判定
+export const exitAnimations = new Set(["fadeOut", "slideOutL", "slideOutR", "slideOutD"]);
+
+// 括弧内テキストから表情とアニメーションを分離する
+function parseExpressionAndAnimation(text) {
+  const parts = text.split("/");
+  if (parts.length >= 2) {
+    const expression = parts[0] || null; // スラッシュの前が空なら null
+    const animation = charAnimationAliases[parts[1]] || null;
+    return { expression, animation };
+  }
+  return { expression: text, animation: null };
+}
 
 export async function loadEventLines(url, startLabel, characters) {
   try {
@@ -497,8 +551,10 @@ function parseEventText(text, label, characters) {
 
           // 名前・表情がある場合
           if (match2) {
-            // 名前、表情、本文を登録
-            blocks.push({ type: "dialogue", char: match2[1], expression: match2[2], text, volume, sound: normalizeRelativeUrl(match[3]?.trim()) });
+            // 表情とアニメーションを分離
+            const { expression, animation } = parseExpressionAndAnimation(match2[2]);
+            // 名前、表情、アニメーション、本文を登録
+            blocks.push({ type: "dialogue", char: match2[1], expression, animation, text, volume, sound: normalizeRelativeUrl(match[3]?.trim()) });
           }
           else {
             // ない場合はすべて名前として解釈
@@ -523,15 +579,17 @@ function parseEventText(text, label, characters) {
 
       // 命令がある場合
       if (match && characters.find(s => s.name === match[1])) {
+        // 表情とアニメーションを分離
+        const { expression, animation } = parseExpressionAndAnimation(match[2]);
 
-        // 退場命令の場合
-        if (match[2] === "退場"){
-          blocks.push({ type: "exit", char: match[1] });
+        // 退場命令の場合（「退場」または退場系アニメーションのみ指定）
+        if (expression === "退場" || (expression === null && animation && exitAnimations.has(animation))){
+          blocks.push({ type: "exit", char: match[1], animation });
         }
         else{
           // それ以外は表情変化の命令として解釈
           isView = true;
-          blocks.push({ type: "expression", char: match[1], expression: match[2] });
+          blocks.push({ type: "expression", char: match[1], expression, animation });
         }
       }
       else {
