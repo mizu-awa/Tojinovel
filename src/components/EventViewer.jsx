@@ -227,7 +227,7 @@ function EventViewer({
                   maxHeight: "90%",
                   width: "auto",
                   height: "auto",
-                  filter: currentLine?.char === ch.name ? "none" : "brightness(0.8)",
+                  filter: (!currentLine?.char || currentLine?.char === ch.name) ? "none" : "brightness(0.8)",
                   transition: "filter 0.3s ease",
                   transform: "translateX(-50%)",
                   transformOrigin: "center bottom",
