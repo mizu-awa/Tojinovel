@@ -155,9 +155,9 @@ function EventViewer({
     return null;
   }
 
-  // 中身がないときもクリック要素を設置
-  if (lines.length === 0 || !currentLine) return (
-    <ClickArea onClick={() => handleClick(lines)} />
+  // 描画するものが何もないときもクリック要素を設置（z-index付きでホットスポットより上に配置）
+  if (!currentLine && !currentBack?.url && !currentBack?.color && !currentImage) return (
+    <ClickArea zIndex={2003} onClick={() => handleClick(lines)} />
   );
 
   const itemBoxSize = gameData.game.itemBox.foldable ? 0 : gameData.game.itemBox.size;
@@ -225,7 +225,7 @@ function EventViewer({
                   maxHeight: "90%",
                   width: "auto",
                   height: "auto",
-                  filter: currentLine.char === ch.name ? "none" : "brightness(0.8)",
+                  filter: currentLine?.char === ch.name ? "none" : "brightness(0.8)",
                   transform: "translateX(-50%)"
                 }}
                 onError={(e) => {
@@ -239,7 +239,7 @@ function EventViewer({
       </div>}
 
       {/* 名前表示 */}
-      {currentLine.char &&
+      {currentLine?.char &&
         <div
           style={{
             ...gameData.game.textBox.nameStyle,
@@ -272,7 +272,7 @@ function EventViewer({
       }
       
       {/* テキストボックス */}
-      {currentLine.text &&
+      {currentLine?.text &&
       <div
         style={{
             ...gameData.game.textBox.style,
@@ -346,12 +346,12 @@ function EventViewer({
       {!forEdit && <ClickArea zIndex={2003} onClick={() => {handleClick(lines)}} />}
 
       {/* クリック要素（文字送り停止） */}
-      {(!forEdit && visibleCount && currentLine.text && (visibleCount < currentLine.text.length)) &&
+      {(!forEdit && visibleCount && currentLine?.text && (visibleCount < currentLine.text.length)) &&
         <ClickArea zIndex={2004} onClick={() => {setVisibleCount(currentLine.text.length)}} />
       }
 
       {/* クリック要素（文字送り停止）（エディタ用） */}
-      {(forEdit && visibleCount && currentLine.text && (visibleCount >= currentLine.text.length)) &&
+      {(forEdit && visibleCount && currentLine?.text && (visibleCount >= currentLine.text.length)) &&
         <ClickArea zIndex={2004} onClick={() => {setVisibleCount(0)}} />
       }
 
