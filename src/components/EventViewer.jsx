@@ -78,9 +78,12 @@ function EventViewer({
     if(currentLine && currentLine.text && currentLine.text.length >= 1){
       if (visibleCount < currentLine.text.length) {
         if(gameData?.game?.textBox?.speed !== 0){
+          const baseSpeed = gameData?.game?.textBox?.speed ?? 80;
+          // 改行文字は2拍分の間を取る
+          const isNewline = currentLine.text[visibleCount]?.char === '\n';
           const timer = setTimeout(() => {
             setVisibleCount(c => c + 1);
-          }, gameData?.game?.textBox?.speed ?? 80);
+          }, isNewline ? baseSpeed * 2 : baseSpeed);
           return () => clearTimeout(timer);
         }
         else{// スピード0の場合は文字送りなし
