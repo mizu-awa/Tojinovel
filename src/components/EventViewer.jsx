@@ -212,9 +212,11 @@ function EventViewer({
         {characterSlots.map((ch, i) => {
           // 画像が指定されている場合のみ表示
           if(ch.nowImage){
+            const animClass = ch.animation ? `char-${ch.animation}` : "";
             return(
               <img
-                key={ch.name}
+                key={`${ch.name}-${ch.animationKey || 0}`}
+                className={animClass}
                 src={ch.nowImage}
                 alt={ch.name}
                 style={{
@@ -226,7 +228,20 @@ function EventViewer({
                   width: "auto",
                   height: "auto",
                   filter: currentLine?.char === ch.name ? "none" : "brightness(0.8)",
-                  transform: "translateX(-50%)"
+                  transition: "filter 0.3s ease",
+                  transformOrigin: "center bottom",
+                }}
+                onAnimationEnd={() => {
+                  // 退場アニメーション完了時にスロットから削除
+                  if(ch.exiting){
+                    setCharacterSlots(prev => prev.filter(s => s.name !== ch.name));
+                  }
+                  // 感情系アニメーション完了時にアニメーション状態をクリア
+                  else if(ch.animation){
+                    setCharacterSlots(prev => prev.map(s =>
+                      s.name === ch.name ? {...s, animation: null, animationKey: undefined} : s
+                    ));
+                  }
                 }}
                 onError={(e) => {
                   e.currentTarget.onerror = null;

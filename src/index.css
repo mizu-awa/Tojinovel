@@ -436,3 +436,135 @@ button:focus-visible {
     clip-path: inset(100% 0 0 0);
   }
 }
+
+/* ===== キャラクターアニメーション ===== */
+
+/* --- 登場系 --- */
+.char-fadeIn {
+  animation: charFadeIn 0.5s ease forwards;
+}
+@keyframes charFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.char-slideInLeft {
+  animation: charSlideInLeft 0.5s ease forwards;
+}
+@keyframes charSlideInLeft {
+  from { opacity: 0; transform: translateX(calc(-50% - 120px)); }
+  to   { opacity: 1; transform: translateX(-50%); }
+}
+
+.char-slideInRight {
+  animation: charSlideInRight 0.5s ease forwards;
+}
+@keyframes charSlideInRight {
+  from { opacity: 0; transform: translateX(calc(-50% + 120px)); }
+  to   { opacity: 1; transform: translateX(-50%); }
+}
+
+.char-slideInDown {
+  animation: charSlideInDown 0.5s ease forwards;
+}
+@keyframes charSlideInDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(100px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* --- 退場系 --- */
+.char-fadeOut {
+  animation: charFadeOut 0.5s ease forwards;
+}
+@keyframes charFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.char-slideOutLeft {
+  animation: charSlideOutLeft 0.5s ease forwards;
+}
+@keyframes charSlideOutLeft {
+  from { opacity: 1; transform: translateX(-50%); }
+  to   { opacity: 0; transform: translateX(calc(-50% - 120px)); }
+}
+
+.char-slideOutRight {
+  animation: charSlideOutRight 0.5s ease forwards;
+}
+@keyframes charSlideOutRight {
+  from { opacity: 1; transform: translateX(-50%); }
+  to   { opacity: 0; transform: translateX(calc(-50% + 120px)); }
+}
+
+.char-slideOutDown {
+  animation: charSlideOutDown 0.5s ease forwards;
+}
+@keyframes charSlideOutDown {
+  from { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(100px); }
+}
+
+/* --- 感情系 --- */
+.char-shake {
+  animation: charShake 0.4s ease;
+}
+@keyframes charShake {
+  0%, 100% { transform: translateX(-50%); }
+  20%      { transform: translateX(calc(-50% - 8px)); }
+  40%      { transform: translateX(calc(-50% + 8px)); }
+  60%      { transform: translateX(calc(-50% - 4px)); }
+  80%      { transform: translateX(calc(-50% + 4px)); }
+}
+
+.char-jump {
+  animation: charJump 0.5s ease;
+  transform-origin: center bottom;
+}
+@keyframes charJump {
+  0%   { transform: translateX(-50%) scaleY(1); }
+  15%  { transform: translateX(-50%) scaleY(0.92); }
+  40%  { transform: translateX(-50%) scaleY(1.06); }
+  60%  { transform: translateX(-50%) scaleY(0.97); }
+  100% { transform: translateX(-50%) scaleY(1); }
+}
+
+.char-nod {
+  animation: charNod 0.4s ease;
+  transform-origin: center bottom;
+}
+@keyframes charNod {
+  0%, 100% { transform: translateX(-50%) scaleY(1); }
+  30%      { transform: translateX(-50%) scaleY(0.97); }
+  60%      { transform: translateX(-50%) scaleY(1); }
+}
+
+.char-bounce {
+  animation: charBounce 0.6s ease;
+  transform-origin: center bottom;
+}
+@keyframes charBounce {
+  0%, 100% { transform: translateX(-50%) scaleY(1); }
+  20%      { transform: translateX(-50%) scaleY(0.9); }
+  40%      { transform: translateX(-50%) scaleY(1.08); }
+  55%      { transform: translateX(-50%) scaleY(0.95); }
+  70%      { transform: translateX(-50%) scaleY(1.03); }
+  85%      { transform: translateX(-50%) scaleY(0.98); }
+}
+
+.char-flash {
+  animation: charFlash 0.3s ease;
+}
+@keyframes charFlash {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(2.5); }
+}
+
+.char-sway {
+  animation: charSway 1s ease-in-out;
+}
+@keyframes charSway {
+  0%, 100% { transform: translateX(-50%); }
+  25%      { transform: translateX(calc(-50% - 10px)); }
+  75%      { transform: translateX(calc(-50% + 10px)); }
+}
