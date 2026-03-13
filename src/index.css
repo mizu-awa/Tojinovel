@@ -139,17 +139,21 @@ button:focus-visible {
 .hoverSh::after{
   content: "";
   position: absolute;
-  top: 0;
-  left: -75%;
-  width: 50%;
-  height: 100%;
+  /* top: -100% + height: 300% で要素中央に垂直配置 */
+  top: -100%;
+  left: -50%;
+  width: 30%;
+  height: 300%;
   background: linear-gradient(
-    120deg,
+    to right,
     rgba(255, 255, 255, 0) 0%,
     rgba(255, 255, 255, 0.6) 50%,
     rgba(255, 255, 255, 0) 100%
   );
-  transform: skewX(-20deg);
+  /* skewXではなくrotateで斜め帯にする（縦長要素でも太さが一定になる） */
+  transform: rotate(20deg);
+  /* 非アニメーション中は非表示（縦長要素で回転コーナーが見えるのを防ぐ） */
+  opacity: 0;
 }
 
 /* ホバー時にきらりんアニメーション */
@@ -183,12 +187,10 @@ button:focus-visible {
 }
 
 @keyframes shine {
-  0% {
-    left: -75%;
-  }
-  100% {
-    left: 125%;
-  }
+  0%   { left: -75%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: 125%; opacity: 0; }
 }
 
 .spin {
