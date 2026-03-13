@@ -559,24 +559,37 @@ function parseEventText(text, label, characters) {
             text = text.slice(0, -4);
           }
 
-          // 名前と表情に分割
-          let match2 = match[1].match(/^(.*?)（(.+?)）$/);
-          if(!match2){
-            // 半角括弧も許容
-            match2 = match[1].match(/^(.*?)\((.+?)\)$/);
-          }
+          // 「・」区切りで複数キャラを分割
+          const charParts = match[1].split("・");
 
-          // 名前・表情がある場合
-          if (match2) {
-            // 表情とアニメーションを分離
-            const { expression, animation } = parseExpressionAndAnimation(match2[2]);
-            // 名前、表情、アニメーション、本文を登録
-            blocks.push({ type: "dialogue", char: match2[1], expression, animation, text, volume, sound: normalizeRelativeUrl(match[3]?.trim()) });
+          // 各キャラの名前・表情・アニメーションをパース
+          const chars = charParts.map(part => {
+            let m = part.match(/^(.*?)（(.+?)）$/);
+            if(!m){
+              m = part.match(/^(.*?)\((.+?)\)$/);
+            }
+            if (m) {
+              const { expression, animation } = parseExpressionAndAnimation(m[2]);
+              return { name: m[1], expression, animation };
+            }
+            return { name: part, expression: null, animation: null };
+          });
+
+          // 代表キャラ（最後のキャラ）の情報でdialogueブロックを生成
+          const lastChar = chars[chars.length - 1];
+          const block = {
+            type: "dialogue",
+            char: lastChar.name,
+            expression: lastChar.expression,
+            animation: lastChar.animation,
+            text, volume,
+            sound: normalizeRelativeUrl(match[3]?.trim())
+          };
+          // 複数キャラの場合はchars配列を付与
+          if (chars.length > 1) {
+            block.chars = chars;
           }
-          else {
-            // ない場合はすべて名前として解釈
-            blocks.push({ type: "dialogue", char: match[1], text, volume, sound: normalizeRelativeUrl(match[3]?.trim()) });
-          }
+          blocks.push(block);
         }
         else {// 分解できなかった場合
           // 全体をセリフとして登録

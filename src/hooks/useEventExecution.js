@@ -199,7 +199,14 @@ export default function useEventViewer({
 
         /* 現在の行の処理（クリック待ち要素） */
         if(nLine.type === "dialogue"){ // セリフ
-            slots = onCharacterExpression(nLine, slots);
+            // 複数キャラ同時発言の場合、全キャラの表情を更新
+            if (nLine.chars) {
+                for (const ch of nLine.chars) {
+                    slots = onCharacterExpression({ char: ch.name, expression: ch.expression, animation: ch.animation }, slots);
+                }
+            } else {
+                slots = onCharacterExpression(nLine, slots);
+            }
             // セリフ音声を再生
             audioManager.stopVoice();
             if(nLine.sound && nLine.sound !== undefined){
@@ -322,8 +329,14 @@ export default function useEventViewer({
             }
             else if(line.type === "dialogue"){// セリフ
                 if(!cLine){// 最初の行対策
-                    // キャラクター表示の計算
-                    slots = onCharacterExpression(line, slots);
+                    // キャラクター表示の計算（複数キャラ同時発言対応）
+                    if (line.chars) {
+                        for (const ch of line.chars) {
+                            slots = onCharacterExpression({ char: ch.name, expression: ch.expression, animation: ch.animation }, slots);
+                        }
+                    } else {
+                        slots = onCharacterExpression(line, slots);
+                    }
                     // セリフ音声を再生
                     audioManager.stopVoice();
                     if(line.sound && line.sound !== undefined){
