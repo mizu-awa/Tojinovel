@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from "react";
+import { useEffect, useState, useRef, memo } from "react";
 import useEventExecution from "../hooks/useEventExecution";
 
 function EventViewer({ 
@@ -34,6 +34,10 @@ function EventViewer({
 
   // states-----------------------------------------------------------------------------------------------------------------------
   const [visibleCount, setVisibleCount] = useState(0);
+
+  // ref-----
+  // シェイクアニメーション用（keyによる再マウントを避けるためrefで制御）
+  const shakeRef = useRef(null);
 
   // useEventExecution----------------------------------------------------------------------------------------------------------------
   const {
@@ -75,6 +79,16 @@ function EventViewer({
     });
   
   // effects--------------------------------------------------------------------------------------------------------------------
+  // シェイクアニメーション（keyによる再マウントを避け、classListで制御）
+  useEffect(() => {
+    if (screenEffect?.type === "shake" && shakeRef.current) {
+      const el = shakeRef.current;
+      el.classList.remove("screen-shake");
+      void el.offsetWidth; // リフロー強制でアニメーションリセット
+      el.classList.add("screen-shake");
+    }
+  }, [screenEffect?.key]);
+
   // 文字送り TODO:Stateだと重いか？
   useEffect(() => {
     if(currentLine && currentLine.text && currentLine.text.length >= 1){
@@ -169,14 +183,16 @@ function EventViewer({
   const strokeWidth = 0.05; // 文字サイズに対して5%の太さ（微調整してください）
   const strokeColor = gameData.game.textBox.highlightStyle.strokeColor;
 
-  const shakeClass = screenEffect?.type === "shake" ? "screen-shake" : "";
-
+  // render-------------------------------------------------------------------------------------------------------------------
   return (
+    // 外側は固定コンテナ（overflow:hiddenでシェイク時のはみ出しをクリップ）
+    <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden" }}>
+    {/* 内側のみシェイク（translateXで動いても外にはみ出ない） */}
     <div
-      key={screenEffect?.type === "shake" ? screenEffect.key : undefined}
-      className={shakeClass}
-      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+      ref={shakeRef}
+      style={{ width: "100%", height: "100%", position: "relative" }}
       onAnimationEnd={() => {
+        shakeRef.current?.classList.remove("screen-shake");
         if (screenEffect?.type === "shake") setScreenEffect(null);
       }}
     >
@@ -420,6 +436,7 @@ function EventViewer({
         />
       )}
     </div>
+    </div>
   );
 }
 
@@ -535,7 +552,7 @@ function Background({currentBack, width, height}){
   const [backs, setBacks] = useState([]);
 
   useEffect(()=>{
-    setBacks([...backs, currentBack].slice(-2));
+    setBacks(prev => [...prev, currentBack].slice(-2));
   }, [currentBack])
 
   const noBack = backs.at(-1) ? !( backs.at(-1).color || backs.at(-1).url ) : true;
