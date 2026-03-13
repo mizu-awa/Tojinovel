@@ -36,7 +36,8 @@ export default function useEventViewer({
   onConsoleLog,
   currentSceneName,
   viewItemName,
-  selectItem
+  selectItem,
+  screenEffect, setScreenEffect
 }){
     // states------------------------------------------------------------------------------------------
     const [inputValue, setInputValue] = useState("");
@@ -194,6 +195,7 @@ export default function useEventViewer({
         let hChar = hiddenCharacter;
         let cInput = currentInput;
         let ms = false;// シーン移動
+        let cScreenEffect = null;// 画面エフェクト
 
         /* 現在の行の処理（クリック待ち要素） */
         if(nLine.type === "dialogue"){ // セリフ
@@ -556,6 +558,9 @@ export default function useEventViewer({
             else if(line.type === "clearText"){// テキスト表示リセット
                 cLine = {text: null, char: null};
             }
+            else if(line.type === "screenEffect"){// 画面エフェクト
+                cScreenEffect = { type: line.effect, key: Date.now() };
+            }
             else if(line.type === "input"){// 入力フォーム
                 break;// クリック待ち
             }
@@ -693,6 +698,7 @@ export default function useEventViewer({
                 setCurrentImage(null);
                 hideCharacter(false);
                 setCurrentInput(null);
+                setScreenEffect(null);
 
                 ifDepth.current = 0;
                 ifSkip.current = false;
@@ -730,6 +736,8 @@ export default function useEventViewer({
                 hideCharacter(hChar);
                 // 入力フォームを表示
                 setCurrentInput(cInput);
+                // 画面エフェクトを更新
+                if (cScreenEffect) setScreenEffect(cScreenEffect);
                 // インデックスを更新 バックグラウンドでは不要のため処理しない
                 setIndex(i);
             }

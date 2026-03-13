@@ -42,6 +42,14 @@ const charAnimationAliases = {
 // 退場系アニメーション判定
 export const exitAnimations = new Set(["fadeOut", "slideOutL", "slideOutR", "slideOutD"]);
 
+// 画面エフェクト名マッピング（日本語→内部名）
+const screenEffectAliases = {
+  "画面揺れ": "shake",
+  "shake": "shake",
+  "画面フラッシュ": "flash",
+  "flash": "flash",
+};
+
 // 括弧内テキストから表情とアニメーションを分離する
 function parseExpressionAndAnimation(text) {
   const parts = text.split("/");
@@ -160,6 +168,7 @@ const prefixAliases = {
   "pauseTimer:": "タイマー一時停止:",
   "resumeTimer:": "タイマー再開:",
   "console:": "コンソール:",
+  "screenEffect:": "画面効果:",
 };
 
 // 英語コマンドを日本語に正規化
@@ -345,6 +354,14 @@ function parseEventText(text, label, characters) {
           isView = true;
           blocks.push({type: "clearImage"});
           break;
+
+        case command.startsWith("画面効果:"): {// 画面全体エフェクト
+          isView = true;
+          const effectName = command.replace("画面効果:", "").trim();
+          const effect = screenEffectAliases[effectName];
+          if (effect) blocks.push({ type: "screenEffect", effect });
+          break;
+        }
 
         case command === "キャラ非表示": // キャラクターを非表示にする
           isView = true;
@@ -635,7 +652,7 @@ export function detectIfElseViewMismatch(text) {
     "クリック待ち", "選択肢", "選択肢:", "背景クリア", "画像クリア",
     "キャラ非表示", "キャラ非表示解除", "キャラクリア", "テキストクリア",
   ]);
-  const viewPrefixes = ["背景:", "画像:", "入力:"];
+  const viewPrefixes = ["背景:", "画像:", "入力:", "画面効果:"];
 
   function isViewCommand(cmd) {
     if (viewCommandSet.has(cmd)) return true;

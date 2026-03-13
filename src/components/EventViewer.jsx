@@ -28,7 +28,8 @@ function EventViewer({
   configVisible,
   currentSceneName,
   viewItemName,
-  selectItem
+  selectItem,
+  screenEffect, setScreenEffect
 }) {
 
   // states-----------------------------------------------------------------------------------------------------------------------
@@ -69,7 +70,8 @@ function EventViewer({
         onConsoleLog,
         currentSceneName,
         viewItemName,
-        selectItem
+        selectItem,
+        screenEffect, setScreenEffect
     });
   
   // effects--------------------------------------------------------------------------------------------------------------------
@@ -167,8 +169,17 @@ function EventViewer({
   const strokeWidth = 0.05; // 文字サイズに対して5%の太さ（微調整してください）
   const strokeColor = gameData.game.textBox.highlightStyle.strokeColor;
 
+  const shakeClass = screenEffect?.type === "shake" ? "screen-shake" : "";
+
   return (
-    <>
+    <div
+      key={screenEffect?.type === "shake" ? screenEffect.key : undefined}
+      className={shakeClass}
+      style={{ position: "relative", width: "100%", height: "100%" }}
+      onAnimationEnd={() => {
+        if (screenEffect?.type === "shake") setScreenEffect(null);
+      }}
+    >
       {/* 背景 */}
       <Background
         currentBack={currentBack}
@@ -390,7 +401,25 @@ function EventViewer({
         handleChange={handleChange}
         commitInput={commitInput}
       />
-    </>
+
+      {/* 画面フラッシュオーバーレイ */}
+      {screenEffect?.type === "flash" && (
+        <div
+          key={screenEffect.key}
+          className="screen-flash"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 2010,
+            pointerEvents: "none",
+          }}
+          onAnimationEnd={() => setScreenEffect(null)}
+        />
+      )}
+    </div>
   );
 }
 
