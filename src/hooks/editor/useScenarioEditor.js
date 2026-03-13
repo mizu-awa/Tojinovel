@@ -4,6 +4,9 @@ import { storage } from "../../services/storageService";
 import { Transaction } from "@codemirror/state";
 import { detectIfElseViewMismatch } from "../useEventLines";
 
+// Wails版かどうか（ファイルシステムを正とする）
+const isWails = !!window.go;
+
 // IndexedDB設定（useIndexedDBStorage.js と同じDB/ストアを共用）
 const DB_NAME = "TojinovelDB";
 const STORE_NAME = "gameSaveStore";
@@ -202,8 +205,9 @@ export default function useScenarioEditor({ setIsSaved }) {
 
     const existing = eventBufferRef.current.get(normalizedPath);
 
-    if (existing) {
+    if (existing && (!isWails || existing.dirty)) {
       // バッファにある場合はそこから表示
+      // ただしWails版でdirtyでない場合はファイルシステムから再読み込み（外部編集対応）
       pendingContentRef.current = existing.content;
 
       if (editorViewRef.current) {
@@ -344,7 +348,13 @@ export default function useScenarioEditor({ setIsSaved }) {
       const db = await getDB();
       const data = await db.get(STORE_NAME, getIdbKey());
       if (data) {
-        eventBufferRef.current = new Map(Object.entries(data));
+        const entries = Object.entries(data);
+        if (isWails) {
+          // Wails版: dirtyなエントリのみ復元（それ以外はファイルシステムから再読み込み）
+          eventBufferRef.current = new Map(entries.filter(([, entry]) => entry.dirty));
+        } else {
+          eventBufferRef.current = new Map(entries);
+        }
         updateHasDirtyFiles();
       }
     } catch (e) {
