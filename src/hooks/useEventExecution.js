@@ -711,7 +711,7 @@ export default function useEventViewer({
                 setCurrentImage(null);
                 hideCharacter(false);
                 setCurrentInput(null);
-                setScreenEffect(null);
+                setScreenEffect?.(null);
 
                 ifDepth.current = 0;
                 ifSkip.current = false;
@@ -750,7 +750,7 @@ export default function useEventViewer({
                 // 入力フォームを表示
                 setCurrentInput(cInput);
                 // 画面エフェクトを更新
-                if (cScreenEffect) setScreenEffect(cScreenEffect);
+                if (cScreenEffect) setScreenEffect?.(cScreenEffect);
                 // インデックスを更新 バックグラウンドでは不要のため処理しない
                 setIndex(i);
             }
