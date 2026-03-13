@@ -570,3 +570,24 @@ button:focus-visible {
   25%      { transform: translateX(calc(-50% - 10px)); }
   75%      { transform: translateX(calc(-50% + 10px)); }
 }
+
+/* 画面エフェクト ----------------------------------------------- */
+.screen-shake {
+  animation: screen-shake 0.4s ease-in-out;
+}
+@keyframes screen-shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+
+.screen-flash {
+  background-color: white;
+  animation: screen-flash 0.3s ease-out forwards;
+}
+@keyframes screen-flash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}

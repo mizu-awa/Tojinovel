@@ -43,6 +43,7 @@ export default function GameApp({ debug }) {
   const [currentImage, setCurrentImage] = useState(null);
   const [hiddenCharacter, hideCharacter] = useState(false);
   const [currentInput, setCurrentInput] = useState(null);
+  const [screenEffect, setScreenEffect] = useState(null);
   const [timerEvents, setTimerEvents] = useState(null);
   // debug
   const [consoleLogs, setConsoleLogs] = useState([]);
@@ -812,6 +813,8 @@ export default function GameApp({ debug }) {
         currentSceneName={currentScene.name}
         viewItemName={viewItemName}
         selectItem={selectItem}
+        screenEffect={screenEffect}
+        setScreenEffect={setScreenEffect}
       />
 
       {/* イベント表示(バックグラウンド) */}
