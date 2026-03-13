@@ -234,8 +234,12 @@ export function expandVarsShallow(block, vars) {
             result[key] = expandVars(value, vars);
         }
         else if (Array.isArray(value)) {
-            // 1次元配列の場合 → 各要素が文字列である前提なので展開
-            result[key] = value.map(s => expandVars(s, vars));
+            // 配列の場合 → 文字列はそのまま展開、オブジェクトは再帰展開
+            result[key] = value.map(s => {
+                if (typeof s === "string") return expandVars(s, vars);
+                if (s !== null && typeof s === "object") return expandVarsShallow(s, vars);
+                return s;
+            });
         }
         else {
             // 文字列でも配列でもない → そのまま（基本このケースは無い）

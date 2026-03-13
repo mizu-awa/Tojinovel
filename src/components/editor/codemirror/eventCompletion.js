@@ -120,6 +120,12 @@ const commands = [
   { label: "#タイマー再開: ", type: "keyword", info: "変数名" },
   { label: "#resumeTimer: ", type: "keyword", info: "変数名" },
 
+  // 画面エフェクト
+  { label: "#画面効果: 画面揺れ", type: "keyword", info: "画面全体を横に振動させる" },
+  { label: "#画面効果: 画面フラッシュ", type: "keyword", info: "画面全体を白くフラッシュさせる" },
+  { label: "#screenEffect: shake", type: "keyword", info: "画面全体を横に振動させる" },
+  { label: "#screenEffect: flash", type: "keyword", info: "画面全体を白くフラッシュさせる" },
+
   // デバッグ
   { label: "#コンソール: ", type: "keyword", info: "出力内容", detail: "デバッグ出力" },
   { label: "#console: ", type: "keyword", info: "出力内容", detail: "デバッグ出力" },

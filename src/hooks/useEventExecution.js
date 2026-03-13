@@ -36,7 +36,8 @@ export default function useEventViewer({
   onConsoleLog,
   currentSceneName,
   viewItemName,
-  selectItem
+  selectItem,
+  screenEffect, setScreenEffect
 }){
     // states------------------------------------------------------------------------------------------
     const [inputValue, setInputValue] = useState("");
@@ -194,10 +195,18 @@ export default function useEventViewer({
         let hChar = hiddenCharacter;
         let cInput = currentInput;
         let ms = false;// シーン移動
+        let cScreenEffect = null;// 画面エフェクト
 
         /* 現在の行の処理（クリック待ち要素） */
         if(nLine.type === "dialogue"){ // セリフ
-            slots = onCharacterExpression(nLine, slots);
+            // 複数キャラ同時発言の場合、全キャラの表情を更新
+            if (nLine.chars) {
+                for (const ch of nLine.chars) {
+                    slots = onCharacterExpression({ char: ch.name, expression: ch.expression, animation: ch.animation }, slots);
+                }
+            } else {
+                slots = onCharacterExpression(nLine, slots);
+            }
             // セリフ音声を再生
             audioManager.stopVoice();
             if(nLine.sound && nLine.sound !== undefined){
@@ -320,8 +329,14 @@ export default function useEventViewer({
             }
             else if(line.type === "dialogue"){// セリフ
                 if(!cLine){// 最初の行対策
-                    // キャラクター表示の計算
-                    slots = onCharacterExpression(line, slots);
+                    // キャラクター表示の計算（複数キャラ同時発言対応）
+                    if (line.chars) {
+                        for (const ch of line.chars) {
+                            slots = onCharacterExpression({ char: ch.name, expression: ch.expression, animation: ch.animation }, slots);
+                        }
+                    } else {
+                        slots = onCharacterExpression(line, slots);
+                    }
                     // セリフ音声を再生
                     audioManager.stopVoice();
                     if(line.sound && line.sound !== undefined){
@@ -556,6 +571,9 @@ export default function useEventViewer({
             else if(line.type === "clearText"){// テキスト表示リセット
                 cLine = {text: null, char: null};
             }
+            else if(line.type === "screenEffect"){// 画面エフェクト
+                cScreenEffect = { type: line.effect, key: Date.now() };
+            }
             else if(line.type === "input"){// 入力フォーム
                 break;// クリック待ち
             }
@@ -693,6 +711,7 @@ export default function useEventViewer({
                 setCurrentImage(null);
                 hideCharacter(false);
                 setCurrentInput(null);
+                setScreenEffect?.(null);
 
                 ifDepth.current = 0;
                 ifSkip.current = false;
@@ -730,6 +749,8 @@ export default function useEventViewer({
                 hideCharacter(hChar);
                 // 入力フォームを表示
                 setCurrentInput(cInput);
+                // 画面エフェクトを更新
+                if (cScreenEffect) setScreenEffect?.(cScreenEffect);
                 // インデックスを更新 バックグラウンドでは不要のため処理しない
                 setIndex(i);
             }

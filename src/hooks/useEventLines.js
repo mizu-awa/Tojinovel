@@ -42,6 +42,14 @@ const charAnimationAliases = {
 // 退場系アニメーション判定
 export const exitAnimations = new Set(["fadeOut", "slideOutL", "slideOutR", "slideOutD"]);
 
+// 画面エフェクト名マッピング（日本語→内部名）
+const screenEffectAliases = {
+  "画面揺れ": "shake",
+  "shake": "shake",
+  "画面フラッシュ": "flash",
+  "flash": "flash",
+};
+
 // 括弧内テキストから表情とアニメーションを分離する
 function parseExpressionAndAnimation(text) {
   const parts = text.split("/");
@@ -160,6 +168,7 @@ const prefixAliases = {
   "pauseTimer:": "タイマー一時停止:",
   "resumeTimer:": "タイマー再開:",
   "console:": "コンソール:",
+  "screenEffect:": "画面効果:",
 };
 
 // 英語コマンドを日本語に正規化
@@ -345,6 +354,14 @@ function parseEventText(text, label, characters) {
           isView = true;
           blocks.push({type: "clearImage"});
           break;
+
+        case command.startsWith("画面効果:"): {// 画面全体エフェクト
+          isView = true;
+          const effectName = command.replace("画面効果:", "").trim();
+          const effect = screenEffectAliases[effectName];
+          if (effect) blocks.push({ type: "screenEffect", effect });
+          break;
+        }
 
         case command === "キャラ非表示": // キャラクターを非表示にする
           isView = true;
@@ -542,24 +559,37 @@ function parseEventText(text, label, characters) {
             text = text.slice(0, -4);
           }
 
-          // 名前と表情に分割
-          let match2 = match[1].match(/^(.*?)（(.+?)）$/);
-          if(!match2){
-            // 半角括弧も許容
-            match2 = match[1].match(/^(.*?)\((.+?)\)$/);
-          }
+          // 「・」区切りで複数キャラを分割
+          const charParts = match[1].split("・");
 
-          // 名前・表情がある場合
-          if (match2) {
-            // 表情とアニメーションを分離
-            const { expression, animation } = parseExpressionAndAnimation(match2[2]);
-            // 名前、表情、アニメーション、本文を登録
-            blocks.push({ type: "dialogue", char: match2[1], expression, animation, text, volume, sound: normalizeRelativeUrl(match[3]?.trim()) });
+          // 各キャラの名前・表情・アニメーションをパース
+          const chars = charParts.map(part => {
+            let m = part.match(/^(.*?)（(.+?)）$/);
+            if(!m){
+              m = part.match(/^(.*?)\((.+?)\)$/);
+            }
+            if (m) {
+              const { expression, animation } = parseExpressionAndAnimation(m[2]);
+              return { name: m[1], expression, animation };
+            }
+            return { name: part, expression: null, animation: null };
+          });
+
+          // 代表キャラ（最後のキャラ）の情報でdialogueブロックを生成
+          const lastChar = chars[chars.length - 1];
+          const block = {
+            type: "dialogue",
+            char: lastChar.name,
+            expression: lastChar.expression,
+            animation: lastChar.animation,
+            text, volume,
+            sound: normalizeRelativeUrl(match[3]?.trim())
+          };
+          // 複数キャラの場合はchars配列を付与
+          if (chars.length > 1) {
+            block.chars = chars;
           }
-          else {
-            // ない場合はすべて名前として解釈
-            blocks.push({ type: "dialogue", char: match[1], text, volume, sound: normalizeRelativeUrl(match[3]?.trim()) });
-          }
+          blocks.push(block);
         }
         else {// 分解できなかった場合
           // 全体をセリフとして登録
@@ -635,7 +665,7 @@ export function detectIfElseViewMismatch(text) {
     "クリック待ち", "選択肢", "選択肢:", "背景クリア", "画像クリア",
     "キャラ非表示", "キャラ非表示解除", "キャラクリア", "テキストクリア",
   ]);
-  const viewPrefixes = ["背景:", "画像:", "入力:"];
+  const viewPrefixes = ["背景:", "画像:", "入力:", "画面効果:"];
 
   function isViewCommand(cmd) {
     if (viewCommandSet.has(cmd)) return true;

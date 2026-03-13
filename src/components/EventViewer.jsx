@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from "react";
+import { useEffect, useState, useRef, memo } from "react";
 import useEventExecution from "../hooks/useEventExecution";
 
 function EventViewer({ 
@@ -28,11 +28,16 @@ function EventViewer({
   configVisible,
   currentSceneName,
   viewItemName,
-  selectItem
+  selectItem,
+  screenEffect, setScreenEffect
 }) {
 
   // states-----------------------------------------------------------------------------------------------------------------------
   const [visibleCount, setVisibleCount] = useState(0);
+
+  // ref-----
+  // シェイクアニメーション用（keyによる再マウントを避けるためrefで制御）
+  const shakeRef = useRef(null);
 
   // useEventExecution----------------------------------------------------------------------------------------------------------------
   const {
@@ -69,10 +74,21 @@ function EventViewer({
         onConsoleLog,
         currentSceneName,
         viewItemName,
-        selectItem
+        selectItem,
+        screenEffect, setScreenEffect
     });
   
   // effects--------------------------------------------------------------------------------------------------------------------
+  // シェイクアニメーション（keyによる再マウントを避け、classListで制御）
+  useEffect(() => {
+    if (screenEffect?.type === "shake" && shakeRef.current) {
+      const el = shakeRef.current;
+      el.classList.remove("screen-shake");
+      void el.offsetWidth; // リフロー強制でアニメーションリセット
+      el.classList.add("screen-shake");
+    }
+  }, [screenEffect?.key]);
+
   // 文字送り TODO:Stateだと重いか？
   useEffect(() => {
     if(currentLine && currentLine.text && currentLine.text.length >= 1){
@@ -167,8 +183,19 @@ function EventViewer({
   const strokeWidth = 0.05; // 文字サイズに対して5%の太さ（微調整してください）
   const strokeColor = gameData.game.textBox.highlightStyle.strokeColor;
 
+  // render-------------------------------------------------------------------------------------------------------------------
   return (
-    <>
+    // 外側は固定コンテナ（overflow:hiddenでシェイク時のはみ出しをクリップ）
+    <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden" }}>
+    {/* 内側のみシェイク（translateXで動いても外にはみ出ない） */}
+    <div
+      ref={shakeRef}
+      style={{ width: "100%", height: "100%", position: "relative" }}
+      onAnimationEnd={() => {
+        shakeRef.current?.classList.remove("screen-shake");
+        if (screenEffect?.type === "shake") setScreenEffect(null);
+      }}
+    >
       {/* 背景 */}
       <Background
         currentBack={currentBack}
@@ -230,7 +257,7 @@ function EventViewer({
                   maxHeight: "90%",
                   width: "auto",
                   height: "auto",
-                  filter: (!currentLine?.char || currentLine?.char === ch.name) ? "none" : "brightness(0.8)",
+                  filter: (!currentLine?.char || currentLine?.char === ch.name || currentLine?.chars?.some(c => c.name === ch.name)) ? "none" : "brightness(0.8)",
                   transition: "filter 0.3s ease",
                   transform: "translateX(-50%)",
                   transformOrigin: "center bottom",
@@ -286,7 +313,7 @@ function EventViewer({
             boxSizing: "border-box"
           }}
         >
-          <span>{currentLine.char}</span>
+          <span>{currentLine.chars ? currentLine.chars.map(c => c.name).join("・") : currentLine.char}</span>
         </div>
       }
       
@@ -365,12 +392,12 @@ function EventViewer({
       {!forEdit && <ClickArea zIndex={2003} onClick={() => {handleClick(lines)}} />}
 
       {/* クリック要素（文字送り停止） */}
-      {(!forEdit && visibleCount && currentLine?.text && (visibleCount < currentLine.text.length)) &&
+      {(!forEdit && visibleCount > 0 && currentLine?.text && (visibleCount < currentLine.text.length)) &&
         <ClickArea zIndex={2004} onClick={() => {setVisibleCount(currentLine.text.length)}} />
       }
 
       {/* クリック要素（文字送り停止）（エディタ用） */}
-      {(forEdit && visibleCount && currentLine?.text && (visibleCount >= currentLine.text.length)) &&
+      {(forEdit && visibleCount > 0 && currentLine?.text && (visibleCount >= currentLine.text.length)) &&
         <ClickArea zIndex={2004} onClick={() => {setVisibleCount(0)}} />
       }
 
@@ -390,7 +417,26 @@ function EventViewer({
         handleChange={handleChange}
         commitInput={commitInput}
       />
-    </>
+
+      {/* 画面フラッシュオーバーレイ */}
+      {screenEffect?.type === "flash" && (
+        <div
+          key={screenEffect.key}
+          className="screen-flash"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 2010,
+            pointerEvents: "none",
+          }}
+          onAnimationEnd={() => setScreenEffect(null)}
+        />
+      )}
+    </div>
+    </div>
   );
 }
 
@@ -506,7 +552,7 @@ function Background({currentBack, width, height}){
   const [backs, setBacks] = useState([]);
 
   useEffect(()=>{
-    setBacks([...backs, currentBack].slice(-2));
+    setBacks(prev => [...prev, currentBack].slice(-2));
   }, [currentBack])
 
   const noBack = backs.at(-1) ? !( backs.at(-1).color || backs.at(-1).url ) : true;
