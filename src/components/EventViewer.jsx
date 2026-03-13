@@ -376,12 +376,12 @@ function EventViewer({
       {!forEdit && <ClickArea zIndex={2003} onClick={() => {handleClick(lines)}} />}
 
       {/* クリック要素（文字送り停止） */}
-      {(!forEdit && visibleCount && currentLine?.text && (visibleCount < currentLine.text.length)) &&
+      {(!forEdit && visibleCount > 0 && currentLine?.text && (visibleCount < currentLine.text.length)) &&
         <ClickArea zIndex={2004} onClick={() => {setVisibleCount(currentLine.text.length)}} />
       }
 
       {/* クリック要素（文字送り停止）（エディタ用） */}
-      {(forEdit && visibleCount && currentLine?.text && (visibleCount >= currentLine.text.length)) &&
+      {(forEdit && visibleCount > 0 && currentLine?.text && (visibleCount >= currentLine.text.length)) &&
         <ClickArea zIndex={2004} onClick={() => {setVisibleCount(0)}} />
       }
 
