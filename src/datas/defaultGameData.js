@@ -62,10 +62,11 @@ export const defaultHotspotData = {
   "states": [defaultStateData]
 }
 
-export const defaultItemData = { 
-    "name": "New item", 
+export const defaultItemData = {
+    "name": "New item",
     "image": "./system/item_image.png",
     "have": true,
+    "used": false,
     "hotspots":[defaultHotspotData]
 }
 

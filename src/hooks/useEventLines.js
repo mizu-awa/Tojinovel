@@ -144,6 +144,7 @@ const prefixAliases = {
   "flag:": "フラグ:",
   "getItem:": "アイテム入手:",
   "discardItem:": "アイテム破棄:",
+  "useItem:": "アイテム使用済:",
   "changeState:": "ステート変更:",
   "changeStateAll:": "ステート一括変更:",
   "changeItemState:": "アイテムステート変更:",
@@ -272,6 +273,10 @@ function parseEventText(text, label, characters) {
         case command.startsWith("アイテム破棄:"):// アイテム破棄
           // アイテム名を登録
           blocks.push({ type: "discardItem", itemName: command.replace("アイテム破棄:", "").trim() });
+          break;
+
+        case command.startsWith("アイテム使用済:"):// アイテム使用済
+          blocks.push({ type: "useItem", itemName: command.replace("アイテム使用済:", "").trim() });
           break;
 
         case command.startsWith("ステート変更:"): {// ステート変更

@@ -11,6 +11,16 @@ function DebugItems({ items, selectedItem, selectItem, updateGameData, theme }) 
     });
   };
 
+  // アイテムの使用済状態を切り替え
+  const toggleUsed = (index) => {
+    updateGameData((prev) => {
+      const next = { ...prev };
+      next.items = [...next.items];
+      next.items[index] = { ...next.items[index], used: !next.items[index].used };
+      return next;
+    });
+  };
+
   // 選択アイテムを切り替え
   const handleSelect = (itemName) => {
     selectItem(selectedItem === itemName ? null : itemName);
@@ -30,6 +40,7 @@ function DebugItems({ items, selectedItem, selectItem, updateGameData, theme }) 
       {/* ヘッダー */}
       <div style={{ ...rowStyle, fontSize: "11px", color: theme.textMuted, fontWeight: 700 }}>
         <span style={{ width: 24 }}>所持</span>
+        <span style={{ width: 36 }}>使用済</span>
         <span style={{ flex: 1 }}>アイテム名</span>
       </div>
 
@@ -47,6 +58,19 @@ function DebugItems({ items, selectedItem, selectItem, updateGameData, theme }) 
               flexShrink: 0,
             }}
             title={item.have ? "所持中" : "未所持"}
+          />
+          <input
+            type="checkbox"
+            checked={item.used ?? false}
+            onChange={() => toggleUsed(i)}
+            style={{
+              accentColor: theme.primary,
+              cursor: "pointer",
+              width: 16,
+              height: 16,
+              flexShrink: 0,
+            }}
+            title={item.used ? "使用済" : "未使用"}
           />
           <span
             style={{
@@ -79,6 +103,7 @@ function DebugItems({ items, selectedItem, selectItem, updateGameData, theme }) 
 
       <div style={{ marginTop: 8, fontSize: "11px", color: theme.textMuted }}>
         所持: {items.filter((i) => i.have).length} / {items.length} 件
+        {" "}| 使用済: {items.filter((i) => i.used).length} 件
       </div>
     </div>
   );
