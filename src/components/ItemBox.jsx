@@ -115,8 +115,8 @@ function ItemBox({
                                 justifyContent: "center",
                                 boxSizing: "border-box",
                                 position: "relative",
-                                opacity: isUsed ? 0.4 : 1,
-                                filter: isUsed ? "grayscale(100%)" : "none",
+                                opacity: isUsed ? 0.55 : 1,
+                                filter: isUsed ? "grayscale(100%) brightness(0.6)" : "none",
                                 pointerEvents: isUsed ? "none" : "auto",
                                 cursor: isUsed ? "default" : undefined
                             }}
