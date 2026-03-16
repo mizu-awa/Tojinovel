@@ -431,6 +431,14 @@ export default function useEventViewer({
                     selectItem?.(prev => prev === line.itemName ? null : prev);
                 }
             }
+            else if(line.type === "useItem"){// アイテム使用済
+                const itemIndex = newGameData.items.findIndex((i) => i.name === line.itemName);
+                if(itemIndex !== -1){
+                    newGameData.items[itemIndex].used = true;
+                    // 使用済みにしたアイテムが選択中だった場合、選択を解除する
+                    selectItem?.(prev => prev === line.itemName ? null : prev);
+                }
+            }
             else if(line.type === "changeState"){// ステート変更
                 // 対象シーンが存在するかどうか確認
                 const sceneIndex = newGameData.scenes.findIndex((r) => r.name === line.scene);

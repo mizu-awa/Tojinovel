@@ -96,10 +96,11 @@ function ItemBox({
                 }}
                 >
                 {haveItems.slice(page * pageFill, (page + 1) * pageFill).map((item)=>{
+                    const isUsed = item.used;
                     return(
                         <div
                             key={item.name}
-                            className={itemBox.hover}
+                            className={isUsed ? undefined : itemBox.hover}
                             style={{
                                 ...itemBox.itemStyle,
                                 aspectRatio: "1 / 1",  /* 正方形にする */
@@ -113,7 +114,11 @@ function ItemBox({
                                 alignItems: "center",
                                 justifyContent: "center",
                                 boxSizing: "border-box",
-                                position: "relative"
+                                position: "relative",
+                                opacity: isUsed ? 0.55 : 1,
+                                filter: isUsed ? "grayscale(100%) brightness(0.6)" : "none",
+                                pointerEvents: isUsed ? "none" : "auto",
+                                cursor: isUsed ? "default" : undefined
                             }}
                             onClick={() => {handleItemClick(item.name)}}
                         >

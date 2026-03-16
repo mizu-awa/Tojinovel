@@ -244,6 +244,7 @@
   "name": "New item",
   "image": "./data/item_image.png",
   "have": true,
+  "used": false,
   "hotspots": []
 }
 ```
@@ -252,6 +253,7 @@
 |name🔑	|string	|アイテム名
 |image	|string	|アイテム画像パス
 |have	|boolean	|アイテムを保持しているかどうか
+|used	|boolean	|使用済みかどうか（trueの場合アイテムボックスでグレーアウト・クリック不可）
 |hotspots	|array（要素：Hotspot）	|ホットスポット一覧
 
 ## 8. Game（ゲーム設定）

@@ -215,6 +215,9 @@ export default function GameApp({ debug }) {
 
   // アイテムボックス内アイテムクリック時のイベント
   function handleItemClick(name){
+    // 使用済みのアイテムは操作不可
+    const item = gameData.items.find(i => i.name === name);
+    if(item?.used) return;
     // 選択中のアイテムだった場合、アイテムドロワーを開く
     if(name === selectedItem){
       setViewItemName(name);
