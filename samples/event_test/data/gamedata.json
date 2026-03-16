@@ -41,8 +41,12 @@
       "name": "ねこ"
     }
   ],
-  "commit": "unknown",
+  "commit": "f092a74",
   "game": {
+    "auto": {
+      "enabled": false,
+      "speed": 2000
+    },
     "backStyle": {
       "backgroundColor": "rgba(255, 255, 255, 1)",
       "backgroundImage": ""
@@ -50,7 +54,9 @@
     "character": {
       "slots": 3
     },
+    "commonSceneName": "",
     "config": {
+      "autoText": "オート",
       "backStyle": {
         "backgroundColor": "rgba(255,255,255,1)",
         "backgroundImage": ""
@@ -83,6 +89,7 @@
         "borderRadius": "3px",
         "height": 6
       },
+      "visibleAuto": true,
       "visibleBGM": true,
       "visibleSE": true,
       "visibleSpeed": true,
@@ -91,6 +98,12 @@
     },
     "direction": {
       "hover": "hoverOp",
+      "images": {
+        "bottom": "",
+        "left": "",
+        "right": "",
+        "top": ""
+      },
       "size": 40,
       "style": {
         "backgroundColor": "rgba(0,0,0,0)",
@@ -103,6 +116,7 @@
       "borderStyle": "none",
       "borderWidth": 1,
       "color": "rgba(0,0,0,1)",
+      "fontFamily": "system-ui",
       "shadowColor": "rgba(0, 0, 0, 0.3)"
     },
     "image": {
@@ -200,15 +214,18 @@
       "position": "bottom right",
       "saveText": "Save",
       "style": {
+        "color": "rgba(0, 0, 0, 1)",
         "fontSize": "16px",
         "fontWeight": 510,
-        "gap": 10
+        "gap": 10,
+        "textOutlineColor": "rgba(0, 0, 0, 0)"
       },
       "visibleConfig": true,
       "visibleLoad": true,
       "visibleSave": true
     },
     "option": {
+      "anchor": "top",
       "gap": 20,
       "hover": "hoverDk",
       "position": [
@@ -248,12 +265,24 @@
         "fontSize": "16px",
         "padding": 10
       },
+      "closeBtnStyle": {
+        "color": "rgba(0,0,0,1)",
+        "hover": "hoverOp",
+        "size": 24
+      },
       "dataText": "Save Data",
+      "gap": 10,
       "hover": "hoverDk",
       "loadText": "Load",
       "noDataText": "No Data",
       "saveText": "Save",
-      "slots": 3
+      "slots": 3,
+      "titleStyle": {
+        "backgroundColor": "transparent",
+        "color": "rgba(0,0,0,1)",
+        "fontSize": "24px",
+        "padding": "0px"
+      }
     },
     "screenSize": [
       800,
@@ -270,9 +299,21 @@
         "color": "rgba(127, 34, 244, 1)",
         "strokeColor": "rgba(255,255,255,1)"
       },
+      "indicator": {
+        "text": "▼"
+      },
       "nameStyle": {
         "backgroundColor": "rgba(2, 6, 23, 0.44)",
-        "backgroundImage": ""
+        "backgroundImage": "",
+        "borderColor": "rgba(0,0,0,0)",
+        "borderRadius": "0px",
+        "borderStyle": "solid",
+        "borderWidth": "0px",
+        "color": "rgba(255,255,255,1)",
+        "distance": 0,
+        "fontSize": "16px",
+        "minWidth": 120,
+        "padding": 12
       },
       "position": [
         20,
@@ -308,16 +349,18 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                185,
-                7,
-                275,
-                59
-              ],
               "background": "",
+              "draggable": false,
+              "height": 52,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -328,6 +371,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -345,19 +389,24 @@
                 }
               ],
               "visibility": true,
+              "width": 90,
+              "x": 185,
+              "y": 7,
               "zIndex": 10
             },
             {
-              "area": [
-                185,
-                7,
-                275,
-                59
-              ],
               "background": "",
+              "draggable": false,
+              "height": 52,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "変更後",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -368,6 +417,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -385,19 +435,24 @@
                 }
               ],
               "visibility": true,
+              "width": 90,
+              "x": 185,
+              "y": 7,
               "zIndex": 10
             },
             {
-              "area": [
-                185,
-                7,
-                275,
-                59
-              ],
               "background": "",
+              "draggable": false,
+              "height": 52,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "黒",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -408,6 +463,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -425,6 +481,9 @@
                 }
               ],
               "visibility": true,
+              "width": 90,
+              "x": 185,
+              "y": 7,
               "zIndex": 10
             }
           ]
@@ -434,16 +493,18 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                11,
-                136,
-                111,
-                180
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -454,6 +515,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -471,19 +533,24 @@
                 }
               ],
               "visibility": true,
+              "width": 100,
+              "x": 11,
+              "y": 136,
               "zIndex": 10
             },
             {
-              "area": [
-                11,
-                136,
-                111,
-                180
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "黒",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -494,6 +561,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -511,6 +579,9 @@
                 }
               ],
               "visibility": true,
+              "width": 100,
+              "x": 11,
+              "y": 136,
               "zIndex": 10
             }
           ]
@@ -520,16 +591,18 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                114,
-                192,
-                209,
-                232
-              ],
               "background": "",
+              "draggable": false,
+              "height": 40,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -540,6 +613,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -557,6 +631,9 @@
                 }
               ],
               "visibility": true,
+              "width": 95,
+              "x": 114,
+              "y": 192,
               "zIndex": 10
             }
           ]
@@ -589,16 +666,18 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                123,
-                345,
-                223,
-                445
-              ],
               "background": "",
+              "draggable": false,
+              "height": 100,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -609,6 +688,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -626,19 +706,24 @@
                 }
               ],
               "visibility": true,
+              "width": 100,
+              "x": 123,
+              "y": 345,
               "zIndex": 10
             },
             {
-              "area": [
-                123,
-                345,
-                223,
-                445
-              ],
               "background": "",
+              "draggable": false,
+              "height": 100,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "変更後",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -649,6 +734,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -666,19 +752,24 @@
                 }
               ],
               "visibility": true,
+              "width": 100,
+              "x": 123,
+              "y": 345,
               "zIndex": 10
             },
             {
-              "area": [
-                123,
-                345,
-                223,
-                445
-              ],
               "background": "",
+              "draggable": false,
+              "height": 100,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "黒",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -689,6 +780,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -706,6 +798,9 @@
                 }
               ],
               "visibility": true,
+              "width": 100,
+              "x": 123,
+              "y": 345,
               "zIndex": 10
             }
           ]
@@ -715,16 +810,18 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                454,
-                79,
-                554,
-                179
-              ],
               "background": "",
+              "draggable": false,
+              "height": 100,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -735,6 +832,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -752,19 +850,24 @@
                 }
               ],
               "visibility": true,
+              "width": 100,
+              "x": 454,
+              "y": 79,
               "zIndex": 10
             },
             {
-              "area": [
-                454,
-                79,
-                554,
-                179
-              ],
               "background": "",
+              "draggable": false,
+              "height": 100,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "黒",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -775,6 +878,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -792,6 +896,9 @@
                 }
               ],
               "visibility": true,
+              "width": 100,
+              "x": 454,
+              "y": 79,
               "zIndex": 10
             }
           ]
@@ -801,16 +908,18 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                498,
-                325,
-                598,
-                425
-              ],
               "background": "",
+              "draggable": false,
+              "height": 100,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -821,6 +930,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -838,6 +948,9 @@
                 }
               ],
               "visibility": true,
+              "width": 100,
+              "x": 498,
+              "y": 325,
               "zIndex": 10
             }
           ]
@@ -871,16 +984,18 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                459,
-                20,
-                625,
-                65
-              ],
               "background": "",
+              "draggable": false,
+              "height": 45,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -891,6 +1006,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -908,6 +1024,9 @@
                 }
               ],
               "visibility": true,
+              "width": 166,
+              "x": 459,
+              "y": 20,
               "zIndex": 10
             }
           ]
@@ -917,18 +1036,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                228,
-                111,
-                420,
-                155
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "フル実行"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -937,6 +1058,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -954,6 +1076,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 228,
+              "y": 111,
               "zIndex": 10
             }
           ]
@@ -963,16 +1088,18 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                49,
-                59,
-                182,
-                99
-              ],
               "background": "",
+              "draggable": false,
+              "height": 40,
               "hover": "none",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
+                "file": "",
+                "label": ""
+              },
+              "onDragEnd": {
                 "file": "",
                 "label": ""
               },
@@ -983,6 +1110,7 @@
                 "borderStyle": "none",
                 "borderWidth": "1px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "21px",
                 "fontWeight": 480,
                 "rotate": 0,
@@ -1000,6 +1128,9 @@
                 }
               ],
               "visibility": true,
+              "width": 133,
+              "x": 49,
+              "y": 59,
               "zIndex": 10
             }
           ]
@@ -1009,18 +1140,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                25,
-                163,
-                217,
-                207
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "テキスト・キャラクター"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1029,6 +1162,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1046,6 +1180,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 25,
+              "y": 163,
               "zIndex": 10
             }
           ]
@@ -1055,18 +1192,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                26,
-                214,
-                218,
-                258
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "変数・フラグ"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1075,6 +1214,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1092,6 +1232,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 26,
+              "y": 214,
               "zIndex": 10
             }
           ]
@@ -1101,18 +1244,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                27,
-                266,
-                219,
-                310
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "シーン・ステート"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1121,6 +1266,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1138,6 +1284,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 27,
+              "y": 266,
               "zIndex": 10
             }
           ]
@@ -1147,18 +1296,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                26,
-                317,
-                218,
-                361
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "アイテム"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1167,6 +1318,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1184,6 +1336,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 26,
+              "y": 317,
               "zIndex": 10
             }
           ]
@@ -1193,18 +1348,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                227,
-                163,
-                419,
-                207
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "背景"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1213,6 +1370,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1230,6 +1388,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 227,
+              "y": 163,
               "zIndex": 10
             }
           ]
@@ -1239,18 +1400,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                228,
-                215,
-                420,
-                259
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "画像表示"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1259,6 +1422,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1276,6 +1440,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 228,
+              "y": 215,
               "zIndex": 10
             }
           ]
@@ -1285,18 +1452,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                228,
-                266,
-                420,
-                310
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "入力・選択肢"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1305,6 +1474,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1322,6 +1492,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 228,
+              "y": 266,
               "zIndex": 10
             }
           ]
@@ -1331,18 +1504,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                228,
-                318,
-                420,
-                362
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "音"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1351,6 +1526,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1368,6 +1544,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 228,
+              "y": 318,
               "zIndex": 10
             }
           ]
@@ -1377,18 +1556,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                431,
-                163,
-                623,
-                207
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "ハイパーリンク"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1397,6 +1578,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1414,6 +1596,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 431,
+              "y": 163,
               "zIndex": 10
             }
           ]
@@ -1423,18 +1608,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                430,
-                217,
-                622,
-                261
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "セーブ・ロード・設定"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1443,6 +1630,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1460,6 +1648,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 430,
+              "y": 217,
               "zIndex": 10
             }
           ]
@@ -1469,18 +1660,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                431,
-                267,
-                623,
-                311
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "タイマー"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1489,6 +1682,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1506,6 +1700,9 @@
                 }
               ],
               "visibility": true,
+              "width": 192,
+              "x": 431,
+              "y": 267,
               "zIndex": 10
             }
           ]
@@ -1515,18 +1712,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                28,
-                385,
-                256,
-                429
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "ハイパーリンク同タブ"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1535,6 +1734,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1552,6 +1752,9 @@
                 }
               ],
               "visibility": true,
+              "width": 228,
+              "x": 28,
+              "y": 385,
               "zIndex": 10
             }
           ]
@@ -1561,18 +1764,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                270,
-                385,
-                432,
-                429
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "ロードボタン"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1581,6 +1786,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1598,6 +1804,9 @@
                 }
               ],
               "visibility": true,
+              "width": 162,
+              "x": 270,
+              "y": 385,
               "zIndex": 10
             }
           ]
@@ -1607,18 +1816,20 @@
           "state": "default",
           "states": [
             {
-              "area": [
-                441,
-                385,
-                603,
-                429
-              ],
               "background": "",
+              "draggable": false,
+              "height": 44,
               "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
               "name": "default",
               "onClick": {
                 "file": "./data/events/events.txt",
                 "label": "タイマーイベントタイミング"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
               },
               "style": {
                 "backgroundColor": "rgba(118, 90, 213, 0.42)",
@@ -1627,6 +1838,7 @@
                 "borderStyle": "solid",
                 "borderWidth": "3px",
                 "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
                 "fontSize": "16px",
                 "fontWeight": 400,
                 "rotate": 0,
@@ -1644,6 +1856,61 @@
                 }
               ],
               "visibility": true,
+              "width": 162,
+              "x": 441,
+              "y": 385,
+              "zIndex": 10
+            }
+          ]
+        },
+        {
+          "name": "キャラクターアニメ",
+          "state": "default",
+          "states": [
+            {
+              "background": "",
+              "draggable": false,
+              "height": 44,
+              "hover": "hoverSh",
+              "inputMode": false,
+              "inputVariable": "",
+              "name": "default",
+              "onClick": {
+                "file": "./data/events/events.txt",
+                "label": "キャラアニメーション"
+              },
+              "onDragEnd": {
+                "file": "",
+                "label": ""
+              },
+              "style": {
+                "backgroundColor": "rgba(118, 90, 213, 0.42)",
+                "borderColor": "rgba(255, 255, 255, 1)",
+                "borderRadius": 7,
+                "borderStyle": "solid",
+                "borderWidth": "3px",
+                "color": "rgba(0,0,0,1)",
+                "fontFamily": "",
+                "fontSize": "16px",
+                "fontWeight": 400,
+                "rotate": 0,
+                "shadowColor": "rgba(0, 0, 0, 0.19)",
+                "textAlign": "left",
+                "textPadding": "12px",
+                "textVAlign": "center"
+              },
+              "text": "1.5.キャラアニメーション",
+              "usedItems": [
+                {
+                  "file": "",
+                  "item": "",
+                  "label": ""
+                }
+              ],
+              "visibility": true,
+              "width": 207,
+              "x": 433,
+              "y": 318,
               "zIndex": 10
             }
           ]

@@ -50,6 +50,9 @@ export const wailsAdapter = {
   // プレイヤー書き出し
   exportPlayer: () => window.go.services.ProjectManager.ExportPlayer(),
 
+  // プロジェクトZIPエクスポート（保存ダイアログ → Go側でZIP作成）
+  exportProjectAsZip: () => window.go.services.ProjectManager.ExportProjectAsZip(),
+
   // ファイルインポート（ダイアログ経由、コピー先フォルダを指定）
   importFile: (destDir) => window.go.services.ProjectManager.ImportFile(destDir),
 

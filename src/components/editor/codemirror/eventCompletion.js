@@ -54,6 +54,8 @@ const commands = [
   { label: "#getItem: ", type: "keyword", info: "アイテム名", detail: "アイテムを入手" },
   { label: "#アイテム破棄: ", type: "keyword", info: "アイテム名", detail: "アイテムを破棄" },
   { label: "#discardItem: ", type: "keyword", info: "アイテム名", detail: "アイテムを破棄" },
+  { label: "#アイテム使用済: ", type: "keyword", info: "アイテム名", detail: "アイテムを使用済みにする" },
+  { label: "#useItem: ", type: "keyword", info: "アイテム名", detail: "アイテムを使用済みにする" },
   { label: "#アイテム背景変更: ", type: "keyword", info: "アイテム名, 背景画像URL" },
   { label: "#itemBg: ", type: "keyword", info: "アイテム名, 背景画像URL" },
   { label: "#アイテムステート変更: ", type: "keyword", info: "アイテム名, ホットスポット名, ステート名" },
@@ -121,6 +123,12 @@ const commands = [
   { label: "#タイマー再開: ", type: "keyword", info: "変数名" },
   { label: "#resumeTimer: ", type: "keyword", info: "変数名" },
 
+  // 画面エフェクト
+  { label: "#画面効果: 画面揺れ", type: "keyword", info: "画面全体を横に振動させる" },
+  { label: "#画面効果: 画面フラッシュ", type: "keyword", info: "画面全体を白くフラッシュさせる" },
+  { label: "#screenEffect: shake", type: "keyword", info: "画面全体を横に振動させる" },
+  { label: "#screenEffect: flash", type: "keyword", info: "画面全体を白くフラッシュさせる" },
+
   // デバッグ
   { label: "#コンソール: ", type: "keyword", info: "出力内容", detail: "デバッグ出力" },
   { label: "#console: ", type: "keyword", info: "出力内容", detail: "デバッグ出力" },
@@ -155,7 +163,7 @@ const PATH_SECOND_CMDS = /^#(シーン背景変更|sceneBg|アイテム背景変
 // 第1引数がシーン名のコマンド
 const SCENE_FIRST_CMDS = /^#(シーン移動|moveScene|シーン背景変更|sceneBg|ステート変更|changeState|ステート一括変更|changeStateAll):/;
 // 第1引数がアイテム名のコマンド
-const ITEM_FIRST_CMDS = /^#(アイテム入手|getItem|アイテム破棄|discardItem|アイテム背景変更|itemBg|アイテムステート変更|changeItemState|アイテムステート一括変更|changeItemStateAll|アイテム画面|openItem):/;
+const ITEM_FIRST_CMDS = /^#(アイテム入手|getItem|アイテム破棄|discardItem|アイテム使用済|useItem|アイテム背景変更|itemBg|アイテムステート変更|changeItemState|アイテムステート一括変更|changeItemStateAll|アイテム画面|openItem):/;
 
 // コマンド種別に応じた拡張子フィルタを返す
 function getExtFilter(cmd) {

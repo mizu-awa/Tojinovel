@@ -554,7 +554,7 @@ export default function FileExplorer({ onFileSelect, onFileChange }) {
   }, []);
 
   const handleAreaDragLeave = useCallback((e) => {
-    if (!e.dataTransfer.types.includes("Files")) return;
+    // dragleave時はdataTransfer.typesが空になるブラウザ仕様があるためチェックしない
     dragCounterRef.current -= 1;
     if (dragCounterRef.current <= 0) {
       dragCounterRef.current = 0;

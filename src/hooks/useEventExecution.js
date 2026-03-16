@@ -9,6 +9,7 @@ import {
     parseOperand
 } from "./eventExecutionUtils.js";
 import { executeExternalFunc } from "../services/externalFuncService.js";
+import { exitAnimations } from "./useEventLines.js";
 
 export default function useEventViewer({
   lines,
@@ -37,7 +38,8 @@ export default function useEventViewer({
   onConsoleLog,
   currentSceneName,
   viewItemName,
-  selectItem
+  selectItem,
+  setScreenEffect
 }){
     // states------------------------------------------------------------------------------------------
     const [inputValue, setInputValue] = useState("");
@@ -83,11 +85,15 @@ export default function useEventViewer({
         const characterSlotsBuf = [...slots]; // 現在のスロットを退避
         const fi = characterSlotsBuf.findIndex(s => s.name === line.char); // 発言中のキャラクターのスロット番号
 
+        // アニメーション情報（あれば付与、なければnull）
+        const anim = line.animation || null;
+        const animKey = anim ? Date.now() : undefined;
+
         // すでに登場している場合
         if (fi !== -1) {
             const character = characterSlotsBuf[fi];
             // 表情を更新
-            characterSlotsBuf[fi] = {...character, nowImage: updateImage(character), lastSpoken: now};
+            characterSlotsBuf[fi] = {...character, nowImage: updateImage(character), lastSpoken: now, animation: anim, animationKey: animKey};
         }
         // 空きスロットがあれば追加する
         else if (characterSlotsBuf.length < gameData.game.character.slots) {
@@ -95,8 +101,8 @@ export default function useEventViewer({
             const character = gameData.characters.find(c => c.name === line.char);
             if(character){
                 // 配列に追加する形で追加
-                characterSlotsBuf.push({ ...character, lastSpoken: now, nowImage: updateImage(character) });
-            } 
+                characterSlotsBuf.push({ ...character, lastSpoken: now, nowImage: updateImage(character), animation: anim, animationKey: animKey });
+            }
         }
         // 空きがなければ最も古いキャラを探して置き換え
         else{
@@ -111,7 +117,7 @@ export default function useEventViewer({
                     }
                 }
                 // キャラクターを新規キャラクターで上書き
-                characterSlotsBuf[oldestIndex] = ({ ...character, lastSpoken: now, nowImage: updateImage(character) });
+                characterSlotsBuf[oldestIndex] = ({ ...character, lastSpoken: now, nowImage: updateImage(character), animation: anim, animationKey: animKey });
             }
         }
 
@@ -136,7 +142,13 @@ export default function useEventViewer({
 
         // 登場している場合
         if (fi !== -1) {
-            characterSlotsBuf.splice(fi, 1); // 削除
+            // 退場アニメーションがある場合はアニメーション付きでスロットに残す（EventViewerのonAnimationEndで削除）
+            if (line.animation && exitAnimations.has(line.animation)) {
+                const character = characterSlotsBuf[fi];
+                characterSlotsBuf[fi] = {...character, animation: line.animation, animationKey: Date.now(), exiting: true};
+                return characterSlotsBuf;
+            }
+            characterSlotsBuf.splice(fi, 1); // 即削除
             return characterSlotsBuf;
         }
         return slots;
@@ -198,10 +210,18 @@ export default function useEventViewer({
         let hChar = hiddenCharacter;
         let cInput = currentInput;
         let ms = false;// シーン移動
+        let cScreenEffect = null;// 画面エフェクト
 
         /* 現在の行の処理（クリック待ち要素） */
         if(nLine.type === "dialogue"){ // セリフ
-            slots = onCharacterExpression(nLine, slots);
+            // 複数キャラ同時発言の場合、全キャラの表情を更新
+            if (nLine.chars) {
+                for (const ch of nLine.chars) {
+                    slots = onCharacterExpression({ char: ch.name, expression: ch.expression, animation: ch.animation }, slots);
+                }
+            } else {
+                slots = onCharacterExpression(nLine, slots);
+            }
             // セリフ音声を再生
             audioManager.stopVoice();
             if(nLine.sound && nLine.sound !== undefined){
@@ -324,8 +344,14 @@ export default function useEventViewer({
             }
             else if(line.type === "dialogue"){// セリフ
                 if(!cLine){// 最初の行対策
-                    // キャラクター表示の計算
-                    slots = onCharacterExpression(line, slots);
+                    // キャラクター表示の計算（複数キャラ同時発言対応）
+                    if (line.chars) {
+                        for (const ch of line.chars) {
+                            slots = onCharacterExpression({ char: ch.name, expression: ch.expression, animation: ch.animation }, slots);
+                        }
+                    } else {
+                        slots = onCharacterExpression(line, slots);
+                    }
                     // セリフ音声を再生
                     audioManager.stopVoice();
                     if(line.sound && line.sound !== undefined){
@@ -417,6 +443,14 @@ export default function useEventViewer({
                     // アイテムを破棄状態にする
                     newGameData.items[itemIndex].have = false;
                     // 破棄したアイテムが選択中だった場合、選択を解除する
+                    selectItem?.(prev => prev === line.itemName ? null : prev);
+                }
+            }
+            else if(line.type === "useItem"){// アイテム使用済
+                const itemIndex = newGameData.items.findIndex((i) => i.name === line.itemName);
+                if(itemIndex !== -1){
+                    newGameData.items[itemIndex].used = true;
+                    // 使用済みにしたアイテムが選択中だった場合、選択を解除する
                     selectItem?.(prev => prev === line.itemName ? null : prev);
                 }
             }
@@ -559,6 +593,9 @@ export default function useEventViewer({
             }
             else if(line.type === "clearText"){// テキスト表示リセット
                 cLine = {text: null, char: null};
+            }
+            else if(line.type === "screenEffect"){// 画面エフェクト
+                cScreenEffect = { type: line.effect, key: Date.now() };
             }
             else if(line.type === "input"){// 入力フォーム
                 break;// クリック待ち
@@ -717,6 +754,7 @@ export default function useEventViewer({
                 setCurrentImage(null);
                 hideCharacter(false);
                 setCurrentInput(null);
+                setScreenEffect?.(null);
 
                 ifDepth.current = 0;
                 ifSkip.current = false;
@@ -754,6 +792,8 @@ export default function useEventViewer({
                 hideCharacter(hChar);
                 // 入力フォームを表示
                 setCurrentInput(cInput);
+                // 画面エフェクトを更新
+                if (cScreenEffect) setScreenEffect?.(cScreenEffect);
                 // インデックスを更新 バックグラウンドでは不要のため処理しない
                 setIndex(i);
             }
@@ -789,10 +829,10 @@ export default function useEventViewer({
                 opSkip.current = false;
                 opLabel.current = null;
 
-                // バックグラウンドイベントからのジャンプは完了扱い（isBackEventRunningをリセット）
-                if(!lines.isView){
-                    onComplete?.();
-                }
+                // バックグラウンドイベントからのジャンプ:
+                // fileJumpはjump=trueでexecuteEventを呼ぶため、キューをバイパスして直接実行される。
+                // ここでonComplete(finishBackEvent)を呼ぶと、キューから次のイベントが取り出されて
+                // fileJumpの結果と競合するため、呼ばない。ジャンプ先の実行完了時にキューが進む。
             }
             else if(!lines.isView && i >= lines.lines.length){ // バックグラウンドイベント実行完了
                 // #if終了 欠落チェック

@@ -139,17 +139,21 @@ button:focus-visible {
 .hoverSh::after{
   content: "";
   position: absolute;
-  top: 0;
-  left: -75%;
-  width: 50%;
-  height: 100%;
+  /* top: -100% + height: 300% で要素中央に垂直配置 */
+  top: -100%;
+  left: -50%;
+  width: 30%;
+  height: 300%;
   background: linear-gradient(
-    120deg,
+    to right,
     rgba(255, 255, 255, 0) 0%,
     rgba(255, 255, 255, 0.6) 50%,
     rgba(255, 255, 255, 0) 100%
   );
-  transform: skewX(-20deg);
+  /* skewXではなくrotateで斜め帯にする（縦長要素でも太さが一定になる） */
+  transform: rotate(20deg);
+  /* 非アニメーション中は非表示（縦長要素で回転コーナーが見えるのを防ぐ） */
+  opacity: 0;
 }
 
 /* ホバー時にきらりんアニメーション */
@@ -183,12 +187,10 @@ button:focus-visible {
 }
 
 @keyframes shine {
-  0% {
-    left: -75%;
-  }
-  100% {
-    left: 125%;
-  }
+  0%   { left: -75%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: 125%; opacity: 0; }
 }
 
 .spin {
@@ -435,4 +437,157 @@ button:focus-visible {
   to {
     clip-path: inset(100% 0 0 0);
   }
+}
+
+/* ===== キャラクターアニメーション ===== */
+
+/* --- 登場系 --- */
+.char-fadeIn {
+  animation: charFadeIn 0.5s ease forwards;
+}
+@keyframes charFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.char-slideInL {
+  animation: charSlideInL 0.5s ease forwards;
+}
+@keyframes charSlideInL {
+  from { opacity: 0; transform: translateX(calc(-50% - 120px)); }
+  to   { opacity: 1; transform: translateX(-50%); }
+}
+
+.char-slideInR {
+  animation: charSlideInR 0.5s ease forwards;
+}
+@keyframes charSlideInR {
+  from { opacity: 0; transform: translateX(calc(-50% + 120px)); }
+  to   { opacity: 1; transform: translateX(-50%); }
+}
+
+.char-slideInD {
+  animation: charSlideInD 0.5s ease forwards;
+}
+@keyframes charSlideInD {
+  from { opacity: 0; transform: translateX(-50%) translateY(100px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* --- 退場系 --- */
+.char-fadeOut {
+  animation: charFadeOut 0.5s ease forwards;
+}
+@keyframes charFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.char-slideOutL {
+  animation: charSlideOutL 0.5s ease forwards;
+}
+@keyframes charSlideOutL {
+  from { opacity: 1; transform: translateX(-50%); }
+  to   { opacity: 0; transform: translateX(calc(-50% - 120px)); }
+}
+
+.char-slideOutR {
+  animation: charSlideOutR 0.5s ease forwards;
+}
+@keyframes charSlideOutR {
+  from { opacity: 1; transform: translateX(-50%); }
+  to   { opacity: 0; transform: translateX(calc(-50% + 120px)); }
+}
+
+.char-slideOutD {
+  animation: charSlideOutD 0.5s ease forwards;
+}
+@keyframes charSlideOutD {
+  from { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(100px); }
+}
+
+/* --- 感情系 --- */
+.char-shake {
+  animation: charShake 0.4s ease;
+}
+@keyframes charShake {
+  0%, 100% { transform: translateX(-50%); }
+  20%      { transform: translateX(calc(-50% - 8px)); }
+  40%      { transform: translateX(calc(-50% + 8px)); }
+  60%      { transform: translateX(calc(-50% - 4px)); }
+  80%      { transform: translateX(calc(-50% + 4px)); }
+}
+
+.char-jump {
+  animation: charJump 0.5s ease;
+  transform-origin: center bottom;
+}
+@keyframes charJump {
+  0%   { transform: translateX(-50%) scaleY(1); }
+  15%  { transform: translateX(-50%) scaleY(0.92); }
+  40%  { transform: translateX(-50%) scaleY(1.06); }
+  60%  { transform: translateX(-50%) scaleY(0.97); }
+  100% { transform: translateX(-50%) scaleY(1); }
+}
+
+.char-nod {
+  animation: charNod 0.4s ease;
+  transform-origin: center bottom;
+}
+@keyframes charNod {
+  0%, 100% { transform: translateX(-50%) scaleY(1); }
+  30%      { transform: translateX(-50%) scaleY(0.97); }
+  60%      { transform: translateX(-50%) scaleY(1); }
+}
+
+.char-bounce {
+  animation: charBounce 0.6s ease;
+  transform-origin: center bottom;
+}
+@keyframes charBounce {
+  0%, 100% { transform: translateX(-50%) scaleY(1); }
+  20%      { transform: translateX(-50%) scaleY(0.9); }
+  40%      { transform: translateX(-50%) scaleY(1.08); }
+  55%      { transform: translateX(-50%) scaleY(0.95); }
+  70%      { transform: translateX(-50%) scaleY(1.03); }
+  85%      { transform: translateX(-50%) scaleY(0.98); }
+}
+
+.char-flash {
+  animation: charFlash 0.3s ease;
+}
+@keyframes charFlash {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(2.5); }
+}
+
+.char-sway {
+  animation: charSway 1s ease-in-out;
+}
+@keyframes charSway {
+  0%, 100% { transform: translateX(-50%); }
+  25%      { transform: translateX(calc(-50% - 10px)); }
+  75%      { transform: translateX(calc(-50% + 10px)); }
+}
+
+/* 画面エフェクト ----------------------------------------------- */
+.screen-shake {
+  animation: screen-shake 0.4s ease-in-out;
+}
+@keyframes screen-shake {
+  0%, 100% { left: 0; }
+  20%      { left: -8px; }
+  40%      { left: 8px; }
+  60%      { left: -4px; }
+  80%      { left: 4px; }
+}
+
+.screen-flash {
+  background-color: white;
+  animation: screen-flash 0.3s ease-out forwards;
+}
+@keyframes screen-flash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
 }
