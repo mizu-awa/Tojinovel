@@ -5,6 +5,7 @@ import { autocompletion } from "@codemirror/autocomplete";
 const IMAGE_EXTS = /\.(jpe?g|png|gif|webp|svg)$/i;
 const AUDIO_EXTS = /\.(mp3|ogg|wav|m4a)$/i;
 const TEXT_EXTS = /\.txt$/i;
+const JS_EXTS = /\.js$/i;
 
 // コマンド一覧（wiki/05-event-reference.md ベース）
 // 各コマンドに日本語版と英語エイリアス版の両方を登録
@@ -131,6 +132,10 @@ const commands = [
   // デバッグ
   { label: "#コンソール: ", type: "keyword", info: "出力内容", detail: "デバッグ出力" },
   { label: "#console: ", type: "keyword", info: "出力内容", detail: "デバッグ出力" },
+
+  // 外部関数
+  { label: "#外部関数: ", type: "keyword", info: "ファイル名.js, 関数名, 戻り値変数名, 引数...", detail: "外部JSを実行" },
+  { label: "#externalFunc: ", type: "keyword", info: "ファイル名.js, 関数名, 戻り値変数名, 引数...", detail: "外部JSを実行" },
 ];
 
 // 自動補完関数
@@ -151,7 +156,7 @@ function eventCompletions(context) {
 
 // パスを引数に取るコマンド定義
 // 第1引数がパスのコマンド
-const PATH_FIRST_CMDS = /^#(背景|bg|画像|image|BGM|SE|ファイルジャンプ|fileJump):/;
+const PATH_FIRST_CMDS = /^#(背景|bg|画像|image|BGM|SE|ファイルジャンプ|fileJump|外部関数|externalFunc):/;
 // 第2引数がパスのコマンド（シーン名, パス の形式）
 const PATH_SECOND_CMDS = /^#(シーン背景変更|sceneBg|アイテム背景変更|itemBg|タイマー|timer):/;
 
@@ -165,6 +170,7 @@ function getExtFilter(cmd) {
   if (cmd === "BGM" || cmd === "SE") return AUDIO_EXTS;
   if (cmd === "ファイルジャンプ" || cmd === "fileJump") return TEXT_EXTS;
   if (cmd === "タイマー" || cmd === "timer") return TEXT_EXTS;
+  if (cmd === "外部関数" || cmd === "externalFunc") return JS_EXTS;
   return IMAGE_EXTS;
 }
 

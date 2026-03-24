@@ -5,8 +5,10 @@ import {
     calcFlag,
     random,
     expandVarsShallow,
-    parseLineText
+    parseLineText,
+    parseOperand
 } from "./eventExecutionUtils.js";
+import { executeExternalFunc } from "../services/externalFuncService.js";
 import { exitAnimations } from "./useEventLines.js";
 
 export default function useEventViewer({
@@ -37,7 +39,7 @@ export default function useEventViewer({
   currentSceneName,
   viewItemName,
   selectItem,
-  screenEffect, setScreenEffect
+  setScreenEffect
 }){
     // states------------------------------------------------------------------------------------------
     const [inputValue, setInputValue] = useState("");
@@ -47,6 +49,7 @@ export default function useEventViewer({
     const opSkip = useRef(false);
     const lastClickSkip = useRef(true);
     const animEndTimer = useRef(null); // アニメーション完了待ちタイマー
+    const pendingAsyncResult = useRef(null); // 非同期外部関数の結果待ち: { returnVar, value }
     const viewItemNameRef = useRef(viewItemName);
     
     // functions-----------------------------------------------------------------------------------------
@@ -182,6 +185,18 @@ export default function useEventViewer({
         if (currentOptions && opLabel.current === null) return;
 
         let newGameData = { ...gameData }; // 親に渡す更新データ
+
+        // 非同期外部関数の結果を適用（再開時）
+        if (pendingAsyncResult.current !== null) {
+            const { returnVar, value } = pendingAsyncResult.current;
+            pendingAsyncResult.current = null;
+            if (returnVar) {
+                const vi = newGameData.variables.findIndex(v => v.name === returnVar);
+                if (vi !== -1) newGameData.variables[vi].value = value;
+                else newGameData.variables.push({ name: returnVar, value });
+            }
+        }
+
         const nLine = expandVarsShallow(lines.lines[index], newGameData.variables); // クリック待ちのために停止した行
         let cLine = currentLine; // 今表示している行の内容かつ、次に表示する行の内容。何もなければ表示に変化なし
         let i = index; // 処理する行数を示すインデックス
@@ -678,7 +693,27 @@ export default function useEventViewer({
                 // デバッグコンソールにログを送信
                 onConsoleLog?.(line.command);
             }
-            
+            else if(line.type === "externalFunc"){// 外部関数実行
+                const resolvedArgs = line.args.map(a => parseOperand(a, newGameData.variables));
+                const ret = executeExternalFunc(line.file, line.func, resolvedArgs);
+                if (ret instanceof Promise) {
+                    // 非同期: 次の行を指すようにしてからbreak、Promise完了後に再開
+                    i++;
+                    ret.then(value => {
+                        pendingAsyncResult.current = { returnVar: line.returnVar, value: value ?? "" };
+                        handleClick(lines);
+                    });
+                    break;
+                } else {
+                    // 同期: 即座に変数格納してループ続行
+                    if (line.returnVar) {
+                        const vi = newGameData.variables.findIndex(v => v.name === line.returnVar);
+                        if (vi !== -1) newGameData.variables[vi].value = ret ?? "";
+                        else newGameData.variables.push({ name: line.returnVar, value: ret ?? "" });
+                    }
+                }
+            }
+
             i++;
         }
 
@@ -796,8 +831,10 @@ export default function useEventViewer({
 
                 // バックグラウンドイベントからのジャンプ:
                 // fileJumpはjump=trueでexecuteEventを呼ぶため、キューをバイパスして直接実行される。
-                // ここでonComplete(finishBackEvent)を呼ぶと、キューから次のイベントが取り出されて
-                // fileJumpの結果と競合するため、呼ばない。ジャンプ先の実行完了時にキューが進む。
+                // ジャンプ先がフロントイベントの場合はexecuteEvent内でfinishBackEventが呼ばれ、
+                // バックグラウンドランナーが終了してキューが進む。
+                // ジャンプ先がバックグラウンドイベントの場合はjump=trueで上書き実行され、
+                // 完了時にonComplete(finishBackEvent)が呼ばれてキューが進む。
             }
             else if(!lines.isView && i >= lines.lines.length){ // バックグラウンドイベント実行完了
                 // #if終了 欠落チェック

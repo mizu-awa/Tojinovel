@@ -169,6 +169,7 @@ const prefixAliases = {
   "pauseTimer:": "タイマー一時停止:",
   "resumeTimer:": "タイマー再開:",
   "console:": "コンソール:",
+  "externalFunc:": "外部関数:",
   "screenEffect:": "画面効果:",
 };
 
@@ -517,6 +518,18 @@ function parseEventText(text, label, characters) {
         case command.startsWith("コンソール:"):
           blocks.push({type: "console", command: command.replace("コンソール:", "").trim()});
           break;
+
+        case command.startsWith("外部関数:"): {
+          const parts = command.replace("外部関数:", "").split(",").map(s => s.trim());
+          blocks.push({
+            type: "externalFunc",
+            file: parts[0],              // ファイル名（リテラル）
+            func: parts[1],              // 関数名（リテラル）
+            returnVar: parts[2] || null, // 空欄 → null（戻り値なし）
+            args: parts.slice(3)         // 実行時にparseOperandで解決
+          });
+          break;
+        }
       }
       continue;
     }
