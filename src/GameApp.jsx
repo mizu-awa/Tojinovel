@@ -81,6 +81,11 @@ export default function GameApp({ debug }) {
     if(parsedLines.isView){
       setLines(parsedLines);
       setIndex(0);
+      // バックグラウンドイベントからのファイルジャンプでフロントに遷移した場合、
+      // バックグラウンドランナーを終了させてキューを進める
+      if(isBackEventRunning.current){
+        finishBackEvent();
+      }
     }
     else{
       
